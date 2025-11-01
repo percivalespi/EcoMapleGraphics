@@ -1,0 +1,233 @@
+#pragma once // Evita que este archivo se incluya varias veces
+
+// --- 1. INCLUDES ---
+// Aquí van TODAS las librerías de tu proyecto
+#include <iostream>
+#include <stdlib.h>
+#include <vector>
+#include <random>
+#include <cmath>
+#include <limits>
+#include <algorithm>
+
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/compatibility.hpp>
+#include <glm/gtx/norm.hpp>
+
+#include <shader_m.h>
+#include <camera.h>
+#include <model.h>
+#include <light.h>
+#include <material.h>
+#include <animatedmodel.h>
+#include <irrKlang.h>
+
+using namespace irrklang;
+
+
+// --- 2. ESTRUCTURAS ---
+// Aquí van TODAS las definiciones de structs y enums
+struct Plane {
+    glm::vec3 normal;
+    float distance;
+    void normalize() {
+        float length = glm::length(normal);
+        if (length > 0.0f) {
+            normal /= length;
+            distance /= length;
+        }
+    }
+    float getSignedDistanceToPoint(const glm::vec3& point) const {
+        return glm::dot(normal, point) + distance;
+    }
+};
+
+struct Frustum {
+    Plane planes[6];
+    // Las definiciones (cuerpos) de estas funciones irán en un .cpp
+    void extractPlanes(const glm::mat4& vp);
+    bool isBoxInFrustum(const glm::vec3& min, const glm::vec3& max) const;
+};
+
+enum class TreeState {
+    ALIVE,
+    CHOPPED_ONCE,
+    BURNING,
+    CHOPPED_TWICE
+};
+
+struct TreeInstance {
+    glm::mat4 matrix;
+    TreeState state = TreeState::ALIVE;
+    int id;
+    float fireTriggerTime = -1.0f;
+    float burnOutTime = -1.0f;
+};
+
+struct Chunk {
+    glm::vec3 position;
+    glm::vec3 aabb_min;
+    glm::vec3 aabb_max;
+    std::vector<glm::mat4> grass_matrices;
+    std::vector<glm::mat4> rock_matrices;
+    std::vector<TreeInstance> tree_instances;
+};
+
+struct Leaf {
+    glm::vec3 position;
+    glm::vec3 rotationAxis;
+    float rotationAngle;
+    float fallSpeed;
+    float spinSpeed;
+    glm::vec3 initialTreePos;
+    float initialHeight;
+    int parentTreeId = -1;
+    bool is_active = true;
+    bool is_explosion_leaf = false;
+};
+
+
+// --- 3. DECLARACIONES GLOBALES (EXTERN) ---
+// 'extern' le dice al compilador: "esta variable existe,
+// pero su memoria está definida en OTRO archivo .cpp"
+// IMPORTANTE: Se quitan todas las inicializaciones (ej: = 0.0f o (rd()))
+
+extern GLFWwindow* window;
+extern const unsigned int SCR_WIDTH;
+extern const unsigned int SCR_HEIGHT;
+
+extern Camera camera;
+extern float lastX;
+extern float lastY;
+extern bool firstMouse;
+
+extern float deltaTime;
+extern float lastFrame;
+extern float sunAngle;
+extern float sunElevationAngle;
+
+// --- Globales Random ---
+extern std::random_device rd;
+std::mt19937;
+extern const float CHUNK_SIZE;
+extern const float fireDuration;
+extern const float minBurnDuration;
+extern const float maxBurnDuration;
+
+extern std::uniform_real_distribution<float> dis_pos;
+extern std::uniform_real_distribution<float> dis_scale_grass;
+extern std::uniform_real_distribution<float> dis_scale_rock;
+extern std::uniform_real_distribution<float> dis_scale_tree;
+extern std::uniform_real_distribution<float> dis_rot;
+extern std::uniform_real_distribution<float> dis_axis;
+extern std::uniform_real_distribution<float> dis_leaf_offset;
+extern std::uniform_real_distribution<float> dis_leaf_height;
+extern std::uniform_real_distribution<float> dis_initial_fall;
+extern std::uniform_real_distribution<float> dis_initial_spin;
+extern std::uniform_real_distribution<float> dis_explode_y;
+extern std::uniform_real_distribution<float> dis_explode_angle;
+extern std::uniform_real_distribution<float> dis_explode_radius;
+extern std::uniform_real_distribution<float> dis_explode_fall;
+extern std::uniform_real_distribution<float> dis_explode_spin;
+extern std::uniform_real_distribution<float> dis_fire_time;
+extern std::uniform_real_distribution<float> dis_burn_duration;
+extern const float minCloudDistanceSq;
+extern const int maxPlacementTries;
+extern std::uniform_real_distribution<float> dis_cloud_distant_x;
+extern std::uniform_real_distribution<float> dis_cloud_distant_z;
+extern std::uniform_real_distribution<float> dis_cloud_y;
+extern std::uniform_real_distribution<float> dis_cloud_scale;
+
+// --- Shaders y Modelos ---
+extern Shader* phongShader;
+extern Shader* instancePhongShader;
+extern Shader* instanceAlphaTestPhongShader;
+extern Shader* skyboxShader;
+extern Shader* sunShader;
+extern Shader* crosshairShader;
+extern Shader* uiShader;
+extern Model* terrain_model;
+extern Model* grass_model;
+extern Model* rock_model;
+extern Model* mountain_model;
+extern Model* tree_model;
+extern Model* chopped_once_model;
+extern Model* burning_tree_model;
+extern Model* chopped_twice_model;
+extern Model* cubeenv;
+extern Model* cubeenv_noche;
+extern Model* sun_model;
+extern Model* moon_model;
+extern Model* cloud_model;
+extern Model* leaf_model;
+
+// --- Luz y Materiales ---
+extern Light theLight;
+extern Material defaultMaterial;
+extern Material mountainMaterial;
+extern Material treeMaterial;
+extern Material cloudMaterial;
+extern Material leafMaterial;
+extern Material sunMaterial;
+
+extern bool isDay;
+
+// --- Contenedores del Mundo ---
+extern std::vector<Chunk> terrain_chunks;
+extern const int WORLD_SIZE;
+extern Frustum cameraFrustum;
+
+// --- Constantes ---
+extern const unsigned int GRASS_PER_CHUNK;
+extern const unsigned int ROCKS_PER_CHUNK;
+extern const unsigned int TREES_PER_CHUNK;
+extern const unsigned int LEAVES_PER_TREE;
+extern const unsigned int NUM_DISTANT_CLOUDS;
+extern const unsigned int NUM_LOCAL_CLOUDS;
+extern const unsigned int TOTAL_CLOUDS;
+extern const unsigned int EXPLOSION_LEAVES_PER_HIT;
+
+// --- VBOs y VAOs ---
+extern unsigned int grassInstanceVBO;
+extern unsigned int rockInstanceVBO;
+extern unsigned int treeInstanceVBO;
+extern unsigned int choppedOnceTreeInstanceVBO;
+extern unsigned int burningTreeInstanceVBO;
+extern unsigned int choppedTwiceTreeInstanceVBO;
+extern unsigned int cloudInstanceVBO;
+extern unsigned int leafInstanceVBO;
+extern unsigned int crosshairVAO, crosshairVBO;
+extern unsigned int uiVAO, uiVBO;
+
+// --- Texturas UI ---
+extern unsigned int fireTextureID;
+extern unsigned int treeTextureID;
+extern unsigned int highlightTextureID;
+extern unsigned int legendFireTextureID;
+extern unsigned int legendTreeTextureID;
+
+// --- Vectores de Instancias ---
+extern std::vector<glm::mat4> cloud_matrices;
+extern std::vector<glm::vec3> cloud_positions;
+extern std::vector<Leaf> falling_leaves;
+extern std::vector<glm::mat4> leaf_matrices;
+extern int next_tree_id;
+
+extern const glm::vec3 tree_trunk_aabb_min;
+extern const glm::vec3 tree_trunk_aabb_max;
+
+// --- Globales de Lógica ---
+extern bool p_key_pressed;
+extern bool f_key_pressed;
+extern bool g_key_pressed;
+extern const float max_plant_distance;
+extern bool isFireActive;
+extern float fireStartTime;
+
+// --- Audio ---
+// extern ISoundEngine* SoundEngine;

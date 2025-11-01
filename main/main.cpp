@@ -1,102 +1,10 @@
 /*
 *
-* 06 - Texturizado (con Chunks, Instancias, Montaña, Luz de Phong, Sol/Luna Esféricos, Ciclo Día/Noche, Nubes, Hojas y Talar/Plantar Árboles + Incendio Secuencial)
+* ProyectoFinal (con Chunks, Instancias, Montaña, Luz de Phong, Sol/Luna Esféricos, Ciclo Día/Noche, Nubes, Hojas y Talar/Plantar Árboles + Incendio Secuencial)
 * Versión Final Corregida (Incendio Secuencial + Scope Global + Estilo Súper Estricto)
 */
 
-#include <iostream>
-#include <stdlib.h>
-#include <vector>
-#include <random>       // Incluido para std::random_device, std::mt1937, etc.
-#include <cmath>        // Para fmod, sin, cos
-#include <limits>       // Para std::numeric_limits
-#include <algorithm>    // Para std::remove_if (usado en plantTree)
-
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/compatibility.hpp>
-#include <glm/gtx/norm.hpp>
-
-#include <shader_m.h>
-#include <camera.h>
-#include <model.h>
-#include <light.h>
-#include <material.h>
-
-//Por si se llega a emplear el cubemap
-
-//Bibliotecas pendientes de implementar
-#include <animatedmodel.h>
-
-//Sonidos
-#include <irrKlang.h>
-using namespace irrklang;
-
-
-// --- ESTRUCTURAS ---
-struct Plane {
-    glm::vec3 normal;
-    float distance;
-    void normalize() {
-        float length = glm::length(normal);
-        if (length > 0.0f) {
-            normal /= length;
-            distance /= length;
-        }
-    }
-    float getSignedDistanceToPoint(const glm::vec3& point) const {
-        return glm::dot(normal, point) + distance;
-    }
-};
-
-struct Frustum {
-    Plane planes[6];
-    void extractPlanes(const glm::mat4& vp);
-    bool isBoxInFrustum(const glm::vec3& min, const glm::vec3& max) const;
-};
-
-// --- MODIFICADO: Estado del Árbol ---
-enum class TreeState {
-    ALIVE,
-    CHOPPED_ONCE,
-    BURNING,        // <-- Nuevo estado para troncoquemado.fbx
-    CHOPPED_TWICE
-};
-// ---------------------------------
-
-struct TreeInstance {
-    glm::mat4 matrix;
-    TreeState state = TreeState::ALIVE;
-    int id;
-    float fireTriggerTime = -1.0f; // <-- Tiempo en segundos (desde inicio incendio) para empezar a quemarse
-    float burnOutTime = -1.0f;     // <-- Tiempo en segundos (desde inicio incendio) para pasar a base cortada
-};
-
-struct Chunk {
-    glm::vec3 position;
-    glm::vec3 aabb_min;
-    glm::vec3 aabb_max;
-    std::vector<glm::mat4> grass_matrices;
-    std::vector<glm::mat4> rock_matrices;
-    std::vector<TreeInstance> tree_instances;
-};
-
-struct Leaf {
-    glm::vec3 position;
-    glm::vec3 rotationAxis;
-    float rotationAngle;
-    float fallSpeed;
-    float spinSpeed;
-    glm::vec3 initialTreePos;
-    float initialHeight;
-    int parentTreeId = -1;
-    bool is_active = true;
-    bool is_explosion_leaf = false;
-};
+#include <globals.h>
 
 // Declaraciones de funciones
 bool Start();
@@ -111,7 +19,7 @@ bool intersectRayAABB(const glm::vec3& ray_origin, const glm::vec3& ray_dir,
     const glm::vec3& aabb_min, const glm::vec3& aabb_max, float& t);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 void plantTree();
-void startFire(); // <-- Nueva función
+void startFire();
 
 // --- Globales ---
 GLFWwindow* window;
@@ -247,8 +155,7 @@ float fireStartTime = 0.0f;
 // ------------------------------------
 
 
-// Audio
-//ISoundEngine* SoundEngine = createIrrKlangDevice();
+
 
 int main() {
     if (!Start()) {
