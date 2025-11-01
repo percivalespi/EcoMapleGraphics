@@ -135,15 +135,6 @@ const int WORLD_SIZE = 10;
 // --> Variable Globale Para lo que la camara puede ver [Pendiente por separar]
 Frustum cameraFrustum;
 
-const unsigned int GRASS_PER_CHUNK = 80;
-const unsigned int ROCKS_PER_CHUNK = 15;
-const unsigned int TREES_PER_CHUNK = 5;
-const unsigned int LEAVES_PER_TREE = 2;
-const unsigned int NUM_DISTANT_CLOUDS = 40;
-const unsigned int NUM_LOCAL_CLOUDS = 10;
-const unsigned int TOTAL_CLOUDS = NUM_DISTANT_CLOUDS + NUM_LOCAL_CLOUDS;
-const unsigned int EXPLOSION_LEAVES_PER_HIT = 20;
-
 // --> Variables GLOBALES VAO (Vertex Array Object) Y VBO ((Vertex Buffer Object))
 unsigned int grassInstanceVBO = 0;
 unsigned int rockInstanceVBO = 0;
@@ -161,33 +152,37 @@ unsigned int uiVAO = 0, uiVBO = 0; // Buffers UI
 // Shader Interfaz Grafica (UI)
 Shader* uiShader = nullptr;
 
-// --- MODIFICADO: AÑADIR GLOBALES PARA LEYENDAS ---
-// Texturas UI
+// Texturas ID UI: Iconos
 unsigned int fireTextureID = 0;
 unsigned int treeTextureID = 0;
 unsigned int highlightTextureID = 0;
-// --- NUEVO: Texturas para las leyendas ---
+// Texturas ID UI: Leyendas Texto
 unsigned int legendFireTextureID = 0;
 unsigned int legendTreeTextureID = 0;
-// ----------------------------------------
-// --------------------
 
+// -> Variables Globales Mecanica (Talado de Árboles)
+const unsigned int GRASS_PER_CHUNK = 80;
+const unsigned int ROCKS_PER_CHUNK = 15;
+const unsigned int TREES_PER_CHUNK = 5;
+const unsigned int LEAVES_PER_TREE = 2;
+const unsigned int NUM_DISTANT_CLOUDS = 40;
+const unsigned int NUM_LOCAL_CLOUDS = 10;
+const unsigned int TOTAL_CLOUDS = NUM_DISTANT_CLOUDS + NUM_LOCAL_CLOUDS;
+const unsigned int EXPLOSION_LEAVES_PER_HIT = 20;
 
-
+// Hitboxes Arboles
 const glm::vec3 tree_trunk_aabb_min(-0.5f, 0.0f, -0.5f);
 const glm::vec3 tree_trunk_aabb_max(0.5f, 2.0f, 5.5f);
 
-// --- Globales para Input e Incendio ---
+// Banderas de Estado Mecácnica Fuego/Plantar 
+const float max_plant_distance = 15.0f;
 bool p_key_pressed = false;
 bool f_key_pressed = false;
 bool g_key_pressed = false;
-const float max_plant_distance = 15.0f;
 bool isFireActive = false;
 float fireStartTime = 0.0f;
-// ------------------------------------
 
-
-// Variable Global Para el Manejo del [Audio]
+// -> Variable Global Para el Manejo del [Audio]
 ISoundEngine* SoundEngine = createIrrKlangDevice();
 
 int main() {
