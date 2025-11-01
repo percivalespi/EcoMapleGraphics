@@ -27,6 +27,16 @@
 #include <light.h>
 #include <material.h>
 
+//Por si se llega a emplear el cubemap
+
+//Bibliotecas pendientes de implementar
+#include <animatedmodel.h>
+
+//Sonidos
+#include <irrKlang.h>
+using namespace irrklang;
+
+
 // --- ESTRUCTURAS ---
 struct Plane {
     glm::vec3 normal;
@@ -237,6 +247,9 @@ float fireStartTime = 0.0f;
 // ------------------------------------
 
 
+// Audio
+//ISoundEngine* SoundEngine = createIrrKlangDevice();
+
 int main() {
     if (!Start()) {
         glfwTerminate();
@@ -346,7 +359,11 @@ bool Start() {
     }
     glEnable(GL_DEPTH_TEST);
 
+    // ----------------------------- DEFINICIÓN DE SHADERS ----------------------------------------------------
+
+    //NOTA: EL BOSQUE AL TENER UNA SOLA FUENTE DE ILUMINACIÓN (SOL) SE USA LE BASICO
     phongShader = new Shader("shaders/11_BasicPhongShader.vs", "shaders/11_BasicPhongShader.fs");
+    //phongShader = new Shader("shaders/11_PhongShaderMultLights.vs", "shaders/11_PhongShaderMultLights.fs");
     instancePhongShader = new Shader("shaders/instancing_phong.vs", "shaders/11_BasicPhongShader.fs");
     instanceAlphaTestPhongShader = new Shader("shaders/instancing_phong.vs", "shaders/instancing_phong_alpha_test.fs");
     skyboxShader = new Shader("shaders/10_vertex_simple.vs", "shaders/10_fragment_simple.fs");
