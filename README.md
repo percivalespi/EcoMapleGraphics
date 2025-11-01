@@ -1,7 +1,15 @@
 # EcoMapleGraphics
 
+
 >[!WARNING]
+> **Se recomienda aun no configurar el entorno - CAMBIOS PRONTOS**
+> 
 > Aun no se incluye la carpeta models debido a que como va aumnetar de tamaño estos se deben de decargar por separado, lo más probable es que hasta que este final se comprima y seba añadir manualmente al proyecto.
+
+Para ello descargar la carpeta models del siguiente link y meterlo en la carpeta BIN del 
+
+[Descarga Carpeta models](https://drive.google.com/drive/folders/1vFyg7XFG_-V_k6AOsx5DUSa3R7gHPfq3?usp=sharing)
+
 
 ## Modelos Implementados Hasta el momento
 
@@ -49,3 +57,9 @@ Para esta mecanica se ocupo la cruz que tenemos en el centro de pantalla y es ne
 ### Iluminacion
 
 Para mover el sol y la luna se mueve con las teclas de arriba, abajo, izqueirdaa y derecha
+
+# TO DO (Pendientes)
+* [] Refactorizar Codigo
+* [] Verificar el funcionamiento
+* [] Implementación de funciones de utilidad
+* [] Implementación de los shaders para varias fuentes de iluminación (ver con angel las diferencias)
