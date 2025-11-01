@@ -34,14 +34,15 @@ models/image estan los imagenes que ocupamos en la pantalla
 **Interaccion con el mundo:**
 
 *  `A,W,S,D` : es para **moverse**
-* P y viendo hacia una parte cercada del suelo: se planta un arbol:
-* F: Se inicia el incendio dura alrededor de 90 segundos, pueden cambiarlo desde las variables del codigo:
-* G: Se apaga el incendio 
-* espacio: volar
-* ctrl:descender
-* Mecanica de talar arboles
+* `P` y viendo hacia una parte cercada del suelo: se **planta un arbol**:
+* `F`: Se **inicia el incendio** dura alrededor de 90 segundos, pueden cambiarlo desde las variables del codigo:
+* `G`: Se **apaga el incendio** 
+* `espacio`: **volar**
+* `ctrl`: **descender**
 
 ### PICKING (Interacición Objetos)
+***Mecanica de talar arboles***
+
 Para esta mecanica se ocupo la cruz que tenemos en el centro de pantalla y es necesario hacer in clic izquierdo sobre el tronco para talar el arbol, pasara de un arbol con hojas a un arbol sin hojas y despues a una base de arbol cortada si se clikea en ese orden
 
 
