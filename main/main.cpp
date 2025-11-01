@@ -1,12 +1,18 @@
 /*
 *
-* ProyectoFinal (con Chunks, Instancias, Montaña, Luz de Phong, Sol/Luna Esféricos, Ciclo Día/Noche, Nubes, Hojas y Talar/Plantar Árboles + Incendio Secuencial)
-* Versión Final Corregida (Incendio Secuencial + Scope Global + Estilo Súper Estricto)
+* ProyectoFinal 0.0.1-alpha
+
+Funcionalidades: (Con Chunks, In<stancias, Montaña, Luz de Phong, Sol/Luna Esféricos, Ciclo Día/Noche, Nubes, Hojas y Talar/Plantar Árboles + Incendio Secuencial)
+
+Ultimas Implementaciones: (Incendio Secuencial + Scope Global + Estilo Súper Estricto)
 */
 
+/* ---------------------------------------- Encabezados del Proyecto -------------------------------------------------*/
+
+// Archivo de Encabezado con las Estrucuras y Bibliotecas del Proyecto
 #include <globals.h>
 
-// Declaraciones de funciones
+// Declaraciones de funciones (Se va a mover)
 bool Start();
 bool Update();
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -21,7 +27,9 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 void plantTree();
 void startFire();
 
-// --- Globales ---
+/* ------------------------------------------ Variables Globales ------------------------------------------------------ */
+
+// --> Variables Globales Para la <Ventana> 
 GLFWwindow* window;
 const unsigned int SCR_WIDTH = 1024;
 const unsigned int SCR_HEIGHT = 768;
@@ -36,14 +44,21 @@ float lastFrame = 0.0f;
 float sunAngle = 0.0f;
 float sunElevationAngle = 45.0f;
 
-// --- Globales Random (CORREGIDO: Ámbito Global) ---
-std::random_device rd;
-std::mt19937 gen(rd());
+// --> Variables Globales Para Definir las [Reglas del Mundo]
 const float CHUNK_SIZE = 20.0f;
 const float fireDuration = 80.0f; // 1 Minuto
-const float minBurnDuration = 15.0f; // Mínimo que un árbol arde
-const float maxBurnDuration = 40.0f; // Máximo que un árbol arde
+const float minBurnDuration = 15.0f; // [Mínimo que un árbol arde]
+const float maxBurnDuration = 40.0f; // Máximo que un árbol arde]
+const float minCloudDistanceSq = 60.0f * 60.0f;
+const int maxPlacementTries = 20;
 
+// --> Variables Globales Para la Generacion Aleatoria del Bosque
+
+// Generando Semilla Aleatora
+std::random_device rd;
+std::mt19937 gen(rd());
+
+// Generación de elemntos aleatorios dentro del chunk [BOSQUE]
 std::uniform_real_distribution<float> dis_pos(-CHUNK_SIZE / 2.0f, CHUNK_SIZE / 2.0f);
 std::uniform_real_distribution<float> dis_scale_grass(0.8f, 1.2f);
 std::uniform_real_distribution<float> dis_scale_rock(0.2f, 0.7f);
@@ -61,21 +76,26 @@ std::uniform_real_distribution<float> dis_explode_fall(1.5f, 3.0f);
 std::uniform_real_distribution<float> dis_explode_spin(40.0f, 90.0f);
 std::uniform_real_distribution<float> dis_fire_time(0.0f, fireDuration - maxBurnDuration); // Tiempo de inicio de fuego
 std::uniform_real_distribution<float> dis_burn_duration(minBurnDuration, maxBurnDuration); // Duración de quema
-const float minCloudDistanceSq = 60.0f * 60.0f;
-const int maxPlacementTries = 20;
+
+// Generación de elemntos aleatorios dentro del chunk [NUBES]
 std::uniform_real_distribution<float> dis_cloud_distant_x(-800.0f, 800.0f);
 std::uniform_real_distribution<float> dis_cloud_distant_z(-800.0f, 800.0f);
 std::uniform_real_distribution<float> dis_cloud_y(70.0f, 100.0f);
 std::uniform_real_distribution<float> dis_cloud_scale(1.0f, 2.5f);
-// ----------------------------------------------------
 
+// --> Variables Globales Para el uso de [SHADERS]
+
+// Shaders de Phong
 Shader* phongShader = nullptr;
 Shader* instancePhongShader = nullptr;
 Shader* instanceAlphaTestPhongShader = nullptr;
+// Shaders personalizados
 Shader* skyboxShader = nullptr;
 Shader* sunShader = nullptr;
 Shader* crosshairShader = nullptr;
-Shader* uiShader = nullptr; // Shader UI
+
+
+// --> Variables Globales Para la [Carga de Modelos]
 Model* terrain_model = nullptr;
 Model* grass_model = nullptr;
 Model* rock_model = nullptr;
@@ -91,6 +111,7 @@ Model* moon_model = nullptr;
 Model* cloud_model = nullptr;
 Model* leaf_model = nullptr;
 
+// --> Variables Globales Para la [Iluminacion y Materiales]
 Light theLight;
 Material defaultMaterial;
 Material mountainMaterial;
@@ -99,10 +120,19 @@ Material cloudMaterial;
 Material leafMaterial;
 Material sunMaterial;
 
+// --> Variables Globales Para el estado del mundo [Iluminacion y Materiales]
+std::vector<Chunk> terrain_chunks;
+std::vector<Leaf> falling_leaves;
+std::vector<glm::mat4> cloud_matrices;
+std::vector<glm::vec3> cloud_positions;
+std::vector<glm::mat4> leaf_matrices;
+int next_tree_id = 0;
 bool isDay = true;
 
-std::vector<Chunk> terrain_chunks;
+// --> Variable Globale Para el Tamano del Mundo
 const int WORLD_SIZE = 10;
+
+// --> Variable Globale Para lo que la camara puede ver [Pendiente por separar]
 Frustum cameraFrustum;
 
 const unsigned int GRASS_PER_CHUNK = 80;
@@ -114,6 +144,7 @@ const unsigned int NUM_LOCAL_CLOUDS = 10;
 const unsigned int TOTAL_CLOUDS = NUM_DISTANT_CLOUDS + NUM_LOCAL_CLOUDS;
 const unsigned int EXPLOSION_LEAVES_PER_HIT = 20;
 
+// --> Variables GLOBALES VAO (Vertex Array Object) Y VBO ((Vertex Buffer Object))
 unsigned int grassInstanceVBO = 0;
 unsigned int rockInstanceVBO = 0;
 unsigned int treeInstanceVBO = 0;
@@ -123,7 +154,12 @@ unsigned int choppedTwiceTreeInstanceVBO = 0;
 unsigned int cloudInstanceVBO = 0;
 unsigned int leafInstanceVBO = 0;
 unsigned int crosshairVAO = 0, crosshairVBO = 0;
+
+// --> Variables Globales Para la Interfaz Gráfica
 unsigned int uiVAO = 0, uiVBO = 0; // Buffers UI
+
+// Shader Interfaz Grafica (UI)
+Shader* uiShader = nullptr;
 
 // --- MODIFICADO: AÑADIR GLOBALES PARA LEYENDAS ---
 // Texturas UI
@@ -136,11 +172,7 @@ unsigned int legendTreeTextureID = 0;
 // ----------------------------------------
 // --------------------
 
-std::vector<glm::mat4> cloud_matrices;
-std::vector<glm::vec3> cloud_positions;
-std::vector<Leaf> falling_leaves;
-std::vector<glm::mat4> leaf_matrices;
-int next_tree_id = 0;
+
 
 const glm::vec3 tree_trunk_aabb_min(-0.5f, 0.0f, -0.5f);
 const glm::vec3 tree_trunk_aabb_max(0.5f, 2.0f, 5.5f);
@@ -155,7 +187,8 @@ float fireStartTime = 0.0f;
 // ------------------------------------
 
 
-
+// Variable Global Para el Manejo del [Audio]
+ISoundEngine* SoundEngine = createIrrKlangDevice();
 
 int main() {
     if (!Start()) {

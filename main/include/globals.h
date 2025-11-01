@@ -1,7 +1,7 @@
 #pragma once // Evita que este archivo se incluya varias veces
 
 // --- 1. INCLUDES ---
-// Aquí van TODAS las librerías de tu proyecto
+// Aquí van TODAS las librerías del proyecto
 #include <iostream>
 #include <stdlib.h>
 #include <vector>
@@ -49,7 +49,7 @@ struct Plane {
 
 struct Frustum {
     Plane planes[6];
-    // Las definiciones (cuerpos) de estas funciones irán en un .cpp
+    // Las definiciones (cuerpos) de estas funciones irán en un .cpp [Pendiente]
     void extractPlanes(const glm::mat4& vp);
     bool isBoxInFrustum(const glm::vec3& min, const glm::vec3& max) const;
 };
@@ -230,4 +230,4 @@ extern bool isFireActive;
 extern float fireStartTime;
 
 // --- Audio ---
-// extern ISoundEngine* SoundEngine;
+extern ISoundEngine* SoundEngine;
