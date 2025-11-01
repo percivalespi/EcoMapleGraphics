@@ -1,0 +1,427 @@
+#ifndef MODEL_H
+#define MODEL_H
+
+#include <glm/gtx/string_cast.hpp>
+
+#include <modelstructs.h>
+
+class Model
+{
+public:
+	/* Model Data */
+	vector<Texture> textures_loaded;	// stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
+	vector<Mesh> meshes;
+	string directory;
+	bool gammaCorrection;
+
+	string filename;
+
+	/* Bones data */
+	vector<Bone> bones;
+
+	/* Scene data */
+	Assimp::Importer importer;
+	const aiScene* scene;
+
+	map<string, unsigned int> m_BoneMapping; // maps a bone name to its index
+	unsigned int m_NumBones;
+	vector<BoneInfo> m_BoneInfo;
+	glm::mat4 m_GlobalInverseTransform;
+
+	/* Functions   */
+	// constructor, expects a filepath to a 3D model.
+	Model(string const& path, bool gamma = false) : gammaCorrection(gamma)
+	{
+		loadModel(path);
+	}
+
+	// draws the model, and thus all its meshes
+	void Draw(Shader shader)
+	{
+		for (unsigned int i = 0; i < meshes.size(); i++)
+			meshes[i].Draw(shader);
+	}
+
+	// update transformations in time 
+	void SetPose(float time, glm::mat4* gBones) {
+
+		glm::mat4 n_matrix(1.0f);
+		ReadNodeHierarchy(time, scene->mRootNode, n_matrix);
+
+		for (unsigned int i = 0; i < bones.size(); i++) {
+			if (i < 100) {
+				gBones[i] = bones[i].transformation;
+			}
+		}
+	}
+
+	// Return the duration of the animation in ticks (frames)
+	double getNumFrames() {
+		if (!scene || !scene->HasAnimations()) return -1.0;
+		const aiAnimation* pAnimation = scene->mAnimations[0];
+		if (pAnimation == nullptr) return -1.0;
+		cout << "Animation total frames:" << pAnimation->mDuration << endl;
+		return pAnimation->mDuration;
+	}
+
+	// return the number of ticks per second
+	double getFramerate() {
+		if (!scene || !scene->HasAnimations()) return -1.0;
+		const aiAnimation* pAnimation = scene->mAnimations[0];
+		if (pAnimation == nullptr) return -1.0;
+		cout << "Animation framerate:" << pAnimation->mTicksPerSecond << " fps" << endl;
+		return  pAnimation->mTicksPerSecond;
+	}
+
+private:
+
+	/* Functions   */
+
+	inline glm::mat4 aiMatrix4x4ToGlm(aiMatrix4x4 from)
+	{
+		glm::mat4 to;
+
+		to[0][0] = (GLfloat)from.a1; to[0][1] = (GLfloat)from.b1;  to[0][2] = (GLfloat)from.c1; to[0][3] = (GLfloat)from.d1;
+		to[1][0] = (GLfloat)from.a2; to[1][1] = (GLfloat)from.b2;  to[1][2] = (GLfloat)from.c2; to[1][3] = (GLfloat)from.d2;
+		to[2][0] = (GLfloat)from.a3; to[2][1] = (GLfloat)from.b3;  to[2][2] = (GLfloat)from.c3; to[2][3] = (GLfloat)from.d3;
+		to[3][0] = (GLfloat)from.a4; to[3][1] = (GLfloat)from.b4;  to[3][2] = (GLfloat)from.c4; to[3][3] = (GLfloat)from.d4;
+
+		return to;
+	}
+
+	void loadModel(string const& path)
+	{
+		scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+		{
+			cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << endl;
+			return;
+		}
+		filename = path;
+		directory = path.substr(0, path.find_last_of('/'));
+
+		aiMatrix4x4 inverseTransform = scene->mRootNode->mTransformation;
+		inverseTransform.Inverse();
+		m_GlobalInverseTransform = aiMatrix4x4ToGlm(inverseTransform);
+
+		processNode(scene->mRootNode, scene);
+	}
+
+	void processNode(aiNode* node, float time) {
+
+		if (node == nullptr) return;
+
+		glm::mat4 n_matrix(1.0f);
+		ReadNodeHierarchy(time, node, n_matrix);
+	}
+
+	void processNode(aiNode* node, const aiScene* scene)
+	{
+		for (unsigned int i = 0; i < node->mNumMeshes; i++)
+		{
+			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+			meshes.push_back(processMesh(mesh, scene));
+		}
+		for (unsigned int i = 0; i < node->mNumChildren; i++)
+		{
+			processNode(node->mChildren[i], scene);
+		}
+
+	}
+
+	Mesh processMesh(aiMesh* mesh, const aiScene* scene)
+	{
+		vector<Vertex> vertices;
+		vector<unsigned int> indices;
+		vector<Texture> textures;
+
+		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
+		{
+			Vertex vertex;
+			glm::vec3 vector;
+
+			vertex.Position.x = mesh->mVertices[i].x;
+			vertex.Position.y = mesh->mVertices[i].y;
+			vertex.Position.z = mesh->mVertices[i].z;
+
+			if (mesh->HasNormals())
+			{
+				vertex.Normal.x = mesh->mNormals[i].x;
+				vertex.Normal.y = mesh->mNormals[i].y;
+				vertex.Normal.z = mesh->mNormals[i].z;
+			}
+			else
+				vertex.Normal = glm::vec3(0.0f, 0.0f, 0.0f);
+
+			if (mesh->mTextureCoords[0])
+			{
+				vertex.TexCoords.x = mesh->mTextureCoords[0][i].x;
+				vertex.TexCoords.y = mesh->mTextureCoords[0][i].y;
+			}
+			else
+				vertex.TexCoords = glm::vec2(0.0f, 0.0f);
+
+			if (mesh->HasTangentsAndBitangents())
+			{
+				vertex.Tangent.x = mesh->mTangents[i].x;
+				vertex.Tangent.y = mesh->mTangents[i].y;
+				vertex.Tangent.z = mesh->mTangents[i].z;
+				vertex.Bitangent.x = mesh->mBitangents[i].x;
+				vertex.Bitangent.y = mesh->mBitangents[i].y;
+				vertex.Bitangent.z = mesh->mBitangents[i].z;
+			}
+			else
+			{
+				vertex.Tangent = glm::vec3(0.0f, 0.0f, 0.0f);
+				vertex.Bitangent = glm::vec3(0.0f, 0.0f, 0.0f);
+			}
+
+			int bcount = 0;
+			for (unsigned int pb = 0; pb < MAX_NUM_BONES; pb++) {
+				vertex.IDs1[pb] = 0.0f;
+				vertex.IDs2[pb] = 0.0f;
+				vertex.IDs3[pb] = 0.0f;
+				vertex.Weights1[pb] = 0.0f;
+				vertex.Weights2[pb] = 0.0f;
+				vertex.Weights3[pb] = 0.0f;
+			}
+			m_NumBones = mesh->mNumBones;
+			for (unsigned int j = 0; j < mesh->mNumBones; j++) {
+				for (unsigned int k = 0; k < mesh->mBones[j]->mNumWeights; k++) {
+					unsigned int VertexID = mesh->mBones[j]->mWeights[k].mVertexId;
+					float Weight = (float)(mesh->mBones[j]->mWeights[k].mWeight);
+					if (VertexID == i && bcount < MAX_NUM_BONES) {
+						vertex.IDs1[bcount] = (float)j;
+						vertex.Weights1[bcount] = Weight;
+						bcount++;
+					}
+					if (VertexID == i && bcount >= MAX_NUM_BONES && bcount < 2 * MAX_NUM_BONES) {
+						vertex.IDs2[bcount - MAX_NUM_BONES] = (float)j;
+						vertex.Weights2[bcount - MAX_NUM_BONES] = Weight;
+						bcount++;
+					}
+					if (VertexID == i && bcount >= 2 * MAX_NUM_BONES && bcount < 3 * MAX_NUM_BONES) {
+						vertex.IDs3[bcount - 2 * MAX_NUM_BONES] = (float)j;
+						vertex.Weights3[bcount - 2 * MAX_NUM_BONES] = Weight;
+						bcount++;
+					}
+				}
+			}
+			vertices.push_back(vertex);
+		}
+
+		bones.clear();
+		for (unsigned int i = 0; i < mesh->mNumBones; i++) {
+			Bone  newBone;
+			newBone.name = mesh->mBones[i]->mName;
+			newBone.offsetMatrix = aiMatrix4x4ToGlm(mesh->mBones[i]->mOffsetMatrix);
+			newBone.transformation = glm::mat4(1.0f);
+			for (unsigned int j = 0; j < mesh->mBones[i]->mNumWeights; j++) {
+				unsigned int VertexID = mesh->mBones[i]->mWeights[j].mVertexId;
+				float Weight = mesh->mBones[i]->mWeights[j].mWeight;
+				newBone.push(VertexID, Weight);
+			}
+			bones.push_back(newBone);
+		}
+
+		for (unsigned int i = 0; i < mesh->mNumFaces; i++)
+		{
+			aiFace face = mesh->mFaces[i];
+			for (unsigned int j = 0; j < face.mNumIndices; j++)
+				indices.push_back(face.mIndices[j]);
+		}
+
+		// process materials (¡CORREGIDO!)
+		if (mesh->mMaterialIndex >= 0)
+		{
+			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+
+			// 1. diffuse maps
+			vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+			textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+			// 2. specular maps
+			vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+			// 3. normal maps
+			std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+			textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+			// 4. height maps
+			std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
+			textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+		}
+
+		return Mesh(vertices, indices, textures);
+	}
+
+	void ReadNodeHierarchy(float AnimationTime, const aiNode* pNode, const glm::mat4& ParentTransform)
+	{
+		if (pNode == nullptr || scene == nullptr || !scene->HasAnimations()) return;
+
+		string NodeName(pNode->mName.data);
+		const aiAnimation* pAnimation = scene->mAnimations[0];
+		if (pAnimation == nullptr) return;
+
+		aiMatrix4x4 NodeTransformation(pNode->mTransformation);
+		const aiNodeAnim* pNodeAnim = FindNodeAnim(pAnimation, NodeName);
+
+		if (pNodeAnim) {
+			aiVector3D Scaling;
+			CalcInterpolatedScaling(Scaling, AnimationTime, pNodeAnim);
+			aiMatrix4x4 ScalingM;
+			aiMatrix4x4::Scaling(Scaling, ScalingM);
+
+			aiQuaternion RotationQ;
+			CalcInterpolatedRotation(RotationQ, AnimationTime, pNodeAnim);
+			aiMatrix4x4 RotationM = aiMatrix4x4(RotationQ.GetMatrix());
+
+			aiVector3D Translation;
+			CalcInterpolatedPosition(Translation, AnimationTime, pNodeAnim);
+			aiMatrix4x4 TranslationM;
+			aiMatrix4x4::Translation(Translation, TranslationM);
+
+			NodeTransformation = TranslationM * RotationM * ScalingM;
+		}
+
+		glm::mat4 GlobalTransformation = ParentTransform * aiMatrix4x4ToGlm(NodeTransformation);
+
+		for (unsigned int b = 0; b < bones.size(); b++) {
+			if (bones[b].name == pNode->mName) {
+				bones[b].transformation = m_GlobalInverseTransform * GlobalTransformation * bones[b].offsetMatrix;
+			}
+		}
+
+		for (unsigned int i = 0; i < pNode->mNumChildren; i++) {
+			ReadNodeHierarchy(AnimationTime, pNode->mChildren[i], GlobalTransformation);
+		}
+	}
+
+	const aiNodeAnim* FindNodeAnim(const aiAnimation* pAnimation, const string NodeName)
+	{
+		for (unsigned int i = 0; i < pAnimation->mNumChannels; i++) {
+			const aiNodeAnim* pNodeAnim = pAnimation->mChannels[i];
+			if (string(pNodeAnim->mNodeName.data) == NodeName) {
+				return pNodeAnim;
+			}
+		}
+		return nullptr;
+	}
+
+	void CalcInterpolatedScaling(aiVector3D& Out, float AnimationTime, const aiNodeAnim* pNodeAnim)
+	{
+		if (pNodeAnim->mNumScalingKeys == 1) {
+			Out = pNodeAnim->mScalingKeys[0].mValue;
+			return;
+		}
+		unsigned int ScalingIndex = FindScaling(AnimationTime, pNodeAnim);
+		unsigned int NextScalingIndex = (ScalingIndex + 1);
+		assert(NextScalingIndex < pNodeAnim->mNumScalingKeys);
+		float DeltaTime = (float)(pNodeAnim->mScalingKeys[NextScalingIndex].mTime - pNodeAnim->mScalingKeys[ScalingIndex].mTime);
+		float Factor = (AnimationTime - (float)pNodeAnim->mScalingKeys[ScalingIndex].mTime) / DeltaTime;
+		const aiVector3D& Start = pNodeAnim->mScalingKeys[ScalingIndex].mValue;
+		const aiVector3D& End = pNodeAnim->mScalingKeys[NextScalingIndex].mValue;
+		aiVector3D Delta = End - Start;
+		Out = Start + Factor * Delta;
+	}
+
+	unsigned int FindScaling(float AnimationTime, const aiNodeAnim* pNodeAnim)
+	{
+		assert(pNodeAnim->mNumScalingKeys > 0);
+		for (unsigned int i = 0; i < pNodeAnim->mNumScalingKeys - 1; i++) {
+			if (AnimationTime < (float)pNodeAnim->mScalingKeys[i + 1].mTime) {
+				return i;
+			}
+		}
+		return 0;
+	}
+
+	void CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const aiNodeAnim* pNodeAnim)
+	{
+		if (pNodeAnim->mNumRotationKeys == 1) {
+			Out = pNodeAnim->mRotationKeys[0].mValue;
+			return;
+		}
+		unsigned int RotationIndex = FindRotation(AnimationTime, pNodeAnim);
+		unsigned int NextRotationIndex = (RotationIndex + 1);
+		assert(NextRotationIndex < pNodeAnim->mNumRotationKeys);
+		float DeltaTime = (float)(pNodeAnim->mRotationKeys[NextRotationIndex].mTime - pNodeAnim->mRotationKeys[RotationIndex].mTime);
+		float Factor = (AnimationTime - (float)pNodeAnim->mRotationKeys[RotationIndex].mTime) / DeltaTime;
+		const aiQuaternion& StartRotationQ = pNodeAnim->mRotationKeys[RotationIndex].mValue;
+		const aiQuaternion& EndRotationQ = pNodeAnim->mRotationKeys[NextRotationIndex].mValue;
+		aiQuaternion::Interpolate(Out, StartRotationQ, EndRotationQ, Factor);
+		Out = Out.Normalize();
+	}
+
+	unsigned int FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim)
+	{
+		assert(pNodeAnim->mNumRotationKeys > 0);
+		for (unsigned int i = 0; i < pNodeAnim->mNumRotationKeys - 1; i++) {
+			if (AnimationTime < (float)pNodeAnim->mRotationKeys[i + 1].mTime) {
+				return i;
+			}
+		}
+		return 0;
+	}
+
+	unsigned int FindPosition(float AnimationTime, const aiNodeAnim* pNodeAnim)
+	{
+		for (unsigned int i = 0; i < pNodeAnim->mNumPositionKeys - 1; i++) {
+			if (AnimationTime < (float)pNodeAnim->mPositionKeys[i + 1].mTime) {
+				return i;
+			}
+		}
+		return 0;
+	}
+
+	void CalcInterpolatedPosition(aiVector3D& Out, float AnimationTime, const aiNodeAnim* pNodeAnim)
+	{
+		if (pNodeAnim->mNumPositionKeys == 1) {
+			Out = pNodeAnim->mPositionKeys[0].mValue;
+			return;
+		}
+		unsigned int PositionIndex = FindPosition(AnimationTime, pNodeAnim);
+		unsigned int NextPositionIndex = (PositionIndex + 1);
+		assert(NextPositionIndex < pNodeAnim->mNumPositionKeys);
+		float DeltaTime = (float)(pNodeAnim->mPositionKeys[NextPositionIndex].mTime - pNodeAnim->mPositionKeys[PositionIndex].mTime);
+		float Factor = (AnimationTime - (float)pNodeAnim->mPositionKeys[PositionIndex].mTime) / DeltaTime;
+		const aiVector3D& Start = pNodeAnim->mPositionKeys[PositionIndex].mValue;
+		const aiVector3D& End = pNodeAnim->mPositionKeys[NextPositionIndex].mValue;
+		aiVector3D Delta = End - Start;
+		Out = Start + Factor * Delta;
+	}
+
+	vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName)
+	{
+		vector<Texture> textures;
+		// (¡CORREGIDO!) Añadimos una comprobación para asegurarnos de que el material no sea nulo.
+		if (mat == nullptr) {
+			return textures;
+		}
+		for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
+		{
+			aiString str;
+			mat->GetTexture(type, i, &str);
+			bool skip = false;
+			for (unsigned int j = 0; j < textures_loaded.size(); j++)
+			{
+				if (std::strcmp(textures_loaded[j].path.data(), str.C_Str()) == 0)
+				{
+					textures.push_back(textures_loaded[j]);
+					skip = true;
+					break;
+				}
+			}
+			if (!skip)
+			{
+				Texture texture;
+				texture.id = TextureFromFile(str.C_Str(), this->directory);
+				texture.type = typeName;
+				texture.path = str.C_Str();
+				textures.push_back(texture);
+				textures_loaded.push_back(texture);
+			}
+		}
+		return textures;
+	}
+};
+
+#endif
