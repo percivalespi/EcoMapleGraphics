@@ -11,8 +11,9 @@ void startFire();
 bool intersectRayAABB(const glm::vec3& ray_origin, const glm::vec3& ray_dir,
     const glm::vec3& aabb_min, const glm::vec3& aabb_max, float& t);
 
-// NOTA: Las declaraciones de Frustum::extractPlanes y Frustum::isBoxInFrustum
-// ya están en globals.h (dentro de la struct Frustum), 
-// así que no necesitamos repetirlas aquí.
+void updateGameLogic();
+
+//Esta funcion se va a mover a otra clase a futuro para generar de difente manera entornos
+void generateForest();
 
 #endif

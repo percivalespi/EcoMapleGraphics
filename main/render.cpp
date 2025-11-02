@@ -54,35 +54,7 @@ void renderScene() {
     glm::vec4 dimmedLightPower = theLight.Power * nightDimFactor;
     isDay = (normalizedSunY > -0.1f);
 
-    leaf_matrices.clear();
-    for (size_t i = 0; i < falling_leaves.size(); ++i) {
-        Leaf& leaf = falling_leaves[i];
-        if (!leaf.is_active) {
-            continue;
-        }
 
-        leaf.position.y -= leaf.fallSpeed * deltaTime;
-        leaf.rotationAngle += leaf.spinSpeed * deltaTime;
-
-        if (leaf.position.y < 0.0f) {
-            if (leaf.is_explosion_leaf) {
-                leaf.is_active = false;
-                continue;
-            }
-            else {
-                leaf.position.y = leaf.initialHeight;
-                leaf.position.x = leaf.initialTreePos.x + dis_leaf_offset(gen);
-                leaf.position.z = leaf.initialTreePos.z + dis_leaf_offset(gen);
-            }
-        }
-
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, leaf.position);
-        model = glm::rotate(model, glm::radians(leaf.rotationAngle), leaf.rotationAxis);
-        model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(0.009f));
-        leaf_matrices.push_back(model);
-    }
 
     // --- 1. DIBUJAR OBJETOS OPACOS ESTÁTICOS ---
     if (phongShader != nullptr && phongShader->ID != 0) {

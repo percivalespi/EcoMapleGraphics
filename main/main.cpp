@@ -421,149 +421,7 @@ bool Start() {
     std::cout << "Using Manual Tree Trunk AABB Min: (" << tree_trunk_aabb_min.x << ", " << tree_trunk_aabb_min.y << ", " << tree_trunk_aabb_min.z << ")" << std::endl;
     std::cout << "Using Manual Tree Trunk AABB Max: (" << tree_trunk_aabb_max.x << ", " << tree_trunk_aabb_max.y << ", " << tree_trunk_aabb_max.z << ")" << std::endl;
 
-    const float TERRAIN_AABB_HEIGHT = 35.0f;
-    // Las distribuciones ya están globales
-
-    for (int chunk_idx_x = 0; chunk_idx_x < WORLD_SIZE; ++chunk_idx_x) {
-        for (int chunk_idx_z = 0; chunk_idx_z < WORLD_SIZE; ++chunk_idx_z) {
-            int x_coord = chunk_idx_x - WORLD_SIZE / 2;
-            int z_coord = chunk_idx_z - WORLD_SIZE / 2;
-            Chunk chunk;
-            chunk.position = glm::vec3(x_coord * CHUNK_SIZE, 0.0f, z_coord * CHUNK_SIZE);
-            float half_size = CHUNK_SIZE / 2.0f;
-            chunk.aabb_min = glm::vec3(chunk.position.x - half_size, -2.0f, chunk.position.z - half_size);
-            chunk.aabb_max = glm::vec3(chunk.position.x + half_size, TERRAIN_AABB_HEIGHT, chunk.position.z + half_size);
-            std::vector<glm::vec3> large_object_positions;
-
-            for (unsigned int i = 0; i < ROCKS_PER_CHUNK; i++) {
-                glm::mat4 model = glm::mat4(1.0f);
-                glm::vec3 pos = chunk.position + glm::vec3(dis_pos(gen), 0.5f, dis_pos(gen));
-                large_object_positions.push_back(pos);
-                model = glm::translate(model, pos);
-                model = glm::rotate(model, glm::radians(dis_rot(gen)), glm::vec3(0.0f, 1.0f, 0.0f));
-                model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-                model = glm::scale(model, glm::vec3(dis_scale_rock(gen)));
-                chunk.rock_matrices.push_back(model);
-            }
-            for (unsigned int i = 0; i < TREES_PER_CHUNK; i++) {
-                glm::vec3 pos;
-                bool position_ok;
-                int tries = 0;
-                do {
-                    position_ok = true;
-                    pos = chunk.position + glm::vec3(dis_pos(gen), 0.0f, dis_pos(gen));
-                    for (const auto& occupied_pos : large_object_positions) {
-                        if (glm::distance(pos, occupied_pos) < 6.0f) {
-                            position_ok = false;
-                            break;
-                        }
-                    }
-                    tries++;
-                } while (!position_ok && tries < 20);
-
-                if (position_ok) {
-                    large_object_positions.push_back(pos);
-                    TreeInstance instance;
-                    instance.id = next_tree_id++;
-                    instance.state = TreeState::ALIVE;
-                    instance.fireTriggerTime = -1.0f;
-                    instance.burnOutTime = -1.0f;
-                    float scale_factor = dis_scale_tree(gen);
-                    instance.matrix = glm::mat4(1.0f);
-                    instance.matrix = glm::translate(instance.matrix, pos);
-                    instance.matrix = glm::rotate(instance.matrix, glm::radians(dis_rot(gen)), glm::vec3(0.0f, 1.0f, 0.0f));
-                    instance.matrix = glm::rotate(instance.matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-                    instance.matrix = glm::scale(instance.matrix, glm::vec3(scale_factor));
-                    chunk.tree_instances.push_back(instance);
-
-                    glm::vec3 treeBasePos = pos;
-                    for (int j = 0; j < LEAVES_PER_TREE; j++) {
-                        Leaf leaf;
-                        float startHeight = dis_leaf_height(gen);
-                        leaf.initialTreePos = treeBasePos + glm::vec3(dis_leaf_offset(gen), 0.0f, dis_leaf_offset(gen));
-                        leaf.initialHeight = startHeight;
-                        leaf.position = leaf.initialTreePos + glm::vec3(0.0f, startHeight, 0.0f);
-                        leaf.rotationAxis = glm::normalize(glm::vec3(dis_axis(gen), dis_axis(gen), dis_axis(gen)));
-                        if (glm::length(leaf.rotationAxis) < 0.01f) {
-                            leaf.rotationAxis = glm::vec3(0.0f, 1.0f, 0.0f);
-                        }
-                        leaf.rotationAngle = dis_rot(gen);
-                        leaf.fallSpeed = dis_initial_fall(gen);
-                        leaf.spinSpeed = dis_initial_spin(gen);
-                        leaf.parentTreeId = instance.id;
-                        leaf.is_active = true;
-                        leaf.is_explosion_leaf = false;
-                        falling_leaves.push_back(leaf);
-                    }
-                }
-            }
-            for (unsigned int i = 0; i < GRASS_PER_CHUNK; i++) {
-                glm::mat4 model = glm::mat4(1.0f);
-                glm::vec3 pos = chunk.position + glm::vec3(dis_pos(gen), 0.5f, dis_pos(gen));
-                model = glm::translate(model, pos);
-                model = glm::rotate(model, glm::radians(dis_rot(gen)), glm::vec3(0.0f, 1.0f, 0.0f));
-                model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-                model = glm::scale(model, glm::vec3(dis_scale_grass(gen)));
-                chunk.grass_matrices.push_back(model);
-            }
-            terrain_chunks.push_back(chunk);
-        }
-    }
-
-    // Generación Nubes
-    for (unsigned int i = 0; i < NUM_DISTANT_CLOUDS; i++) {
-        glm::mat4 model = glm::mat4(1.0f);
-        glm::vec3 pos;
-        bool position_ok;
-        int tries = 0;
-        do {
-            position_ok = true;
-            pos = glm::vec3(dis_cloud_distant_x(gen), dis_cloud_y(gen), dis_cloud_distant_z(gen));
-            for (const auto& existing_pos : cloud_positions) {
-                if (glm::distance2(glm::vec2(pos.x, pos.z), glm::vec2(existing_pos.x, existing_pos.z)) < minCloudDistanceSq) {
-                    position_ok = false;
-                    break;
-                }
-            }
-            tries++;
-        } while (!position_ok && tries < maxPlacementTries);
-        if (position_ok) {
-            cloud_positions.push_back(pos);
-            model = glm::translate(model, pos);
-            model = glm::rotate(model, glm::radians(dis_rot(gen)), glm::vec3(0.0f, 1.0f, 0.0f));
-            model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-            model = glm::scale(model, glm::vec3(dis_cloud_scale(gen)));
-            cloud_matrices.push_back(model);
-        }
-    }
-    float world_half_width = (WORLD_SIZE / 2.0f) * CHUNK_SIZE;
-    std::uniform_real_distribution<float> dis_cloud_local_x(-world_half_width, world_half_width);
-    std::uniform_real_distribution<float> dis_cloud_local_z(-world_half_width, world_half_width);
-    for (unsigned int i = 0; i < NUM_LOCAL_CLOUDS; i++) {
-        glm::mat4 model = glm::mat4(1.0f);
-        glm::vec3 pos;
-        bool position_ok;
-        int tries = 0;
-        do {
-            position_ok = true;
-            pos = glm::vec3(dis_cloud_local_x(gen), dis_cloud_y(gen), dis_cloud_local_z(gen));
-            for (const auto& existing_pos : cloud_positions) {
-                if (glm::distance2(glm::vec2(pos.x, pos.z), glm::vec2(existing_pos.x, existing_pos.z)) < minCloudDistanceSq) {
-                    position_ok = false;
-                    break;
-                }
-            }
-            tries++;
-        } while (!position_ok && tries < maxPlacementTries);
-        if (position_ok) {
-            cloud_positions.push_back(pos);
-            model = glm::translate(model, pos);
-            model = glm::rotate(model, glm::radians(dis_rot(gen)), glm::vec3(0.0f, 1.0f, 0.0f));
-            model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-            model = glm::scale(model, glm::vec3(dis_cloud_scale(gen)));
-            cloud_matrices.push_back(model);
-        }
-    }
+    //generateForest();
 
     // Configurar VBOs Instancias
     size_t max_initial_trees = WORLD_SIZE * WORLD_SIZE * TREES_PER_CHUNK;
@@ -595,58 +453,21 @@ bool Start() {
 }
 
 bool Update() {
+    //Delta Time
     float currentFrame = (float)glfwGetTime();
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
 
+    // Procesar Entradas por Hardware
     processInput(window);
 
-    if (isFireActive) {
-        float fire_elapsed = (float)glfwGetTime() - fireStartTime;
-        if (fire_elapsed >= fireDuration) {
-            isFireActive = false;
-            std::cout << "El incendio ha terminado." << std::endl;
-            for (Chunk& chunk : terrain_chunks) {
-                for (TreeInstance& tree : chunk.tree_instances) {
-                    if (tree.state == TreeState::BURNING) {
-                        tree.state = TreeState::CHOPPED_TWICE;
-                    }
-                }
-            }
-        }
-        else {
-            for (Chunk& chunk : terrain_chunks) {
-                for (TreeInstance& tree : chunk.tree_instances) {
-                    // Transición 1: ALIVE/CHOPPED_ONCE -> BURNING
-                    if (tree.fireTriggerTime >= 0.0f && fire_elapsed >= tree.fireTriggerTime) {
-                        if (tree.state == TreeState::ALIVE || tree.state == TreeState::CHOPPED_ONCE) {
-                            if (tree.state == TreeState::ALIVE) {
-                                for (Leaf& leaf : falling_leaves) {
-                                    if (leaf.parentTreeId == tree.id) {
-                                        leaf.is_active = false;
-                                    }
-                                }
-                            }
-                            tree.state = TreeState::BURNING;
-                            tree.fireTriggerTime = -1.0f;
-                        }
-                    }
-                    // Transición 2: BURNING -> CHOPPED_TWICE
-                    if (tree.burnOutTime >= 0.0f && fire_elapsed >= tree.burnOutTime) {
-                        if (tree.state == TreeState::BURNING) {
-                            tree.state = TreeState::CHOPPED_TWICE;
-                            tree.burnOutTime = -1.0f;
-                        }
-                    }
-                }
-            }
-        }
-    }
+    //Actualizar la Logica de Mundo
+    updateGameLogic();
 
-    // 5. Dibujar Escena 3D (de render.cpp)
+    // Dibujar Escena 3D
     renderScene();
 
-    // 6. Dibujar UI 2D (de render.cpp)
+    // Dibujar UI 2D 
     renderUI();
 
     glfwSwapBuffers(window);
