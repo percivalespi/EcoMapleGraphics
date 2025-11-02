@@ -10,12 +10,15 @@ Ultimas Implementaciones: (Incendio Secuencial + Scope Global + Estilo Súper Es
 /* ---------------------------------------- Encabezados del Proyecto -------------------------------------------------*/
 
 // Archivo de Encabezado con las Estrucuras y Bibliotecas del Proyecto
-#include <globals.h>
+#include "globals.h"
+#include "input.h"
+#include "mechanic.h"
+#include "render.h"
+#include "src_manager.h"
 
 // Declaraciones de funciones (Se va a mover)
 bool Start();
 bool Update();
-void init_values();
 
 /* ------------------------------------------ Variables Globales ------------------------------------------------------ */
 
@@ -83,32 +86,33 @@ Shader* instanceAlphaTestPhongShader = nullptr;
 Shader* skyboxShader = nullptr;
 Shader* sunShader = nullptr;
 Shader* crosshairShader = nullptr;
+Shader* mLightsShader = nullptr;
 
 
 // --> Variables Globales Para la [Carga de Modelos]
-Model* terrain_model = nullptr;
-Model* grass_model = nullptr;
-Model* rock_model = nullptr;
-Model* mountain_model = nullptr;
-Model* tree_model = nullptr;
-Model* chopped_once_model = nullptr;
-Model* burning_tree_model = nullptr;
-Model* chopped_twice_model = nullptr;
-Model* cubeenv = nullptr;
-Model* cubeenv_noche = nullptr;
-Model* sun_model = nullptr;
-Model* moon_model = nullptr;
-Model* cloud_model = nullptr;
-Model* leaf_model = nullptr;
+//Model* terrain_model = nullptr;
+//Model* grass_model = nullptr;
+//Model* rock_model = nullptr;
+//Model* mountain_model = nullptr;
+//Model* tree_model = nullptr;
+//Model* chopped_once_model = nullptr;
+//Model* burning_tree_model = nullptr;
+//Model* chopped_twice_model = nullptr;
+//Model* cubeenv = nullptr;
+//Model* cubeenv_noche = nullptr;
+//Model* sun_model = nullptr;
+//Model* moon_model = nullptr;
+//Model* cloud_model = nullptr;
+//Model* leaf_model = nullptr;
 
 // --> Variables Globales Para la [Iluminacion y Materiales]
-Light theLight;
-Material defaultMaterial;
-Material mountainMaterial;
-Material treeMaterial;
-Material cloudMaterial;
-Material leafMaterial;
-Material sunMaterial;
+//Light theLight;
+//Material defaultMaterial;
+//Material mountainMaterial;
+//Material treeMaterial;
+//Material cloudMaterial;
+//Material leafMaterial;
+//Material sunMaterial;
 
 // --> Variables Globales Para el estado del mundo [Iluminacion y Materiales]
 std::vector<Chunk> terrain_chunks;
@@ -172,6 +176,11 @@ bool g_key_pressed = false;
 bool isFireActive = false;
 float fireStartTime = 0.0f;
 
+
+// Assets del Bosque
+ForestAssets fa;
+
+
 // -> Variable Global Para el Manejo del [Audio]
 ISoundEngine* SoundEngine = createIrrKlangDevice();
 
@@ -217,56 +226,34 @@ int main() {
     delete sunShader;
     delete crosshairShader;
     delete uiShader;
-    delete terrain_model;
-    delete grass_model;
-    delete rock_model;
-    delete mountain_model;
-    delete tree_model;
-    delete chopped_once_model;
-    delete burning_tree_model;
-    delete chopped_twice_model;
-    delete cubeenv;
-    delete cubeenv_noche;
-    delete sun_model;
-    delete moon_model;
-    delete cloud_model;
-    delete leaf_model;
+    delete fa.terrain_model;
+    delete fa.grass_model;
+    delete fa.rock_model;
+    delete fa.mountain_model;
+    delete fa.tree_model;
+    delete fa.chopped_once_model;
+    delete fa.burning_tree_model;
+    delete fa.chopped_twice_model;
+    delete fa.cubeenv;
+    delete fa.cubeenv_noche;
+    delete fa.sun_model;
+    delete fa.moon_model;
+    delete fa.cloud_model;
+    delete fa.leaf_model;
 
     glfwTerminate();
     return 0;
 }
 
-void init_values() {
-    theLight.Power = glm::vec4(1.5f, 1.5f, 1.5f, 1.0f);
-    theLight.Color = glm::vec4(1.0f, 1.0f, 0.95f, 1.0f);
-    theLight.alphaIndex = 32;
-    defaultMaterial.ambient = glm::vec4(0.4f, 0.4f, 0.4f, 1.0f);
-    defaultMaterial.specular = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
-    defaultMaterial.transparency = 1.0f;
-    mountainMaterial.ambient = glm::vec4(0.4f, 0.4f, 0.4f, 1.0f);
-    mountainMaterial.specular = glm::vec4(0.05f, 0.05f, 0.05f, 1.0f);
-    mountainMaterial.transparency = 1.0f;
-    treeMaterial.ambient = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
-    treeMaterial.specular = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-    treeMaterial.transparency = 1.0f;
-    cloudMaterial.ambient = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f);
-    cloudMaterial.specular = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
-    cloudMaterial.transparency = 1.0f;
-    leafMaterial.ambient = glm::vec4(0.3f, 0.3f, 0.3f, 1.0f);
-    leafMaterial.specular = glm::vec4(0.05f, 0.05f, 0.05f, 1.0f);
-    leafMaterial.transparency = 1.0f;
-    sunMaterial.ambient = glm::vec4(1.0f, 1.0f, 0.8f, 1.0f);
-    sunMaterial.specular = glm::vec4(0.0f);
-    sunMaterial.transparency = 1.0f;
-}
+
 
 bool Start() {
     glfwInit();
-    init_values();
+
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Mundo Instanciado", NULL, NULL);
+    window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "EcoMapleGrahics  v0.0.0-alpha", NULL, NULL);
     if (window == NULL) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -288,13 +275,15 @@ bool Start() {
 
     //NOTA: EL BOSQUE AL TENER UNA SOLA FUENTE DE ILUMINACIÓN (SOL) SE USA LE BASICO
     phongShader = new Shader("shaders/11_BasicPhongShader.vs", "shaders/11_BasicPhongShader.fs");
-    //phongShader = new Shader("shaders/11_PhongShaderMultLights.vs", "shaders/11_PhongShaderMultLights.fs");
     instancePhongShader = new Shader("shaders/instancing_phong.vs", "shaders/11_BasicPhongShader.fs");
     instanceAlphaTestPhongShader = new Shader("shaders/instancing_phong.vs", "shaders/instancing_phong_alpha_test.fs");
     skyboxShader = new Shader("shaders/10_vertex_simple.vs", "shaders/10_fragment_simple.fs");
     sunShader = new Shader("shaders/sun.vs", "shaders/sun.fs");
     crosshairShader = new Shader("shaders/crosshair.vs", "shaders/crosshair.fs");
     uiShader = new Shader("shaders/ui_shader.vs", "shaders/ui_shader.fs");
+
+    //Shader de Luces Multiples de Phong
+    mLightsShader = new Shader("shaders/11_PhongShaderMultLights.vs", "shaders/11_PhongShaderMultLights.fs");
 
     if (!phongShader || phongShader->ID == 0 ||
         !instancePhongShader || instancePhongShader->ID == 0 ||
@@ -315,35 +304,37 @@ bool Start() {
         return false;
     }
 
-    terrain_model = new Model("models/tierra_superficie.fbx");
-    grass_model = new Model("models/pastoooyya.fbx");
-    rock_model = new Model("models/piedrotanew.fbx");
-    mountain_model = new Model("models/montana.fbx");
-    tree_model = new Model("models/arce.fbx");
-    chopped_once_model = new Model("models/troncomuerto.fbx");
-    burning_tree_model = new Model("models/troncoquemado.fbx");
-    chopped_twice_model = new Model("models/basecortada.fbx");
-    sun_model = new Model("models/sphere.fbx");
-    moon_model = new Model("models/moon.fbx");
-    cloud_model = new Model("models/cloud.fbx");
-    leaf_model = new Model("models/hojaarce.fbx");
-    cubeenv = new Model("models/mycube.fbx");
-    cubeenv_noche = new Model("models/noche/mycube.fbx");
+    loadForest(fa);
 
-    if (!chopped_once_model) {
+    //terrain_model = new Model("models/tierra_superficie.fbx");
+    //grass_model = new Model("models/pastoooyya.fbx");
+    //rock_model = new Model("models/piedrotanew.fbx");
+    //mountain_model = new Model("models/montana.fbx");
+    //tree_model = new Model("models/arce.fbx");
+    //chopped_once_model = new Model("models/troncomuerto.fbx");
+    //burning_tree_model = new Model("models/troncoquemado.fbx");
+    //chopped_twice_model = new Model("models/basecortada.fbx");
+    //sun_model = new Model("models/sphere.fbx");
+    //moon_model = new Model("models/moon.fbx");
+    //cloud_model = new Model("models/cloud.fbx");
+    //leaf_model = new Model("models/hojaarce.fbx");
+    //cubeenv = new Model("models/mycube.fbx");
+    //cubeenv_noche = new Model("models/noche/mycube.fbx");
+
+    if (!fa.chopped_once_model) {
         std::cerr << "ERROR: Could not load troncomuerto.fbx" << std::endl;
     }
-    if (!burning_tree_model) {
+    if (!fa.burning_tree_model) {
         std::cerr << "ERROR: Could not load troncoquemado.fbx" << std::endl;
     }
-    if (!chopped_twice_model) {
+    if (!fa.chopped_twice_model) {
         std::cerr << "ERROR: Could not load basecortada.fbx" << std::endl;
     }
     // CORREGIDO: Usar -> en punteros
-    if (!cubeenv || cubeenv->meshes.empty() || cubeenv->meshes[0].textures.empty()) {
+    if (!fa.cubeenv || fa.cubeenv->meshes.empty() || fa.cubeenv->meshes[0].textures.empty()) {
         std::cout << "ERROR: Skybox DIA" << std::endl;
     }
-    if (!cubeenv_noche || cubeenv_noche->meshes.empty() || cubeenv_noche->meshes[0].textures.empty()) {
+    if (!fa.cubeenv_noche || fa.cubeenv_noche->meshes.empty() || fa.cubeenv_noche->meshes[0].textures.empty()) {
         std::cout << "ERROR: Skybox NIGHT" << std::endl;
     }
 
@@ -421,7 +412,7 @@ bool Start() {
     std::cout << "Using Manual Tree Trunk AABB Min: (" << tree_trunk_aabb_min.x << ", " << tree_trunk_aabb_min.y << ", " << tree_trunk_aabb_min.z << ")" << std::endl;
     std::cout << "Using Manual Tree Trunk AABB Max: (" << tree_trunk_aabb_max.x << ", " << tree_trunk_aabb_max.y << ", " << tree_trunk_aabb_max.z << ")" << std::endl;
 
-    //generateForest();
+    generateForest();
 
     // Configurar VBOs Instancias
     size_t max_initial_trees = WORLD_SIZE * WORLD_SIZE * TREES_PER_CHUNK;
@@ -431,23 +422,23 @@ bool Start() {
     size_t max_explosion_leaves = max_total_trees * EXPLOSION_LEAVES_PER_HIT;
     size_t max_total_leaves = initial_leaves_count + max_explosion_leaves;
 
-    setupInstanceVBO(grassInstanceVBO, WORLD_SIZE * WORLD_SIZE * GRASS_PER_CHUNK, grass_model);
-    setupInstanceVBO(rockInstanceVBO, WORLD_SIZE * WORLD_SIZE * ROCKS_PER_CHUNK, rock_model);
-    setupInstanceVBO(treeInstanceVBO, max_total_trees, tree_model);
-    if (chopped_once_model != nullptr) {
-        setupInstanceVBO(choppedOnceTreeInstanceVBO, max_total_trees, chopped_once_model);
+    setupInstanceVBO(grassInstanceVBO, WORLD_SIZE * WORLD_SIZE * GRASS_PER_CHUNK, fa.grass_model);
+    setupInstanceVBO(rockInstanceVBO, WORLD_SIZE * WORLD_SIZE * ROCKS_PER_CHUNK, fa.rock_model);
+    setupInstanceVBO(treeInstanceVBO, max_total_trees, fa.tree_model);
+    if (fa.chopped_once_model != nullptr) {
+        setupInstanceVBO(choppedOnceTreeInstanceVBO, max_total_trees, fa.chopped_once_model);
     }
-    if (burning_tree_model != nullptr) {
-        setupInstanceVBO(burningTreeInstanceVBO, max_total_trees, burning_tree_model);
+    if (fa.burning_tree_model != nullptr) {
+        setupInstanceVBO(burningTreeInstanceVBO, max_total_trees, fa.burning_tree_model);
     }
-    if (chopped_twice_model != nullptr) {
-        setupInstanceVBO(choppedTwiceTreeInstanceVBO, max_total_trees, chopped_twice_model);
+    if (fa.chopped_twice_model != nullptr) {
+        setupInstanceVBO(choppedTwiceTreeInstanceVBO, max_total_trees, fa.chopped_twice_model);
     }
-    setupInstanceVBO(cloudInstanceVBO, TOTAL_CLOUDS, cloud_model);
+    setupInstanceVBO(cloudInstanceVBO, TOTAL_CLOUDS, fa.cloud_model);
 
     std::cout << "Initial leaves: " << initial_leaves_count << ", Max total leaves (VBO): " << max_total_leaves << std::endl;
     leaf_matrices.reserve(max_total_leaves);
-    setupInstanceVBO(leafInstanceVBO, max_total_leaves, leaf_model);
+    setupInstanceVBO(leafInstanceVBO, max_total_leaves, fa.leaf_model);
 
     return true;
 }

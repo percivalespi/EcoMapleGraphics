@@ -1,4 +1,5 @@
 #include "mechanic.h"
+#include "globals.h"
 
 void plantTree() {
     // 1. Calcular Rayo en Coordenadas del Mundo
@@ -484,4 +485,8 @@ void generateForest() {
             cloud_matrices.push_back(model);
         }
     }
+}
+
+void generateCity() {
+
 }

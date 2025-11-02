@@ -28,10 +28,6 @@
 #include <animatedmodel.h>
 #include <irrKlang.h>
 
-#include <input.h>
-#include <mechanic.h>
-#include <render.h>
-
 
 using namespace irrklang;
 
@@ -55,7 +51,6 @@ struct Plane {
 
 struct Frustum {
     Plane planes[6];
-    // Las definiciones (cuerpos) de estas funciones irán en un .cpp [Pendiente]
     void extractPlanes(const glm::mat4& vp);
     bool isBoxInFrustum(const glm::vec3& min, const glm::vec3& max) const;
 };
@@ -97,11 +92,37 @@ struct Leaf {
     bool is_explosion_leaf = false;
 };
 
+//Estructura con los modelos de los assets
+struct ForestAssets {
+    // Modelos
+    Model* terrain_model;
+    Model* grass_model;
+    Model* rock_model;
+    Model* mountain_model;
+    Model* tree_model;
+    Model* chopped_once_model;
+    Model* burning_tree_model;
+    Model* chopped_twice_model;
+    Model* cubeenv;
+    Model* cubeenv_noche;
+    Model* sun_model;
+    Model* moon_model;
+    Model* cloud_model;
+    Model* leaf_model;
+    // --- Luz
+    Light theLight;
+    // Material
+    Material defaultMaterial;
+    Material mountainMaterial;
+    Material treeMaterial;
+    Material cloudMaterial;
+    Material leafMaterial;
+    Material sunMaterial;
+};
 
 // --- 3. DECLARACIONES GLOBALES (EXTERN) ---
 // 'extern' le dice al compilador: "esta variable existe,
 // pero su memoria está definida en OTRO archivo .cpp"
-// IMPORTANTE: Se quitan todas las inicializaciones (ej: = 0.0f o (rd()))
 
 extern GLFWwindow* window;
 extern const unsigned int SCR_WIDTH;
@@ -149,39 +170,20 @@ extern std::uniform_real_distribution<float> dis_cloud_distant_z;
 extern std::uniform_real_distribution<float> dis_cloud_y;
 extern std::uniform_real_distribution<float> dis_cloud_scale;
 
-// --- Shaders y Modelos ---
+// --- Bosque
+extern Shader* uiShader;
+extern Shader* mLightsShader;
 extern Shader* phongShader;
 extern Shader* instancePhongShader;
 extern Shader* instanceAlphaTestPhongShader;
 extern Shader* skyboxShader;
 extern Shader* sunShader;
 extern Shader* crosshairShader;
-extern Shader* uiShader;
-extern Model* terrain_model;
-extern Model* grass_model;
-extern Model* rock_model;
-extern Model* mountain_model;
-extern Model* tree_model;
-extern Model* chopped_once_model;
-extern Model* burning_tree_model;
-extern Model* chopped_twice_model;
-extern Model* cubeenv;
-extern Model* cubeenv_noche;
-extern Model* sun_model;
-extern Model* moon_model;
-extern Model* cloud_model;
-extern Model* leaf_model;
-
-// --- Luz y Materiales ---
-extern Light theLight;
-extern Material defaultMaterial;
-extern Material mountainMaterial;
-extern Material treeMaterial;
-extern Material cloudMaterial;
-extern Material leafMaterial;
-extern Material sunMaterial;
 
 extern bool isDay;
+
+// -- Assets del Bosque
+extern ForestAssets fa;
 
 // --- Contenedores del Mundo ---
 extern std::vector<Chunk> terrain_chunks;

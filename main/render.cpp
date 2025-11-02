@@ -1,4 +1,5 @@
 #include "render.h"
+#include "globals.h"
 
 void setupInstanceVBO(unsigned int& vbo, size_t max_items, Model* model_to_setup) {
     if (model_to_setup == nullptr) {
@@ -46,12 +47,12 @@ void renderScene() {
     float lightDistance = 200.0f;
     float sunElevRad = glm::radians(sunElevationAngle);
     float sunAngleRad = glm::radians(sunAngle);
-    theLight.Position = glm::vec3(lightDistance * cos(sunElevRad) * sin(sunAngleRad), lightDistance * sin(sunElevRad), lightDistance * cos(sunElevRad) * cos(sunAngleRad));
+    fa.theLight.Position = glm::vec3(lightDistance * cos(sunElevRad) * sin(sunAngleRad), lightDistance * sin(sunElevRad), lightDistance * cos(sunElevRad) * cos(sunAngleRad));
     float minDimFactor = 0.15f;
-    float normalizedSunY = glm::clamp(theLight.Position.y / lightDistance, -1.0f, 1.0f);
+    float normalizedSunY = glm::clamp(fa.theLight.Position.y / lightDistance, -1.0f, 1.0f);
     float dayNightTransition = glm::smoothstep(-0.1f, 0.1f, normalizedSunY);
     float nightDimFactor = glm::mix(minDimFactor, 1.0f, dayNightTransition);
-    glm::vec4 dimmedLightPower = theLight.Power * nightDimFactor;
+    glm::vec4 dimmedLightPower = fa.theLight.Power * nightDimFactor;
     isDay = (normalizedSunY > -0.1f);
 
 
@@ -61,36 +62,36 @@ void renderScene() {
         phongShader->use();
         phongShader->setMat4("projection", projection);
         phongShader->setMat4("view", view);
-        phongShader->setVec3("lightPosition", theLight.Position);
-        phongShader->setVec4("LightColor", theLight.Color);
+        phongShader->setVec3("lightPosition", fa.theLight.Position);
+        phongShader->setVec4("LightColor", fa.theLight.Color);
         phongShader->setVec4("LightPower", dimmedLightPower);
-        phongShader->setInt("alphaIndex", theLight.alphaIndex);
+        phongShader->setInt("alphaIndex", fa.theLight.alphaIndex);
 
-        if (terrain_model != nullptr) {
+        if (fa.terrain_model != nullptr) {
             phongShader->setBool("isTerrain", true);
-            phongShader->setVec4("MaterialAmbientColor", defaultMaterial.ambient);
-            phongShader->setVec4("MaterialSpecularColor", defaultMaterial.specular);
-            phongShader->setFloat("transparency", defaultMaterial.transparency);
+            phongShader->setVec4("MaterialAmbientColor", fa.defaultMaterial.ambient);
+            phongShader->setVec4("MaterialSpecularColor", fa.defaultMaterial.specular);
+            phongShader->setFloat("transparency", fa.defaultMaterial.transparency);
             for (const auto& chunk : terrain_chunks) {
                 if (cameraFrustum.isBoxInFrustum(chunk.aabb_min, chunk.aabb_max)) {
                     glm::mat4 model = glm::mat4(1.0f);
                     model = glm::translate(model, chunk.position);
                     model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
                     phongShader->setMat4("model", model);
-                    terrain_model->Draw(*phongShader);
+                    fa.terrain_model->Draw(*phongShader);
                 }
             }
         }
-        if (mountain_model != nullptr) {
+        if (fa.mountain_model != nullptr) {
             phongShader->setBool("isTerrain", false);
-            phongShader->setVec4("MaterialAmbientColor", mountainMaterial.ambient);
-            phongShader->setVec4("MaterialSpecularColor", mountainMaterial.specular);
+            phongShader->setVec4("MaterialAmbientColor", fa.mountainMaterial.ambient);
+            phongShader->setVec4("MaterialSpecularColor", fa.mountainMaterial.specular);
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, glm::vec3(0.0f, 11.75f, 170.0f));
             model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
             model = glm::scale(model, glm::vec3(18.45f, 18.45f, 8.865f));
             phongShader->setMat4("model", model);
-            mountain_model->Draw(*phongShader);
+            fa.mountain_model->Draw(*phongShader);
         }
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, 0);
@@ -138,33 +139,33 @@ void renderScene() {
     }
 
     // --- 2. DIBUJAR INSTANCIAS OPACAS (ROCAS) ---
-    if (instancePhongShader != nullptr && instancePhongShader->ID != 0 && rock_model != nullptr && !visible_rocks.empty()) {
+    if (instancePhongShader != nullptr && instancePhongShader->ID != 0 && fa.rock_model != nullptr && !visible_rocks.empty()) {
         instancePhongShader->use();
         instancePhongShader->setMat4("projection", projection);
         instancePhongShader->setMat4("view", view);
-        instancePhongShader->setVec3("lightPosition", theLight.Position);
-        instancePhongShader->setVec4("LightColor", theLight.Color);
+        instancePhongShader->setVec3("lightPosition", fa.theLight.Position);
+        instancePhongShader->setVec4("LightColor", fa.theLight.Color);
         instancePhongShader->setVec4("LightPower", dimmedLightPower);
-        instancePhongShader->setInt("alphaIndex", theLight.alphaIndex);
-        instancePhongShader->setVec4("MaterialAmbientColor", defaultMaterial.ambient);
-        instancePhongShader->setVec4("MaterialSpecularColor", defaultMaterial.specular);
-        instancePhongShader->setFloat("transparency", defaultMaterial.transparency);
+        instancePhongShader->setInt("alphaIndex", fa.theLight.alphaIndex);
+        instancePhongShader->setVec4("MaterialAmbientColor", fa.defaultMaterial.ambient);
+        instancePhongShader->setVec4("MaterialSpecularColor", fa.defaultMaterial.specular);
+        instancePhongShader->setFloat("transparency", fa.defaultMaterial.transparency);
 
         glBindBuffer(GL_ARRAY_BUFFER, rockInstanceVBO);
         glBufferSubData(GL_ARRAY_BUFFER, 0, visible_rocks.size() * sizeof(glm::mat4), &visible_rocks[0]);
 
-        for (unsigned int i = 0; i < rock_model->meshes.size(); i++) {
-            if (!rock_model->meshes[i].textures.empty()) {
+        for (unsigned int i = 0; i < fa.rock_model->meshes.size(); i++) {
+            if (!fa.rock_model->meshes[i].textures.empty()) {
                 glActiveTexture(GL_TEXTURE0);
                 instancePhongShader->setInt("texture_diffuse1", 0);
-                glBindTexture(GL_TEXTURE_2D, rock_model->meshes[i].textures[0].id);
+                glBindTexture(GL_TEXTURE_2D, fa.rock_model->meshes[i].textures[0].id);
             }
             else {
                 glActiveTexture(GL_TEXTURE0);
                 glBindTexture(GL_TEXTURE_2D, 0);
             }
-            glBindVertexArray(rock_model->meshes[i].VAO);
-            glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(rock_model->meshes[i].indices.size()), GL_UNSIGNED_INT, 0, static_cast<GLsizei>(visible_rocks.size()));
+            glBindVertexArray(fa.rock_model->meshes[i].VAO);
+            glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(fa.rock_model->meshes[i].indices.size()), GL_UNSIGNED_INT, 0, static_cast<GLsizei>(visible_rocks.size()));
             glBindVertexArray(0);
         }
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -177,30 +178,30 @@ void renderScene() {
         instanceAlphaTestPhongShader->use();
         instanceAlphaTestPhongShader->setMat4("projection", projection);
         instanceAlphaTestPhongShader->setMat4("view", view);
-        instanceAlphaTestPhongShader->setVec3("lightPosition", theLight.Position);
-        instanceAlphaTestPhongShader->setVec4("LightColor", theLight.Color);
+        instanceAlphaTestPhongShader->setVec3("lightPosition", fa.theLight.Position);
+        instanceAlphaTestPhongShader->setVec4("LightColor", fa.theLight.Color);
         instanceAlphaTestPhongShader->setVec4("LightPower", dimmedLightPower);
-        instanceAlphaTestPhongShader->setInt("alphaIndex", theLight.alphaIndex);
+        instanceAlphaTestPhongShader->setInt("alphaIndex", fa.theLight.alphaIndex);
         instanceAlphaTestPhongShader->setFloat("transparency", 1.0f);
 
         // Árboles Vivos
-        if (tree_model != nullptr && !visible_trees_alive.empty()) {
-            instanceAlphaTestPhongShader->setVec4("MaterialAmbientColor", treeMaterial.ambient);
-            instanceAlphaTestPhongShader->setVec4("MaterialSpecularColor", treeMaterial.specular);
+        if (fa.tree_model != nullptr && !visible_trees_alive.empty()) {
+            instanceAlphaTestPhongShader->setVec4("MaterialAmbientColor", fa.treeMaterial.ambient);
+            instanceAlphaTestPhongShader->setVec4("MaterialSpecularColor", fa.treeMaterial.specular);
             glBindBuffer(GL_ARRAY_BUFFER, treeInstanceVBO);
             glBufferSubData(GL_ARRAY_BUFFER, 0, visible_trees_alive.size() * sizeof(glm::mat4), &visible_trees_alive[0]);
-            for (unsigned int i = 0; i < tree_model->meshes.size(); i++) {
-                if (!tree_model->meshes[i].textures.empty()) {
+            for (unsigned int i = 0; i < fa.tree_model->meshes.size(); i++) {
+                if (!fa.tree_model->meshes[i].textures.empty()) {
                     glActiveTexture(GL_TEXTURE0);
                     instanceAlphaTestPhongShader->setInt("texture_diffuse1", 0);
-                    glBindTexture(GL_TEXTURE_2D, tree_model->meshes[i].textures[0].id);
+                    glBindTexture(GL_TEXTURE_2D, fa.tree_model->meshes[i].textures[0].id);
                 }
                 else {
                     glActiveTexture(GL_TEXTURE0);
                     glBindTexture(GL_TEXTURE_2D, 0);
                 }
-                glBindVertexArray(tree_model->meshes[i].VAO);
-                glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(tree_model->meshes[i].indices.size()), GL_UNSIGNED_INT, 0, static_cast<GLsizei>(visible_trees_alive.size()));
+                glBindVertexArray(fa.tree_model->meshes[i].VAO);
+                glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(fa.tree_model->meshes[i].indices.size()), GL_UNSIGNED_INT, 0, static_cast<GLsizei>(visible_trees_alive.size()));
                 glBindVertexArray(0);
             }
             glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -208,23 +209,23 @@ void renderScene() {
             glBindTexture(GL_TEXTURE_2D, 0);
         }
         // Pasto
-        if (grass_model != nullptr && !visible_grass.empty()) {
-            instanceAlphaTestPhongShader->setVec4("MaterialAmbientColor", defaultMaterial.ambient);
+        if (fa.grass_model != nullptr && !visible_grass.empty()) {
+            instanceAlphaTestPhongShader->setVec4("MaterialAmbientColor", fa.defaultMaterial.ambient);
             instanceAlphaTestPhongShader->setVec4("MaterialSpecularColor", glm::vec4(0.0f));
             glBindBuffer(GL_ARRAY_BUFFER, grassInstanceVBO);
             glBufferSubData(GL_ARRAY_BUFFER, 0, visible_grass.size() * sizeof(glm::mat4), &visible_grass[0]);
-            for (unsigned int i = 0; i < grass_model->meshes.size(); i++) {
-                if (!grass_model->meshes[i].textures.empty()) {
+            for (unsigned int i = 0; i < fa.grass_model->meshes.size(); i++) {
+                if (!fa.grass_model->meshes[i].textures.empty()) {
                     glActiveTexture(GL_TEXTURE0);
                     instanceAlphaTestPhongShader->setInt("texture_diffuse1", 0);
-                    glBindTexture(GL_TEXTURE_2D, grass_model->meshes[i].textures[0].id);
+                    glBindTexture(GL_TEXTURE_2D, fa.grass_model->meshes[i].textures[0].id);
                 }
                 else {
                     glActiveTexture(GL_TEXTURE0);
                     glBindTexture(GL_TEXTURE_2D, 0);
                 }
-                glBindVertexArray(grass_model->meshes[i].VAO);
-                glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(grass_model->meshes[i].indices.size()), GL_UNSIGNED_INT, 0, static_cast<GLsizei>(visible_grass.size()));
+                glBindVertexArray(fa.grass_model->meshes[i].VAO);
+                glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(fa.grass_model->meshes[i].indices.size()), GL_UNSIGNED_INT, 0, static_cast<GLsizei>(visible_grass.size()));
                 glBindVertexArray(0);
             }
             glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -233,23 +234,23 @@ void renderScene() {
         }
 
         // Nubes
-        if (cloud_model != nullptr && !cloud_matrices.empty()) {
-            instanceAlphaTestPhongShader->setVec4("MaterialAmbientColor", cloudMaterial.ambient);
-            instanceAlphaTestPhongShader->setVec4("MaterialSpecularColor", cloudMaterial.specular);
+        if (fa.cloud_model != nullptr && !cloud_matrices.empty()) {
+            instanceAlphaTestPhongShader->setVec4("MaterialAmbientColor", fa.cloudMaterial.ambient);
+            instanceAlphaTestPhongShader->setVec4("MaterialSpecularColor", fa.cloudMaterial.specular);
             glBindBuffer(GL_ARRAY_BUFFER, cloudInstanceVBO);
             glBufferSubData(GL_ARRAY_BUFFER, 0, cloud_matrices.size() * sizeof(glm::mat4), &cloud_matrices[0]);
-            for (unsigned int i = 0; i < cloud_model->meshes.size(); i++) {
-                if (!cloud_model->meshes[i].textures.empty()) {
+            for (unsigned int i = 0; i < fa.cloud_model->meshes.size(); i++) {
+                if (!fa.cloud_model->meshes[i].textures.empty()) {
                     glActiveTexture(GL_TEXTURE0);
                     instanceAlphaTestPhongShader->setInt("texture_diffuse1", 0);
-                    glBindTexture(GL_TEXTURE_2D, cloud_model->meshes[i].textures[0].id);
+                    glBindTexture(GL_TEXTURE_2D, fa.cloud_model->meshes[i].textures[0].id);
                 }
                 else {
                     glActiveTexture(GL_TEXTURE0);
                     glBindTexture(GL_TEXTURE_2D, 0);
                 }
-                glBindVertexArray(cloud_model->meshes[i].VAO);
-                glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(cloud_model->meshes[i].indices.size()), GL_UNSIGNED_INT, 0, static_cast<GLsizei>(cloud_matrices.size()));
+                glBindVertexArray(fa.cloud_model->meshes[i].VAO);
+                glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(fa.cloud_model->meshes[i].indices.size()), GL_UNSIGNED_INT, 0, static_cast<GLsizei>(cloud_matrices.size()));
                 glBindVertexArray(0);
             }
             glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -258,9 +259,9 @@ void renderScene() {
         }
 
         // Hojas (Activas)
-        if (leaf_model != nullptr && !leaf_matrices.empty()) {
-            instanceAlphaTestPhongShader->setVec4("MaterialAmbientColor", leafMaterial.ambient);
-            instanceAlphaTestPhongShader->setVec4("MaterialSpecularColor", leafMaterial.specular);
+        if (fa.leaf_model != nullptr && !leaf_matrices.empty()) {
+            instanceAlphaTestPhongShader->setVec4("MaterialAmbientColor", fa.leafMaterial.ambient);
+            instanceAlphaTestPhongShader->setVec4("MaterialSpecularColor", fa.leafMaterial.specular);
             glBindBuffer(GL_ARRAY_BUFFER, leafInstanceVBO);
 
             GLint buffer_size = 0;
@@ -271,7 +272,7 @@ void renderScene() {
             if (data_size_needed > (GLsizeiptr)buffer_size) {
                 std::cerr << "WARNING: leafInstanceVBO resizing needed! Current: " << buffer_size << ", Needed: " << data_size_needed << std::endl;
                 glBufferData(GL_ARRAY_BUFFER, data_size_needed, &leaf_matrices[0], GL_DYNAMIC_DRAW);
-                setupInstanceVBO(leafInstanceVBO, data_size_needed / sizeof(glm::mat4), leaf_model);
+                setupInstanceVBO(leafInstanceVBO, data_size_needed / sizeof(glm::mat4), fa.leaf_model);
             }
             else if (data_size_needed > 0) {
                 glBufferSubData(GL_ARRAY_BUFFER, 0, data_size_needed, &leaf_matrices[0]);
@@ -281,18 +282,18 @@ void renderScene() {
             }
 
             if (count_to_draw > 0) {
-                for (unsigned int i = 0; i < leaf_model->meshes.size(); i++) {
-                    if (!leaf_model->meshes[i].textures.empty()) {
+                for (unsigned int i = 0; i < fa.leaf_model->meshes.size(); i++) {
+                    if (!fa.leaf_model->meshes[i].textures.empty()) {
                         glActiveTexture(GL_TEXTURE0);
                         instanceAlphaTestPhongShader->setInt("texture_diffuse1", 0);
-                        glBindTexture(GL_TEXTURE_2D, leaf_model->meshes[i].textures[0].id);
+                        glBindTexture(GL_TEXTURE_2D, fa.leaf_model->meshes[i].textures[0].id);
                     }
                     else {
                         glActiveTexture(GL_TEXTURE0);
                         glBindTexture(GL_TEXTURE_2D, 0);
                     }
-                    glBindVertexArray(leaf_model->meshes[i].VAO);
-                    glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(leaf_model->meshes[i].indices.size()), GL_UNSIGNED_INT, 0, count_to_draw);
+                    glBindVertexArray(fa.leaf_model->meshes[i].VAO);
+                    glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(fa.leaf_model->meshes[i].indices.size()), GL_UNSIGNED_INT, 0, count_to_draw);
                     glBindVertexArray(0);
                 }
             }
@@ -303,33 +304,33 @@ void renderScene() {
     }
 
     // --- 3.5 DIBUJAR ÁRBOLES GOLPEADOS UNA VEZ ---
-    if (instancePhongShader != nullptr && instancePhongShader->ID != 0 && chopped_once_model != nullptr && !visible_trees_chopped_once.empty()) {
+    if (instancePhongShader != nullptr && instancePhongShader->ID != 0 && fa.chopped_once_model != nullptr && !visible_trees_chopped_once.empty()) {
         instancePhongShader->use();
         instancePhongShader->setMat4("projection", projection);
         instancePhongShader->setMat4("view", view);
-        instancePhongShader->setVec3("lightPosition", theLight.Position);
-        instancePhongShader->setVec4("LightColor", theLight.Color);
+        instancePhongShader->setVec3("lightPosition", fa.theLight.Position);
+        instancePhongShader->setVec4("LightColor", fa.theLight.Color);
         instancePhongShader->setVec4("LightPower", dimmedLightPower);
-        instancePhongShader->setInt("alphaIndex", theLight.alphaIndex);
-        instancePhongShader->setVec4("MaterialAmbientColor", treeMaterial.ambient * 0.7f);
+        instancePhongShader->setInt("alphaIndex", fa.theLight.alphaIndex);
+        instancePhongShader->setVec4("MaterialAmbientColor", fa.treeMaterial.ambient * 0.7f);
         instancePhongShader->setVec4("MaterialSpecularColor", glm::vec4(0.0f));
         instancePhongShader->setFloat("transparency", 1.0f);
 
         glBindBuffer(GL_ARRAY_BUFFER, choppedOnceTreeInstanceVBO);
         glBufferSubData(GL_ARRAY_BUFFER, 0, visible_trees_chopped_once.size() * sizeof(glm::mat4), &visible_trees_chopped_once[0]);
 
-        for (unsigned int i = 0; i < chopped_once_model->meshes.size(); i++) {
-            if (!chopped_once_model->meshes[i].textures.empty()) {
+        for (unsigned int i = 0; i < fa.chopped_once_model->meshes.size(); i++) {
+            if (!fa.chopped_once_model->meshes[i].textures.empty()) {
                 glActiveTexture(GL_TEXTURE0);
                 instancePhongShader->setInt("texture_diffuse1", 0);
-                glBindTexture(GL_TEXTURE_2D, chopped_once_model->meshes[i].textures[0].id);
+                glBindTexture(GL_TEXTURE_2D, fa.chopped_once_model->meshes[i].textures[0].id);
             }
             else {
                 glActiveTexture(GL_TEXTURE0);
                 glBindTexture(GL_TEXTURE_2D, 0);
             }
-            glBindVertexArray(chopped_once_model->meshes[i].VAO);
-            glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(chopped_once_model->meshes[i].indices.size()), GL_UNSIGNED_INT, 0, static_cast<GLsizei>(visible_trees_chopped_once.size()));
+            glBindVertexArray(fa.chopped_once_model->meshes[i].VAO);
+            glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(fa.chopped_once_model->meshes[i].indices.size()), GL_UNSIGNED_INT, 0, static_cast<GLsizei>(visible_trees_chopped_once.size()));
             glBindVertexArray(0);
         }
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -338,14 +339,14 @@ void renderScene() {
     }
 
     // --- 3.6 DIBUJAR ÁRBOLES QUEMÁNDOSE ---
-    if (instancePhongShader != nullptr && instancePhongShader->ID != 0 && burning_tree_model != nullptr && !visible_trees_burning.empty()) {
+    if (instancePhongShader != nullptr && instancePhongShader->ID != 0 && fa.burning_tree_model != nullptr && !visible_trees_burning.empty()) {
         instancePhongShader->use();
         instancePhongShader->setMat4("projection", projection);
         instancePhongShader->setMat4("view", view);
-        instancePhongShader->setVec3("lightPosition", theLight.Position);
-        instancePhongShader->setVec4("LightColor", theLight.Color);
+        instancePhongShader->setVec3("lightPosition", fa.theLight.Position);
+        instancePhongShader->setVec4("LightColor", fa.theLight.Color);
         instancePhongShader->setVec4("LightPower", dimmedLightPower);
-        instancePhongShader->setInt("alphaIndex", theLight.alphaIndex);
+        instancePhongShader->setInt("alphaIndex", fa.theLight.alphaIndex);
         instancePhongShader->setVec4("MaterialAmbientColor", glm::vec4(0.1f, 0.1f, 0.1f, 1.0f));
         instancePhongShader->setVec4("MaterialSpecularColor", glm::vec4(0.0f));
         instancePhongShader->setFloat("transparency", 1.0f);
@@ -353,18 +354,18 @@ void renderScene() {
         glBindBuffer(GL_ARRAY_BUFFER, burningTreeInstanceVBO);
         glBufferSubData(GL_ARRAY_BUFFER, 0, visible_trees_burning.size() * sizeof(glm::mat4), &visible_trees_burning[0]);
 
-        for (unsigned int i = 0; i < burning_tree_model->meshes.size(); i++) {
-            if (!burning_tree_model->meshes[i].textures.empty()) {
+        for (unsigned int i = 0; i < fa.burning_tree_model->meshes.size(); i++) {
+            if (!fa.burning_tree_model->meshes[i].textures.empty()) {
                 glActiveTexture(GL_TEXTURE0);
                 instancePhongShader->setInt("texture_diffuse1", 0);
-                glBindTexture(GL_TEXTURE_2D, burning_tree_model->meshes[i].textures[0].id);
+                glBindTexture(GL_TEXTURE_2D, fa.burning_tree_model->meshes[i].textures[0].id);
             }
             else {
                 glActiveTexture(GL_TEXTURE0);
                 glBindTexture(GL_TEXTURE_2D, 0);
             }
-            glBindVertexArray(burning_tree_model->meshes[i].VAO);
-            glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(burning_tree_model->meshes[i].indices.size()), GL_UNSIGNED_INT, 0, static_cast<GLsizei>(visible_trees_burning.size()));
+            glBindVertexArray(fa.burning_tree_model->meshes[i].VAO);
+            glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(fa.burning_tree_model->meshes[i].indices.size()), GL_UNSIGNED_INT, 0, static_cast<GLsizei>(visible_trees_burning.size()));
             glBindVertexArray(0);
         }
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -373,33 +374,33 @@ void renderScene() {
     }
 
     // --- 3.7 DIBUJAR ÁRBOLES GOLPEADOS DOS VECES ---
-    if (instancePhongShader != nullptr && instancePhongShader->ID != 0 && chopped_twice_model != nullptr && !visible_trees_chopped_twice.empty()) {
+    if (instancePhongShader != nullptr && instancePhongShader->ID != 0 && fa.chopped_twice_model != nullptr && !visible_trees_chopped_twice.empty()) {
         instancePhongShader->use();
         instancePhongShader->setMat4("projection", projection);
         instancePhongShader->setMat4("view", view);
-        instancePhongShader->setVec3("lightPosition", theLight.Position);
-        instancePhongShader->setVec4("LightColor", theLight.Color);
+        instancePhongShader->setVec3("lightPosition", fa.theLight.Position);
+        instancePhongShader->setVec4("LightColor", fa.theLight.Color);
         instancePhongShader->setVec4("LightPower", dimmedLightPower);
-        instancePhongShader->setInt("alphaIndex", theLight.alphaIndex);
-        instancePhongShader->setVec4("MaterialAmbientColor", treeMaterial.ambient * 0.4f);
+        instancePhongShader->setInt("alphaIndex", fa.theLight.alphaIndex);
+        instancePhongShader->setVec4("MaterialAmbientColor", fa.treeMaterial.ambient * 0.4f);
         instancePhongShader->setVec4("MaterialSpecularColor", glm::vec4(0.0f));
         instancePhongShader->setFloat("transparency", 1.0f);
 
         glBindBuffer(GL_ARRAY_BUFFER, choppedTwiceTreeInstanceVBO);
         glBufferSubData(GL_ARRAY_BUFFER, 0, visible_trees_chopped_twice.size() * sizeof(glm::mat4), &visible_trees_chopped_twice[0]);
 
-        for (unsigned int i = 0; i < chopped_twice_model->meshes.size(); i++) {
-            if (!chopped_twice_model->meshes[i].textures.empty()) {
+        for (unsigned int i = 0; i < fa.chopped_twice_model->meshes.size(); i++) {
+            if (!fa.chopped_twice_model->meshes[i].textures.empty()) {
                 glActiveTexture(GL_TEXTURE0);
                 instancePhongShader->setInt("texture_diffuse1", 0);
-                glBindTexture(GL_TEXTURE_2D, chopped_twice_model->meshes[i].textures[0].id);
+                glBindTexture(GL_TEXTURE_2D, fa.chopped_twice_model->meshes[i].textures[0].id);
             }
             else {
                 glActiveTexture(GL_TEXTURE0);
                 glBindTexture(GL_TEXTURE_2D, 0);
             }
-            glBindVertexArray(chopped_twice_model->meshes[i].VAO);
-            glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(chopped_twice_model->meshes[i].indices.size()), GL_UNSIGNED_INT, 0, static_cast<GLsizei>(visible_trees_chopped_twice.size()));
+            glBindVertexArray(fa.chopped_twice_model->meshes[i].VAO);
+            glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(fa.chopped_twice_model->meshes[i].indices.size()), GL_UNSIGNED_INT, 0, static_cast<GLsizei>(visible_trees_chopped_twice.size()));
             glBindVertexArray(0);
         }
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -418,7 +419,7 @@ void renderScene() {
         model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(1000.0f));
         skyboxShader->setMat4("model", model);
-        Model* currentSkybox = isDay ? cubeenv : cubeenv_noche;
+        Model* currentSkybox = isDay ? fa.cubeenv : fa.cubeenv_noche;
         if (currentSkybox != nullptr) {
             currentSkybox->Draw(*skyboxShader);
         }
@@ -428,7 +429,7 @@ void renderScene() {
     }
 
     // --- 5. DIBUJAR EL SOL ---
-    if (sunShader != nullptr && sunShader->ID != 0 && sun_model != nullptr) {
+    if (sunShader != nullptr && sunShader->ID != 0 && fa.sun_model != nullptr) {
         glDepthMask(GL_FALSE);
         sunShader->use();
         sunShader->setMat4("projection", projection);
@@ -441,14 +442,14 @@ void renderScene() {
         sunShader->setMat4("model", model);
         glm::vec4 sunTintColor = glm::vec4(1.0f, 1.0f, 0.8f, 1.0f) * nightDimFactor;
         sunShader->setVec4("tintColor", sunTintColor);
-        sun_model->Draw(*sunShader);
+        fa.sun_model->Draw(*sunShader);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     // --- 6. DIBUJAR LA LUNA ---
-    if (sunShader != nullptr && sunShader->ID != 0 && moon_model != nullptr) {
-        if (sun_model == nullptr || !(sunShader && sunShader->ID != 0)) {
+    if (sunShader != nullptr && sunShader->ID != 0 && fa.moon_model != nullptr) {
+        if (fa.sun_model == nullptr || !(sunShader && sunShader->ID != 0)) {
             glDepthMask(GL_FALSE);
         }
         float moonVisibleDistance = 900.0f;
@@ -459,7 +460,7 @@ void renderScene() {
         sunShader->setMat4("model", model);
         glm::vec4 moonTintColor = glm::vec4(0.8f, 0.85f, 0.95f, 1.0f) * (1.0f - dayNightTransition);
         sunShader->setVec4("tintColor", moonTintColor);
-        moon_model->Draw(*sunShader);
+        fa.moon_model->Draw(*sunShader);
         glDepthMask(GL_TRUE);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, 0);
@@ -467,8 +468,6 @@ void renderScene() {
     else {
         glDepthMask(GL_TRUE);
     }
-
-
 
 }
 
@@ -596,3 +595,5 @@ void renderUI() {
     glBindTexture(GL_TEXTURE_2D, 0);
     glUseProgram(0);
 }
+
+
