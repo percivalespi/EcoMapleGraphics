@@ -16,6 +16,9 @@ Ultimas Implementaciones: (Incendio Secuencial + Scope Global + Estilo Súper Es
 #include "render.h"
 #include "src_manager.h"
 
+// Bandera Para activar entorno de prueba
+bool g_runTestEnvironment = true;
+
 // Firmas de Funciones - Estructura Básica OpenGL
 bool Start();
 bool Update();
@@ -134,6 +137,7 @@ std::vector<Light> gLights;
 // Assets del Bosque
 ForestAssets fa;
 UIAssets ui;
+TestAssets ta;
 
 // -> Variable Global Para el Manejo del [Audio]
 ISoundEngine* SoundEngine = createIrrKlangDevice();
@@ -240,6 +244,7 @@ bool Start() {
     //Shader de Luces Multiples de Phong
     mLightsShader = new Shader("shaders/11_PhongShaderMultLights.vs", "shaders/11_PhongShaderMultLights.fs");
 
+ 
     if (!phongShader || phongShader->ID == 0 ||
         !instancePhongShader || instancePhongShader->ID == 0 ||
         !instanceAlphaTestPhongShader || instanceAlphaTestPhongShader->ID == 0 ||
@@ -264,6 +269,7 @@ bool Start() {
 
     // Carga de Modelos y Recursos
     loadUI(ui);
+    loadTest(ta);
     loadForest(fa); 
     
     // Inicialiacion de los Buffer de Renderizado

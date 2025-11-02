@@ -1,6 +1,48 @@
 #include "src_manager.h"
 #include "globals.h"
 
+/* -------------------------------------------- - Manejo de Recursos TEST------------------------------------------*/
+void initializeModelsTest(TestAssets& ta) {
+    ta.car = new Model("models/car.fbx");
+    ta.luminaire = new Model("models/luminaire.fbx");
+    ta.stop = new Model("models/stop.fbx");
+    ta.floor = new Model("models/floor02.fbx");
+}
+
+void initilizeMaterialsTest(TestAssets& ta) {
+    ta.steel.ambient = glm::vec4(0.25f, 0.25f, 0.25f, 1.0f);
+    ta.steel.diffuse = glm::vec4(0.4f, 0.4f, 0.4f, 1.0f);
+    ta.steel.specular = glm::vec4(0.7745f, 0.774f, 0.774f, 1.0f);
+
+    ta.asphalt.ambient = glm::vec4(0.02f, 0.02f, 0.02f, 1.0f);
+    ta.asphalt.diffuse = glm::vec4(0.12f, 0.12f, 0.12f, 1.0f);
+    ta.asphalt.specular = glm::vec4(0.05f, 0.05f, 0.05f, 1.0f);
+
+}
+
+void initilizeLightsTest(TestAssets& ta) {
+    ta.light01.Position = glm::vec3(1.4895f, 1.8836f, -1.1042f);
+    ta.light01.Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    ta.light01.Power = glm::vec4(90.0f, 90.0f, 90.0f, 1.0f); // Potencia en Watts
+    ta.light01.alphaIndex = 50; 
+    ta.light01.distance = 7.0f;
+    gLights.push_back(ta.light01);
+
+    ta.light02.Position = glm::vec3(-1.8224f, 0.1272f, 1.1042f);
+    ta.light02.Color = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
+    ta.light01.alphaIndex = 16;
+    gLights.push_back(ta.light02);
+}
+
+void loadTest(TestAssets& ta) {
+    initilizeLightsTest(ta);
+    initilizeMaterialsTest(ta);
+    initializeModelsTest(ta);
+}
+
+
+
+
 /* -------------------------------------------- - Manejo de Recursos UI------------------------------------------*/
 void loadUI(UIAssets& ui) {
     // --- MODIFICADO: CARGAR LEYENDAS ---

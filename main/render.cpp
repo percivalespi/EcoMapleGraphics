@@ -1,6 +1,34 @@
 #include "render.h"
 #include "globals.h"
 
+
+static void drawObject(Shader* shader, Model* model, const Material& material, const glm::mat4& modelMatrix)
+{
+    // 1. Manejar Transparencia (basado en el material)
+    if (material.transparency < 1.0f) {
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
+
+    // 2. Aplicar transformaciones del modelo (el argumento que pasamos)
+    shader->setMat4("model", modelMatrix);
+
+    // 3. Aplicar propiedades materiales (los argumentos que pasamos)
+    shader->setVec4("MaterialAmbientColor", material.ambient);
+    shader->setVec4("MaterialDiffuseColor", material.diffuse);
+    shader->setVec4("MaterialSpecularColor", material.specular);
+    shader->setFloat("transparency", material.transparency);
+
+    // 4. Dibujar el modelo (el argumento que pasamos)
+    model->Draw(*shader);
+
+    // 5. Limpiar el estado de blending
+    if (material.transparency < 1.0f) {
+        glDisable(GL_BLEND);
+    }
+}
+
+
 void setupInstanceVBO(unsigned int& vbo, size_t max_items, Model* model_to_setup) {
     if (model_to_setup == nullptr) {
         std::cout << "ERROR::SETUP_INSTANCE_VBO: El modelo es nulo." << std::endl;
@@ -36,14 +64,8 @@ void setupInstanceVBO(unsigned int& vbo, size_t max_items, Model* model_to_setup
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void renderScene() {
-    glClearColor(0.1f, 0.15f, 0.2f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 2000.0f);
-    glm::mat4 view = camera.GetViewMatrix();
-    cameraFrustum.extractPlanes(projection * view);
-
+void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
     float lightDistance = 200.0f;
     float sunElevRad = glm::radians(sunElevationAngle);
     float sunAngleRad = glm::radians(sunAngle);
@@ -471,6 +493,81 @@ void renderScene() {
 
 }
 
+
+void renderTestEnvironment(const glm::mat4& projection, const glm::mat4& view) {
+    // Carga del Skybox usando codigo de tenshi
+    if (skyboxShader != nullptr && skyboxShader->ID != 0) {
+        glDepthFunc(GL_LEQUAL);
+        skyboxShader->use();
+        skyboxShader->setMat4("projection", projection);
+        glm::mat4 view_skybox = glm::mat4(glm::mat3(view));
+        skyboxShader->setMat4("view", view_skybox);
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(1000.0f));
+        skyboxShader->setMat4("model", model);
+        Model* currentSkybox = isDay ? fa.cubeenv : fa.cubeenv_noche;
+        if (currentSkybox != nullptr) {
+            currentSkybox->Draw(*skyboxShader);
+        }
+        glDepthFunc(GL_LESS);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
+    mLightsShader->use();
+    mLightsShader->setMat4("projection", projection);
+    mLightsShader->setMat4("view", view);
+    mLightsShader->setVec3("eye", camera.Position);
+
+    // Configuramos propiedades de fuentes de luz
+    mLightsShader->setInt("numLights", (int)gLights.size());
+    for (size_t i = 0; i < gLights.size(); ++i) {
+        SetLightUniformVec3(mLightsShader, "Position", i, gLights[i].Position);
+        SetLightUniformVec3(mLightsShader, "Direction", i, gLights[i].Direction);
+        SetLightUniformVec4(mLightsShader, "Color", i, gLights[i].Color);
+        SetLightUniformVec4(mLightsShader, "Power", i, gLights[i].Power);
+        SetLightUniformInt(mLightsShader, "alphaIndex", i, gLights[i].alphaIndex);
+        SetLightUniformFloat(mLightsShader, "distance", i, gLights[i].distance);
+    }
+
+    //Configuracion de una Matriz de Modelo
+    //Si se aplico en blender el [set Origin -> Origin to 3D Cursor]
+    //No es necesario ajustar al mapa
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+
+    //Dibujado de los Objetos
+    drawObject(mLightsShader, ta.car, ta.steel, model);
+    drawObject(mLightsShader, ta.luminaire, ta.steel, model);
+    drawObject(mLightsShader, ta.stop, ta.steel, model);
+    drawObject(mLightsShader, ta.floor, ta.asphalt, model);
+    glUseProgram(0);
+
+}
+
+void renderScene() {
+    glClearColor(0.1f, 0.15f, 0.2f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 2000.0f);
+    glm::mat4 view = camera.GetViewMatrix();
+    cameraFrustum.extractPlanes(projection * view);
+
+
+    //2. ENRUTADOR DE ESCENA 
+    if (!g_runTestEnvironment)
+    {
+        renderForestScene(projection, view);
+    }
+    else
+    {
+        renderTestEnvironment(projection, view);
+    }
+}
+
 void renderUI() {
     // --- 7. DIBUJAR LA CRUZ (CROSSHAIR) ---
     glDisable(GL_DEPTH_TEST);
@@ -597,9 +694,6 @@ void renderUI() {
     glUseProgram(0);
 }
 
-
-
-
 void initializeRenderBuffers(UIAssets& ui) {
     // --- Configuración Cruz ---
     float crosshairSize = 0.03f;
@@ -676,4 +770,31 @@ void initializeInstanceBuffers(ForestAssets& fa) {
     leaf_matrices.reserve(max_total_leaves); 
     setupInstanceVBO(fa.leafInstanceVBO, max_total_leaves, fa.leaf_model);
 }
+void SetLightUniformInt(Shader* shader, const char* propertyName, size_t lightIndex, int value) {
+    std::ostringstream ss;
+    ss << "allLights[" << lightIndex << "]." << propertyName;
+    std::string uniformName = ss.str();
 
+    shader->setInt(uniformName.c_str(), value);
+}
+void SetLightUniformFloat(Shader* shader, const char* propertyName, size_t lightIndex, float value) {
+    std::ostringstream ss;
+    ss << "allLights[" << lightIndex << "]." << propertyName;
+    std::string uniformName = ss.str();
+
+    shader->setFloat(uniformName.c_str(), value);
+}
+void SetLightUniformVec4(Shader* shader, const char* propertyName, size_t lightIndex, glm::vec4 value) {
+    std::ostringstream ss;
+    ss << "allLights[" << lightIndex << "]." << propertyName;
+    std::string uniformName = ss.str();
+
+    shader->setVec4(uniformName.c_str(), value);
+}
+void SetLightUniformVec3(Shader* shader, const char* propertyName, size_t lightIndex, glm::vec3 value) {
+    std::ostringstream ss;
+    ss << "allLights[" << lightIndex << "]." << propertyName;
+    std::string uniformName = ss.str();
+
+    shader->setVec3(uniformName.c_str(), value);
+}

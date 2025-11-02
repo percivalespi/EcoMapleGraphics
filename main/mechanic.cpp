@@ -268,6 +268,8 @@ bool Frustum::isBoxInFrustum(const glm::vec3& min, const glm::vec3& max) const {
 }
 
 void updateGameLogic() {
+    if (g_runTestEnvironment) return;
+
     if (isFireActive) {
         float fire_elapsed = (float)glfwGetTime() - fireStartTime;
         if (fire_elapsed >= fireDuration) {
@@ -342,6 +344,8 @@ void updateGameLogic() {
 }
 
 void generateForest() {
+    if (g_runTestEnvironment) return;
+          
     const float TERRAIN_AABB_HEIGHT = 35.0f;
     // Las distribuciones ya están globales
 
@@ -488,5 +492,5 @@ void generateForest() {
 }
 
 void generateCity() {
-
+    //proximamente a implementar
 }

@@ -8,6 +8,13 @@
 
 //Cargar - Inicializar Modelos de la ciudad
 
+/* -------------------------------------------- Recursos TEST ------------------------------------------*/
+void initializeModelsTest(TestAssets& fa);
+void initilizeMaterialsTest(TestAssets& fa);
+void initilizeLightsTest(TestAssets& fa);
+void loadTest(TestAssets& fa);
+
+
 /* -------------------------------------------- Recursos UI ------------------------------------------*/
 void loadUI(UIAssets& ui);
 

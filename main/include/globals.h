@@ -24,9 +24,11 @@
 #include <camera.h>
 #include <model.h>
 #include <light.h>
+
 #include <material.h>
 #include <animatedmodel.h>
 #include <irrKlang.h>
+
 
 
 using namespace irrklang;
@@ -144,6 +146,26 @@ struct ForestAssets {
     unsigned int leafInstanceVBO = 0;
 };
 
+struct TestAssets { //Elementos Para el entorno de Prueba
+    Light light01;
+    Light light02;
+    Material steel;
+    Material asphalt;
+    Model* car;
+    Model* luminaire;
+    Model* stop;
+    Model* floor;
+};
+
+// -- Assets del Bosque
+extern ForestAssets fa;
+
+// -- Assets de UI
+extern UIAssets ui;
+
+// -- Assets de Test
+extern TestAssets ta;
+
 // --- 3. DECLARACIONES GLOBALES (EXTERN) ---
 // 'extern' le dice al compilador: "esta variable existe,
 // pero su memoria está definida en OTRO archivo .cpp"
@@ -206,12 +228,6 @@ extern Shader* crosshairShader;
 
 extern bool isDay;
 
-// -- Assets del Bosque
-extern ForestAssets fa;
-
-// -- Assets de UI
-extern UIAssets ui;
-
 // --- Contenedores del Mundo ---
 extern std::vector<Chunk> terrain_chunks;
 extern const int WORLD_SIZE;
@@ -250,5 +266,9 @@ extern float fireStartTime;
 
 // --- Audio ---
 extern ISoundEngine* SoundEngine;
+
+// Bandera Para Entorno de Prueba
+extern bool g_runTestEnvironment;
+
 
 #endif
