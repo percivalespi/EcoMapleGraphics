@@ -8,9 +8,18 @@
 
 //Cargar - Inicializar Modelos de la ciudad
 
+/* -------------------------------------------- Recursos UI ------------------------------------------*/
+void loadUI(UIAssets& ui);
+
+/* -------------------------------------------- Recursos Bosque ------------------------------------------*/
 void initializeModelsForest(ForestAssets& fa);
 void initilizeMaterialsForest(ForestAssets& fa);
 void initilizeLightsForest(ForestAssets& fa);
 void loadForest(ForestAssets& fa);
+
+
+
+
+
 
 #endif

@@ -151,7 +151,7 @@ void renderScene() {
         instancePhongShader->setVec4("MaterialSpecularColor", fa.defaultMaterial.specular);
         instancePhongShader->setFloat("transparency", fa.defaultMaterial.transparency);
 
-        glBindBuffer(GL_ARRAY_BUFFER, rockInstanceVBO);
+        glBindBuffer(GL_ARRAY_BUFFER, fa.rockInstanceVBO);
         glBufferSubData(GL_ARRAY_BUFFER, 0, visible_rocks.size() * sizeof(glm::mat4), &visible_rocks[0]);
 
         for (unsigned int i = 0; i < fa.rock_model->meshes.size(); i++) {
@@ -188,7 +188,7 @@ void renderScene() {
         if (fa.tree_model != nullptr && !visible_trees_alive.empty()) {
             instanceAlphaTestPhongShader->setVec4("MaterialAmbientColor", fa.treeMaterial.ambient);
             instanceAlphaTestPhongShader->setVec4("MaterialSpecularColor", fa.treeMaterial.specular);
-            glBindBuffer(GL_ARRAY_BUFFER, treeInstanceVBO);
+            glBindBuffer(GL_ARRAY_BUFFER, fa.treeInstanceVBO);
             glBufferSubData(GL_ARRAY_BUFFER, 0, visible_trees_alive.size() * sizeof(glm::mat4), &visible_trees_alive[0]);
             for (unsigned int i = 0; i < fa.tree_model->meshes.size(); i++) {
                 if (!fa.tree_model->meshes[i].textures.empty()) {
@@ -212,7 +212,7 @@ void renderScene() {
         if (fa.grass_model != nullptr && !visible_grass.empty()) {
             instanceAlphaTestPhongShader->setVec4("MaterialAmbientColor", fa.defaultMaterial.ambient);
             instanceAlphaTestPhongShader->setVec4("MaterialSpecularColor", glm::vec4(0.0f));
-            glBindBuffer(GL_ARRAY_BUFFER, grassInstanceVBO);
+            glBindBuffer(GL_ARRAY_BUFFER, fa.grassInstanceVBO);
             glBufferSubData(GL_ARRAY_BUFFER, 0, visible_grass.size() * sizeof(glm::mat4), &visible_grass[0]);
             for (unsigned int i = 0; i < fa.grass_model->meshes.size(); i++) {
                 if (!fa.grass_model->meshes[i].textures.empty()) {
@@ -237,7 +237,7 @@ void renderScene() {
         if (fa.cloud_model != nullptr && !cloud_matrices.empty()) {
             instanceAlphaTestPhongShader->setVec4("MaterialAmbientColor", fa.cloudMaterial.ambient);
             instanceAlphaTestPhongShader->setVec4("MaterialSpecularColor", fa.cloudMaterial.specular);
-            glBindBuffer(GL_ARRAY_BUFFER, cloudInstanceVBO);
+            glBindBuffer(GL_ARRAY_BUFFER, fa.cloudInstanceVBO);
             glBufferSubData(GL_ARRAY_BUFFER, 0, cloud_matrices.size() * sizeof(glm::mat4), &cloud_matrices[0]);
             for (unsigned int i = 0; i < fa.cloud_model->meshes.size(); i++) {
                 if (!fa.cloud_model->meshes[i].textures.empty()) {
@@ -262,7 +262,7 @@ void renderScene() {
         if (fa.leaf_model != nullptr && !leaf_matrices.empty()) {
             instanceAlphaTestPhongShader->setVec4("MaterialAmbientColor", fa.leafMaterial.ambient);
             instanceAlphaTestPhongShader->setVec4("MaterialSpecularColor", fa.leafMaterial.specular);
-            glBindBuffer(GL_ARRAY_BUFFER, leafInstanceVBO);
+            glBindBuffer(GL_ARRAY_BUFFER, fa.leafInstanceVBO);
 
             GLint buffer_size = 0;
             glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &buffer_size);
@@ -272,7 +272,7 @@ void renderScene() {
             if (data_size_needed > (GLsizeiptr)buffer_size) {
                 std::cerr << "WARNING: leafInstanceVBO resizing needed! Current: " << buffer_size << ", Needed: " << data_size_needed << std::endl;
                 glBufferData(GL_ARRAY_BUFFER, data_size_needed, &leaf_matrices[0], GL_DYNAMIC_DRAW);
-                setupInstanceVBO(leafInstanceVBO, data_size_needed / sizeof(glm::mat4), fa.leaf_model);
+                setupInstanceVBO(fa.leafInstanceVBO, data_size_needed / sizeof(glm::mat4), fa.leaf_model);
             }
             else if (data_size_needed > 0) {
                 glBufferSubData(GL_ARRAY_BUFFER, 0, data_size_needed, &leaf_matrices[0]);
@@ -316,7 +316,7 @@ void renderScene() {
         instancePhongShader->setVec4("MaterialSpecularColor", glm::vec4(0.0f));
         instancePhongShader->setFloat("transparency", 1.0f);
 
-        glBindBuffer(GL_ARRAY_BUFFER, choppedOnceTreeInstanceVBO);
+        glBindBuffer(GL_ARRAY_BUFFER, fa.choppedOnceTreeInstanceVBO);
         glBufferSubData(GL_ARRAY_BUFFER, 0, visible_trees_chopped_once.size() * sizeof(glm::mat4), &visible_trees_chopped_once[0]);
 
         for (unsigned int i = 0; i < fa.chopped_once_model->meshes.size(); i++) {
@@ -351,7 +351,7 @@ void renderScene() {
         instancePhongShader->setVec4("MaterialSpecularColor", glm::vec4(0.0f));
         instancePhongShader->setFloat("transparency", 1.0f);
 
-        glBindBuffer(GL_ARRAY_BUFFER, burningTreeInstanceVBO);
+        glBindBuffer(GL_ARRAY_BUFFER, fa.burningTreeInstanceVBO);
         glBufferSubData(GL_ARRAY_BUFFER, 0, visible_trees_burning.size() * sizeof(glm::mat4), &visible_trees_burning[0]);
 
         for (unsigned int i = 0; i < fa.burning_tree_model->meshes.size(); i++) {
@@ -386,7 +386,7 @@ void renderScene() {
         instancePhongShader->setVec4("MaterialSpecularColor", glm::vec4(0.0f));
         instancePhongShader->setFloat("transparency", 1.0f);
 
-        glBindBuffer(GL_ARRAY_BUFFER, choppedTwiceTreeInstanceVBO);
+        glBindBuffer(GL_ARRAY_BUFFER, fa.choppedTwiceTreeInstanceVBO);
         glBufferSubData(GL_ARRAY_BUFFER, 0, visible_trees_chopped_twice.size() * sizeof(glm::mat4), &visible_trees_chopped_twice[0]);
 
         for (unsigned int i = 0; i < fa.chopped_twice_model->meshes.size(); i++) {
@@ -474,10 +474,10 @@ void renderScene() {
 void renderUI() {
     // --- 7. DIBUJAR LA CRUZ (CROSSHAIR) ---
     glDisable(GL_DEPTH_TEST);
-    if (crosshairShader != nullptr && crosshairShader->ID != 0 && crosshairVAO != 0) {
+    if (crosshairShader != nullptr && crosshairShader->ID != 0 && ui.crosshairVAO != 0) {
         crosshairShader->use();
         crosshairShader->setVec4("crosshairColor", glm::vec4(1.0f, 1.0f, 1.0f, 0.8f));
-        glBindVertexArray(crosshairVAO);
+        glBindVertexArray(ui.crosshairVAO);
         glLineWidth(2.0f);
         glDrawArrays(GL_LINES, 0, 4);
         glBindVertexArray(0);
@@ -489,13 +489,14 @@ void renderUI() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    if (uiShader != nullptr && uiShader->ID != 0 && uiVAO != 0) {
+
+    if (uiShader != nullptr && uiShader->ID != 0 && ui.uiVAO != 0) {
         uiShader->use();
         glm::mat4 projection_ortho = glm::ortho(0.0f, (float)SCR_WIDTH, 0.0f, (float)SCR_HEIGHT);
         uiShader->setMat4("projection", projection_ortho);
         uiShader->setInt("texture_diffuse1", 0); // Asignar sampler a textura 0
 
-        glBindVertexArray(uiVAO);
+        glBindVertexArray(ui.uiVAO);
 
         // --- MODIFICADO: Definir variables de layout ---
         float icon_size = 64.0f;
@@ -511,7 +512,7 @@ void renderUI() {
         // MODIFICADO: Mover el X_pos aquí para reusarlo
         float tree_icon_x_pos = SCR_WIDTH - (icon_size * 2.0f) - (padding * 2.0f);
 
-        if (treeTextureID != 0) {
+        if (ui.treeTextureID != 0) {
             // MODIFICADO: Posición Y
             glm::vec3 tree_icon_pos(tree_icon_x_pos, y_pos_icon, 0.0f);
             glm::mat4 model_tree = glm::mat4(1.0f);
@@ -520,18 +521,18 @@ void renderUI() {
             uiShader->setMat4("model", model_tree);
 
             glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, treeTextureID);
+            glBindTexture(GL_TEXTURE_2D, ui.treeTextureID);
             glDrawArrays(GL_TRIANGLES, 0, 6);
 
             // Dibujar borde si P está presionada
-            if (p_key_pressed && highlightTextureID != 0) {
-                glBindTexture(GL_TEXTURE_2D, highlightTextureID);
+            if (p_key_pressed && ui.highlightTextureID != 0) {
+                glBindTexture(GL_TEXTURE_2D, ui.highlightTextureID);
                 glDrawArrays(GL_TRIANGLES, 0, 6);
             }
         }
 
         // --- NUEVO: Dibujar leyenda "P" (ABAJO) ---
-        if (legendTreeTextureID != 0) {
+        if (ui.legendTreeTextureID != 0) {
             glm::vec3 legend_tree_pos(tree_icon_x_pos, y_pos_legend, 0.0f);
             glm::mat4 model_legend_tree = glm::mat4(1.0f);
             model_legend_tree = glm::translate(model_legend_tree, legend_tree_pos);
@@ -539,7 +540,7 @@ void renderUI() {
             uiShader->setMat4("model", model_legend_tree);
 
             glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, legendTreeTextureID);
+            glBindTexture(GL_TEXTURE_2D, ui.legendTreeTextureID);
             glDrawArrays(GL_TRIANGLES, 0, 6);
         }
         // ---------------------------------------------
@@ -549,7 +550,7 @@ void renderUI() {
         // MODIFICADO: Mover el X_pos aquí para reusarlo
         float fire_icon_x_pos = SCR_WIDTH - icon_size - padding;
 
-        if (fireTextureID != 0) {
+        if (ui.fireTextureID != 0) {
             // MODIFICADO: Posición Y
             glm::vec3 fire_icon_pos(fire_icon_x_pos, y_pos_icon, 0.0f);
             glm::mat4 model_fire = glm::mat4(1.0f);
@@ -558,18 +559,18 @@ void renderUI() {
             uiShader->setMat4("model", model_fire);
 
             glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, fireTextureID);
+            glBindTexture(GL_TEXTURE_2D, ui.fireTextureID);
             glDrawArrays(GL_TRIANGLES, 0, 6);
 
             // Dibujar borde si el incendio está activo
-            if (isFireActive && highlightTextureID != 0) {
-                glBindTexture(GL_TEXTURE_2D, highlightTextureID);
+            if (isFireActive && ui.highlightTextureID != 0) {
+                glBindTexture(GL_TEXTURE_2D, ui.highlightTextureID);
                 glDrawArrays(GL_TRIANGLES, 0, 6);
             }
         }
 
         // --- NUEVO: Dibujar leyenda "F/G" (ABAJO) ---
-        if (legendFireTextureID != 0) {
+        if (ui.legendFireTextureID != 0) {
             glm::vec3 legend_fire_pos(fire_icon_x_pos, y_pos_legend, 0.0f);
             glm::mat4 model_legend_fire = glm::mat4(1.0f);
             model_legend_fire = glm::translate(model_legend_fire, legend_fire_pos);
@@ -577,7 +578,7 @@ void renderUI() {
             uiShader->setMat4("model", model_legend_fire);
 
             glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, legendFireTextureID);
+            glBindTexture(GL_TEXTURE_2D, ui.legendFireTextureID);
             glDrawArrays(GL_TRIANGLES, 0, 6);
         }
         // ----------------------------------------------
@@ -596,4 +597,83 @@ void renderUI() {
     glUseProgram(0);
 }
 
+
+
+
+void initializeRenderBuffers(UIAssets& ui) {
+    // --- Configuración Cruz ---
+    float crosshairSize = 0.03f;
+    float aspectRatio = (float)SCR_WIDTH / (float)SCR_HEIGHT;
+    float crosshairVertices[] = {
+        -crosshairSize / aspectRatio, 0.0f,
+         crosshairSize / aspectRatio, 0.0f,
+         0.0f, -crosshairSize,
+         0.0f,  crosshairSize
+
+    };
+
+    glGenVertexArrays(1, &ui.crosshairVAO);
+    glGenBuffers(1, &ui.crosshairVBO);
+    glBindVertexArray(ui.crosshairVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, ui.crosshairVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(crosshairVertices), crosshairVertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    // --- Configuración UI VAO/VBO ---
+    float uiQuadVertices[] = {
+        // pos      // tex
+        0.0f, 1.0f,  0.0f, 1.0f,
+        1.0f, 0.0f,  1.0f, 0.0f,
+        0.0f, 0.0f,  0.0f, 0.0f,
+
+        0.0f, 1.0f,  0.0f, 1.0f,
+        1.0f, 1.0f,  1.0f, 1.0f,
+        1.0f, 0.0f,  1.0f, 0.0f
+    };
+    glGenVertexArrays(1, &ui.uiVAO);
+    glGenBuffers(1, &ui.uiVBO);
+    glBindVertexArray(ui.uiVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, ui.uiVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(uiQuadVertices), &uiQuadVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+    glBindVertexArray(0);
+
+}
+
+
+void initializeInstanceBuffers(ForestAssets& fa) {
+    // Configurar VBOs Instancias
+    size_t max_initial_trees = WORLD_SIZE * WORLD_SIZE * TREES_PER_CHUNK;
+    size_t max_plantable_trees = 200;
+    size_t max_total_trees = max_initial_trees + max_plantable_trees;
+    size_t initial_leaves_count = falling_leaves.size();
+    size_t max_explosion_leaves = max_total_trees * EXPLOSION_LEAVES_PER_HIT;
+    size_t max_total_leaves = initial_leaves_count + max_explosion_leaves;
+
+    setupInstanceVBO(fa.grassInstanceVBO, WORLD_SIZE * WORLD_SIZE * GRASS_PER_CHUNK, fa.grass_model);
+    setupInstanceVBO(fa.rockInstanceVBO, WORLD_SIZE * WORLD_SIZE * ROCKS_PER_CHUNK, fa.rock_model);
+    setupInstanceVBO(fa.treeInstanceVBO, max_total_trees, fa.tree_model);
+    
+    if (fa.chopped_once_model != nullptr) {
+        setupInstanceVBO(fa.choppedOnceTreeInstanceVBO, max_total_trees, fa.chopped_once_model);
+    }
+    if (fa.burning_tree_model != nullptr) {
+        setupInstanceVBO(fa.burningTreeInstanceVBO, max_total_trees, fa.burning_tree_model);
+    }
+    if (fa.chopped_twice_model != nullptr) {
+        setupInstanceVBO(fa.choppedTwiceTreeInstanceVBO, max_total_trees, fa.chopped_twice_model);
+    }
+    
+    setupInstanceVBO(fa.cloudInstanceVBO, TOTAL_CLOUDS, fa.cloud_model);
+
+    std::cout << "Initial leaves: " << initial_leaves_count << ", Max total leaves (VBO): " << max_total_leaves << std::endl;
+    leaf_matrices.reserve(max_total_leaves); 
+    setupInstanceVBO(fa.leafInstanceVBO, max_total_leaves, fa.leaf_model);
+}
 

@@ -16,7 +16,7 @@ Ultimas Implementaciones: (Incendio Secuencial + Scope Global + Estilo Súper Es
 #include "render.h"
 #include "src_manager.h"
 
-// Declaraciones de funciones (Se va a mover)
+// Firmas de Funciones - Estructura Básica OpenGL
 bool Start();
 bool Update();
 
@@ -87,32 +87,9 @@ Shader* skyboxShader = nullptr;
 Shader* sunShader = nullptr;
 Shader* crosshairShader = nullptr;
 Shader* mLightsShader = nullptr;
+// Shader Interfaz Grafica (UI)
+Shader* uiShader = nullptr;
 
-
-// --> Variables Globales Para la [Carga de Modelos]
-//Model* terrain_model = nullptr;
-//Model* grass_model = nullptr;
-//Model* rock_model = nullptr;
-//Model* mountain_model = nullptr;
-//Model* tree_model = nullptr;
-//Model* chopped_once_model = nullptr;
-//Model* burning_tree_model = nullptr;
-//Model* chopped_twice_model = nullptr;
-//Model* cubeenv = nullptr;
-//Model* cubeenv_noche = nullptr;
-//Model* sun_model = nullptr;
-//Model* moon_model = nullptr;
-//Model* cloud_model = nullptr;
-//Model* leaf_model = nullptr;
-
-// --> Variables Globales Para la [Iluminacion y Materiales]
-//Light theLight;
-//Material defaultMaterial;
-//Material mountainMaterial;
-//Material treeMaterial;
-//Material cloudMaterial;
-//Material leafMaterial;
-//Material sunMaterial;
 
 // --> Variables Globales Para el estado del mundo [Iluminacion y Materiales]
 std::vector<Chunk> terrain_chunks;
@@ -126,33 +103,8 @@ bool isDay = true;
 // --> Variable Globale Para el Tamano del Mundo
 const int WORLD_SIZE = 10;
 
-// --> Variable Globale Para lo que la camara puede ver [Pendiente por separar]
+// --> Variable Globale Para lo que la camara puede ver
 Frustum cameraFrustum;
-
-// --> Variables GLOBALES VAO (Vertex Array Object) Y VBO ((Vertex Buffer Object))
-unsigned int grassInstanceVBO = 0;
-unsigned int rockInstanceVBO = 0;
-unsigned int treeInstanceVBO = 0;
-unsigned int choppedOnceTreeInstanceVBO = 0;
-unsigned int burningTreeInstanceVBO = 0;
-unsigned int choppedTwiceTreeInstanceVBO = 0;
-unsigned int cloudInstanceVBO = 0;
-unsigned int leafInstanceVBO = 0;
-unsigned int crosshairVAO = 0, crosshairVBO = 0;
-
-// --> Variables Globales Para la Interfaz Gráfica
-unsigned int uiVAO = 0, uiVBO = 0; // Buffers UI
-
-// Shader Interfaz Grafica (UI)
-Shader* uiShader = nullptr;
-
-// Texturas ID UI: Iconos
-unsigned int fireTextureID = 0;
-unsigned int treeTextureID = 0;
-unsigned int highlightTextureID = 0;
-// Texturas ID UI: Leyendas Texto
-unsigned int legendFireTextureID = 0;
-unsigned int legendTreeTextureID = 0;
 
 // -> Variables Globales Mecanica (Talado de Árboles)
 const unsigned int GRASS_PER_CHUNK = 80;
@@ -176,13 +128,16 @@ bool g_key_pressed = false;
 bool isFireActive = false;
 float fireStartTime = 0.0f;
 
+// Vector de Luces
+std::vector<Light> gLights;
 
 // Assets del Bosque
 ForestAssets fa;
-
+UIAssets ui;
 
 // -> Variable Global Para el Manejo del [Audio]
 ISoundEngine* SoundEngine = createIrrKlangDevice();
+
 
 int main() {
     if (!Start()) {
@@ -197,26 +152,26 @@ int main() {
     }
 
     // Limpieza
-    if (crosshairVAO != 0) { glDeleteVertexArrays(1, &crosshairVAO); crosshairVAO = 0; }
-    if (crosshairVBO != 0) { glDeleteBuffers(1, &crosshairVBO); crosshairVBO = 0; }
-    if (uiVAO != 0) { glDeleteVertexArrays(1, &uiVAO); uiVAO = 0; }
-    if (uiVBO != 0) { glDeleteBuffers(1, &uiVBO); uiVBO = 0; }
-    if (grassInstanceVBO != 0) { glDeleteBuffers(1, &grassInstanceVBO); }
-    if (rockInstanceVBO != 0) { glDeleteBuffers(1, &rockInstanceVBO); }
-    if (treeInstanceVBO != 0) { glDeleteBuffers(1, &treeInstanceVBO); }
-    if (choppedOnceTreeInstanceVBO != 0) { glDeleteBuffers(1, &choppedOnceTreeInstanceVBO); }
-    if (burningTreeInstanceVBO != 0) { glDeleteBuffers(1, &burningTreeInstanceVBO); }
-    if (choppedTwiceTreeInstanceVBO != 0) { glDeleteBuffers(1, &choppedTwiceTreeInstanceVBO); }
-    if (cloudInstanceVBO != 0) { glDeleteBuffers(1, &cloudInstanceVBO); }
-    if (leafInstanceVBO != 0) { glDeleteBuffers(1, &leafInstanceVBO); }
+    if (ui.crosshairVAO != 0) { glDeleteVertexArrays(1, &ui.crosshairVAO); ui.crosshairVAO = 0; }
+    if (ui.crosshairVBO != 0) { glDeleteBuffers(1, &ui.crosshairVBO); ui.crosshairVBO = 0; }
+    if (ui.uiVAO != 0) { glDeleteVertexArrays(1, &ui.uiVAO); ui.uiVAO = 0; }
+    if (ui.uiVBO != 0) { glDeleteBuffers(1, &ui.uiVBO); ui.uiVBO = 0; }
+    if (fa.grassInstanceVBO != 0) { glDeleteBuffers(1, &fa.grassInstanceVBO); }
+    if (fa.rockInstanceVBO != 0) { glDeleteBuffers(1, &fa.rockInstanceVBO); }
+    if (fa.treeInstanceVBO != 0) { glDeleteBuffers(1, &fa.treeInstanceVBO); }
+    if (fa.choppedOnceTreeInstanceVBO != 0) { glDeleteBuffers(1, &fa.choppedOnceTreeInstanceVBO); }
+    if (fa.burningTreeInstanceVBO != 0) { glDeleteBuffers(1, &fa.burningTreeInstanceVBO); }
+    if (fa.choppedTwiceTreeInstanceVBO != 0) { glDeleteBuffers(1, &fa.choppedTwiceTreeInstanceVBO); }
+    if (fa.cloudInstanceVBO != 0) { glDeleteBuffers(1, &fa.cloudInstanceVBO); }
+    if (fa.leafInstanceVBO != 0) { glDeleteBuffers(1, &fa.leafInstanceVBO); }
 
-    if (fireTextureID != 0) { glDeleteTextures(1, &fireTextureID); }
-    if (treeTextureID != 0) { glDeleteTextures(1, &treeTextureID); }
-    if (highlightTextureID != 0) { glDeleteTextures(1, &highlightTextureID); }
+    if (ui.fireTextureID != 0) { glDeleteTextures(1, &ui.fireTextureID); }
+    if (ui.treeTextureID != 0) { glDeleteTextures(1, &ui.treeTextureID); }
+    if (ui.highlightTextureID != 0) { glDeleteTextures(1, &ui.highlightTextureID); }
 
     // --- NUEVO: Limpieza de leyendas ---
-    if (legendFireTextureID != 0) { glDeleteTextures(1, &legendFireTextureID); }
-    if (legendTreeTextureID != 0) { glDeleteTextures(1, &legendTreeTextureID); }
+    if (ui.legendFireTextureID != 0) { glDeleteTextures(1, &ui.legendFireTextureID); }
+    if (ui.legendTreeTextureID != 0) { glDeleteTextures(1, &ui.legendTreeTextureID); }
     // -----------------------------------
 
     delete phongShader;
@@ -291,7 +246,9 @@ bool Start() {
         !skyboxShader || skyboxShader->ID == 0 ||
         !sunShader || sunShader->ID == 0 ||
         !crosshairShader || crosshairShader->ID == 0 ||
-        !uiShader || uiShader->ID == 0)
+        !uiShader || uiShader->ID == 0 ||
+        !mLightsShader || mLightsShader->ID == 0
+        )
     {
         std::cerr << "ERROR: Shaders failed to load." << std::endl;
         delete phongShader;
@@ -301,144 +258,23 @@ bool Start() {
         delete sunShader;
         delete crosshairShader;
         delete uiShader;
+        delete mLightsShader;
         return false;
     }
 
-    loadForest(fa);
+    // Carga de Modelos y Recursos
+    loadUI(ui);
+    loadForest(fa); 
+    
+    // Inicialiacion de los Buffer de Renderizado
+    initializeRenderBuffers(ui);
 
-    //terrain_model = new Model("models/tierra_superficie.fbx");
-    //grass_model = new Model("models/pastoooyya.fbx");
-    //rock_model = new Model("models/piedrotanew.fbx");
-    //mountain_model = new Model("models/montana.fbx");
-    //tree_model = new Model("models/arce.fbx");
-    //chopped_once_model = new Model("models/troncomuerto.fbx");
-    //burning_tree_model = new Model("models/troncoquemado.fbx");
-    //chopped_twice_model = new Model("models/basecortada.fbx");
-    //sun_model = new Model("models/sphere.fbx");
-    //moon_model = new Model("models/moon.fbx");
-    //cloud_model = new Model("models/cloud.fbx");
-    //leaf_model = new Model("models/hojaarce.fbx");
-    //cubeenv = new Model("models/mycube.fbx");
-    //cubeenv_noche = new Model("models/noche/mycube.fbx");
-
-    if (!fa.chopped_once_model) {
-        std::cerr << "ERROR: Could not load troncomuerto.fbx" << std::endl;
-    }
-    if (!fa.burning_tree_model) {
-        std::cerr << "ERROR: Could not load troncoquemado.fbx" << std::endl;
-    }
-    if (!fa.chopped_twice_model) {
-        std::cerr << "ERROR: Could not load basecortada.fbx" << std::endl;
-    }
-    // CORREGIDO: Usar -> en punteros
-    if (!fa.cubeenv || fa.cubeenv->meshes.empty() || fa.cubeenv->meshes[0].textures.empty()) {
-        std::cout << "ERROR: Skybox DIA" << std::endl;
-    }
-    if (!fa.cubeenv_noche || fa.cubeenv_noche->meshes.empty() || fa.cubeenv_noche->meshes[0].textures.empty()) {
-        std::cout << "ERROR: Skybox NIGHT" << std::endl;
-    }
-
-    // --- MODIFICADO: CARGAR LEYENDAS ---
-    // --- Cargar Texturas UI ---
-    fireTextureID = TextureFromFile("fire.png", "models/image");
-    treeTextureID = TextureFromFile("tree.png", "models/image");
-    highlightTextureID = TextureFromFile("highlight.png", "models/image");
-
-    // --- NUEVO: Cargar texturas de leyendas ---
-    legendFireTextureID = TextureFromFile("legend_fire.png", "models/image");
-    legendTreeTextureID = TextureFromFile("legend_tree.png", "models/image");
-    // -------------------------------------------
-
-    if (fireTextureID == 0) {
-        std::cerr << "ERROR: Failed to load 'models/image/fire.png'" << std::endl;
-    }
-    if (treeTextureID == 0) {
-        std::cerr << "ERROR: Failed to load 'models/image/tree.png'" << std::endl;
-    }
-    if (highlightTextureID == 0) {
-        std::cerr << "ERROR: Failed to load 'models/image/highlight.png'" << std::endl;
-    }
-
-    // --- NUEVO: Comprobaciones de error para leyendas ---
-    if (legendFireTextureID == 0) {
-        std::cerr << "ERROR: Failed to load 'models/image/legend_fire.png'" << std::endl;
-    }
-    if (legendTreeTextureID == 0) {
-        std::cerr << "ERROR: Failed to load 'models/image/legend_tree.png'" << std::endl;
-    }
-    // ----------------------------------------------------
-
-    // --- Configuración Cruz ---
-    float crosshairSize = 0.03f;
-    float aspectRatio = (float)SCR_WIDTH / (float)SCR_HEIGHT;
-    float crosshairVertices[] = {
-        -crosshairSize / aspectRatio, 0.0f,
-         crosshairSize / aspectRatio, 0.0f,
-         0.0f, -crosshairSize,
-         0.0f,  crosshairSize
-    };
-    glGenVertexArrays(1, &crosshairVAO);
-    glGenBuffers(1, &crosshairVBO);
-    glBindVertexArray(crosshairVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, crosshairVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(crosshairVertices), crosshairVertices, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-
-    // --- Configuración UI VAO/VBO ---
-    float uiQuadVertices[] = {
-        // pos      // tex
-        0.0f, 1.0f,  0.0f, 1.0f,
-        1.0f, 0.0f,  1.0f, 0.0f,
-        0.0f, 0.0f,  0.0f, 0.0f,
-
-        0.0f, 1.0f,  0.0f, 1.0f,
-        1.0f, 1.0f,  1.0f, 1.0f,
-        1.0f, 0.0f,  1.0f, 0.0f
-    };
-    glGenVertexArrays(1, &uiVAO);
-    glGenBuffers(1, &uiVBO);
-    glBindVertexArray(uiVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, uiVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(uiQuadVertices), &uiQuadVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-    glBindVertexArray(0);
-
+    // Depuración (Se debe de Borrar)
     std::cout << "Using Manual Tree Trunk AABB Min: (" << tree_trunk_aabb_min.x << ", " << tree_trunk_aabb_min.y << ", " << tree_trunk_aabb_min.z << ")" << std::endl;
     std::cout << "Using Manual Tree Trunk AABB Max: (" << tree_trunk_aabb_max.x << ", " << tree_trunk_aabb_max.y << ", " << tree_trunk_aabb_max.z << ")" << std::endl;
 
     generateForest();
-
-    // Configurar VBOs Instancias
-    size_t max_initial_trees = WORLD_SIZE * WORLD_SIZE * TREES_PER_CHUNK;
-    size_t max_plantable_trees = 200;
-    size_t max_total_trees = max_initial_trees + max_plantable_trees;
-    size_t initial_leaves_count = falling_leaves.size();
-    size_t max_explosion_leaves = max_total_trees * EXPLOSION_LEAVES_PER_HIT;
-    size_t max_total_leaves = initial_leaves_count + max_explosion_leaves;
-
-    setupInstanceVBO(grassInstanceVBO, WORLD_SIZE * WORLD_SIZE * GRASS_PER_CHUNK, fa.grass_model);
-    setupInstanceVBO(rockInstanceVBO, WORLD_SIZE * WORLD_SIZE * ROCKS_PER_CHUNK, fa.rock_model);
-    setupInstanceVBO(treeInstanceVBO, max_total_trees, fa.tree_model);
-    if (fa.chopped_once_model != nullptr) {
-        setupInstanceVBO(choppedOnceTreeInstanceVBO, max_total_trees, fa.chopped_once_model);
-    }
-    if (fa.burning_tree_model != nullptr) {
-        setupInstanceVBO(burningTreeInstanceVBO, max_total_trees, fa.burning_tree_model);
-    }
-    if (fa.chopped_twice_model != nullptr) {
-        setupInstanceVBO(choppedTwiceTreeInstanceVBO, max_total_trees, fa.chopped_twice_model);
-    }
-    setupInstanceVBO(cloudInstanceVBO, TOTAL_CLOUDS, fa.cloud_model);
-
-    std::cout << "Initial leaves: " << initial_leaves_count << ", Max total leaves (VBO): " << max_total_leaves << std::endl;
-    leaf_matrices.reserve(max_total_leaves);
-    setupInstanceVBO(leafInstanceVBO, max_total_leaves, fa.leaf_model);
+    initializeInstanceBuffers(fa);
 
     return true;
 }

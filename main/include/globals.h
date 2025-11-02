@@ -92,6 +92,21 @@ struct Leaf {
     bool is_explosion_leaf = false;
 };
 
+struct UIAssets{//Buffers
+    unsigned int crosshairVAO = 0;
+    unsigned int crosshairVBO = 0;
+    unsigned int uiVAO = 0;
+    unsigned int uiVBO = 0;
+
+    // Texturas de UI
+    unsigned int fireTextureID = 0;
+    unsigned int treeTextureID = 0;
+    unsigned int highlightTextureID = 0;
+    unsigned int legendFireTextureID = 0;
+    unsigned int legendTreeTextureID = 0;
+};
+
+
 //Estructura con los modelos de los assets
 struct ForestAssets {
     // Modelos
@@ -118,6 +133,15 @@ struct ForestAssets {
     Material cloudMaterial;
     Material leafMaterial;
     Material sunMaterial;
+    // --> Variables GLOBALES VAO (Vertex Array Object) Y VBO ((Vertex Buffer Object))
+    unsigned int grassInstanceVBO = 0;
+    unsigned int rockInstanceVBO = 0;
+    unsigned int treeInstanceVBO = 0;
+    unsigned int choppedOnceTreeInstanceVBO = 0;
+    unsigned int burningTreeInstanceVBO = 0;
+    unsigned int choppedTwiceTreeInstanceVBO = 0;
+    unsigned int cloudInstanceVBO = 0;
+    unsigned int leafInstanceVBO = 0;
 };
 
 // --- 3. DECLARACIONES GLOBALES (EXTERN) ---
@@ -185,10 +209,16 @@ extern bool isDay;
 // -- Assets del Bosque
 extern ForestAssets fa;
 
+// -- Assets de UI
+extern UIAssets ui;
+
 // --- Contenedores del Mundo ---
 extern std::vector<Chunk> terrain_chunks;
 extern const int WORLD_SIZE;
 extern Frustum cameraFrustum;
+
+// -- Arreglo de Camaras
+extern std::vector<Light> gLights;
 
 // --- Constantes ---
 extern const unsigned int GRASS_PER_CHUNK;
@@ -199,25 +229,6 @@ extern const unsigned int NUM_DISTANT_CLOUDS;
 extern const unsigned int NUM_LOCAL_CLOUDS;
 extern const unsigned int TOTAL_CLOUDS;
 extern const unsigned int EXPLOSION_LEAVES_PER_HIT;
-
-// --- VBOs y VAOs ---
-extern unsigned int grassInstanceVBO;
-extern unsigned int rockInstanceVBO;
-extern unsigned int treeInstanceVBO;
-extern unsigned int choppedOnceTreeInstanceVBO;
-extern unsigned int burningTreeInstanceVBO;
-extern unsigned int choppedTwiceTreeInstanceVBO;
-extern unsigned int cloudInstanceVBO;
-extern unsigned int leafInstanceVBO;
-extern unsigned int crosshairVAO, crosshairVBO;
-extern unsigned int uiVAO, uiVBO;
-
-// --- Texturas UI ---
-extern unsigned int fireTextureID;
-extern unsigned int treeTextureID;
-extern unsigned int highlightTextureID;
-extern unsigned int legendFireTextureID;
-extern unsigned int legendTreeTextureID;
 
 // --- Vectores de Instancias ---
 extern std::vector<glm::mat4> cloud_matrices;
