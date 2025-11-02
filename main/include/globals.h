@@ -28,6 +28,11 @@
 #include <animatedmodel.h>
 #include <irrKlang.h>
 
+#include <input.h>
+#include <mechanic.h>
+#include <render.h>
+
+
 using namespace irrklang;
 
 
