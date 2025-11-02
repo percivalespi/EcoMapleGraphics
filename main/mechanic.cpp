@@ -1,0 +1,267 @@
+#include "mechanic.h"
+
+void plantTree() {
+    // 1. Calcular Rayo en Coordenadas del Mundo
+    glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 2000.0f);
+    glm::mat4 view = camera.GetViewMatrix();
+    glm::vec4 ray_clip(0.0f, 0.0f, -1.0, 1.0);
+    glm::vec4 ray_eye = glm::inverse(projection) * ray_clip;
+    ray_eye = glm::vec4(ray_eye.x, ray_eye.y, -1.0, 0.0);
+    glm::vec3 ray_wor = glm::normalize(glm::vec3(glm::inverse(view) * ray_eye));
+    glm::vec3 ray_origin = camera.Position;
+
+    // 2. Intersección Rayo-Plano (Suelo en Y=0)
+    glm::vec3 plane_normal(0.0f, 1.0f, 0.0f);
+    float plane_d = 0.0f;
+    float denom = glm::dot(plane_normal, ray_wor);
+    float t_ground = -1.0f;
+    glm::vec3 ground_hit_pos;
+
+    if (std::abs(denom) > 1e-6) {
+        float t = -(glm::dot(plane_normal, ray_origin) + plane_d) / denom;
+        if (t > 0.0f && t < max_plant_distance) {
+            t_ground = t;
+            ground_hit_pos = ray_origin + ray_wor * t_ground;
+        }
+    }
+
+    // 3. Intersección Rayo-Bases de Árboles (CHOPPED_TWICE)
+    float closest_t_tree_local = std::numeric_limits<float>::max(); // CORREGIDO: Declarado
+    float closest_t_tree_world = std::numeric_limits<float>::max();
+    int hit_chunk_idx = -1;
+    size_t hit_tree_idx = -1;
+    int hit_tree_id = -1;
+    glm::vec3 tree_base_hit_pos;
+
+    for (int c_idx = 0; c_idx < terrain_chunks.size(); ++c_idx) {
+        if (glm::distance(camera.Position, terrain_chunks[c_idx].position) > CHUNK_SIZE * 1.5f + max_plant_distance) {
+            continue;
+        }
+
+        for (size_t t_idx = 0; t_idx < terrain_chunks[c_idx].tree_instances.size(); ++t_idx) {
+            const auto& tree_instance = terrain_chunks[c_idx].tree_instances[t_idx];
+
+            if (tree_instance.state != TreeState::CHOPPED_TWICE) {
+                continue;
+            }
+
+            glm::mat4 inv_model = glm::inverse(tree_instance.matrix);
+            glm::vec3 local_ray_origin = glm::vec3(inv_model * glm::vec4(ray_origin, 1.0f));
+            glm::vec3 local_ray_dir = glm::normalize(glm::vec3(inv_model * glm::vec4(ray_wor, 0.0f)));
+
+            float t_local;
+            if (intersectRayAABB(local_ray_origin, local_ray_dir, tree_trunk_aabb_min, tree_trunk_aabb_max, t_local)) {
+                glm::vec3 world_hit_point = glm::vec3(tree_instance.matrix * glm::vec4(local_ray_origin + local_ray_dir * t_local, 1.0f));
+                float world_distance = glm::distance(ray_origin, world_hit_point);
+
+                if (world_distance < max_plant_distance && world_distance < closest_t_tree_world) {
+                    closest_t_tree_local = t_local;
+                    closest_t_tree_world = world_distance;
+                    hit_chunk_idx = c_idx;
+                    hit_tree_idx = t_idx;
+                    hit_tree_id = tree_instance.id;
+                    tree_base_hit_pos = glm::vec3(tree_instance.matrix[3]);
+                }
+            }
+        }
+    }
+
+    // 4. Decidir dónde plantar
+    bool hit_ground = (t_ground > 0.0f);
+    bool hit_tree_base = (hit_tree_id != -1);
+
+    glm::vec3 final_plant_pos;
+    int target_chunk_idx = -1;
+    bool should_plant = false;
+    bool remove_old_base = false;
+    size_t old_base_index = (size_t)-1;
+
+    if (!hit_ground && !hit_tree_base) {
+        std::cout << "Mire al suelo o a una base cortada para plantar." << std::endl;
+        return;
+    }
+
+    if (hit_ground && (!hit_tree_base || t_ground <= closest_t_tree_world)) {
+        final_plant_pos = ground_hit_pos;
+        final_plant_pos.y = 0.0f;
+        should_plant = true;
+
+        int chunk_x = static_cast<int>(std::floor((final_plant_pos.x + CHUNK_SIZE / 2.0f) / CHUNK_SIZE));
+        int chunk_z = static_cast<int>(std::floor((final_plant_pos.z + CHUNK_SIZE / 2.0f) / CHUNK_SIZE));
+        int chunk_idx_x = chunk_x + WORLD_SIZE / 2;
+        int chunk_idx_z = chunk_z + WORLD_SIZE / 2;
+        target_chunk_idx = chunk_idx_x * WORLD_SIZE + chunk_idx_z;
+
+    }
+    else if (hit_tree_base) {
+        final_plant_pos = tree_base_hit_pos;
+        final_plant_pos.y = 0.0f;
+        should_plant = true;
+        remove_old_base = true;
+        target_chunk_idx = hit_chunk_idx;
+        old_base_index = hit_tree_idx;
+    }
+
+    // 5. Ejecutar Plantado
+    if (should_plant) {
+        if (target_chunk_idx >= 0 && target_chunk_idx < (int)terrain_chunks.size()) {
+
+            Chunk& target_chunk = terrain_chunks[target_chunk_idx];
+
+            if (remove_old_base) {
+                std::cout << "Reemplazando base de árbol ID: " << hit_tree_id << std::endl;
+                if (old_base_index < target_chunk.tree_instances.size() &&
+                    target_chunk.tree_instances[old_base_index].id == hit_tree_id)
+                {
+                    target_chunk.tree_instances.erase(target_chunk.tree_instances.begin() + old_base_index);
+                }
+                else {
+                    bool found = false;
+                    for (auto it = target_chunk.tree_instances.begin(); it != target_chunk.tree_instances.end(); ++it) {
+                        if (it->id == hit_tree_id) {
+                            target_chunk.tree_instances.erase(it);
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        std::cerr << "ERROR: No se pudo encontrar la base del árbol para borrarla." << std::endl;
+                    }
+                }
+            }
+            else {
+                std::cout << "Plantando nuevo árbol en el suelo." << std::endl;
+            }
+
+            // Crear nueva instancia de árbol
+            TreeInstance new_tree;
+            new_tree.id = next_tree_id++;
+            new_tree.state = TreeState::ALIVE;
+            new_tree.fireTriggerTime = -1.0f;
+            new_tree.burnOutTime = -1.0f;
+
+            if (isFireActive) {
+                float fire_elapsed = (float)glfwGetTime() - fireStartTime;
+                float remaining_time = fireDuration - fire_elapsed;
+                if (remaining_time > maxBurnDuration) {
+                    std::uniform_real_distribution<float> dis_new_fire_time(fire_elapsed, fireDuration - maxBurnDuration);
+                    new_tree.fireTriggerTime = dis_new_fire_time(gen);
+                    new_tree.burnOutTime = new_tree.fireTriggerTime + dis_burn_duration(gen);
+                    std::cout << " -> Árbol plantado se quemará en " << (new_tree.fireTriggerTime - fire_elapsed) << "s" << std::endl;
+                }
+                else {
+                    std::cout << " -> Árbol plantado demasiado tarde, no se quemará." << std::endl;
+                }
+            }
+
+            float scale_factor = dis_scale_tree(gen);
+            new_tree.matrix = glm::mat4(1.0f);
+            new_tree.matrix = glm::translate(new_tree.matrix, final_plant_pos);
+            new_tree.matrix = glm::rotate(new_tree.matrix, glm::radians(dis_rot(gen)), glm::vec3(0.0f, 1.0f, 0.0f));
+            new_tree.matrix = glm::rotate(new_tree.matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+            new_tree.matrix = glm::scale(new_tree.matrix, glm::vec3(scale_factor));
+
+            target_chunk.tree_instances.push_back(new_tree);
+
+            // Añadir hojas para el nuevo árbol
+            glm::vec3 treeBasePos = final_plant_pos;
+            for (int j = 0; j < LEAVES_PER_TREE; j++) {
+                Leaf leaf;
+                float startHeight = dis_leaf_height(gen);
+                leaf.initialTreePos = treeBasePos + glm::vec3(dis_leaf_offset(gen), 0.0f, dis_leaf_offset(gen));
+                leaf.initialHeight = startHeight;
+                leaf.position = leaf.initialTreePos + glm::vec3(0.0f, startHeight, 0.0f);
+                leaf.rotationAxis = glm::normalize(glm::vec3(dis_axis(gen), dis_axis(gen), dis_axis(gen)));
+                if (glm::length(leaf.rotationAxis) < 0.01f) {
+                    leaf.rotationAxis = glm::vec3(0.0f, 1.0f, 0.0f);
+                }
+                leaf.rotationAngle = dis_rot(gen);
+                leaf.fallSpeed = dis_initial_fall(gen);
+                leaf.spinSpeed = dis_initial_spin(gen);
+                leaf.parentTreeId = new_tree.id;
+                leaf.is_active = true;
+                leaf.is_explosion_leaf = false;
+                falling_leaves.push_back(leaf);
+            }
+
+        }
+        else {
+            std::cout << "Intento de plantar en un chunk inválido." << std::endl;
+        }
+    }
+}
+
+void startFire() {
+    if (isFireActive) {
+        std::cout << "El incendio ya está en progreso." << std::endl;
+        return;
+    }
+
+    std::cout << "¡Iniciando incendio!" << std::endl;
+    isFireActive = true;
+    fireStartTime = (float)glfwGetTime();
+
+    for (Chunk& chunk : terrain_chunks) {
+        for (TreeInstance& tree : chunk.tree_instances) {
+            if (tree.state == TreeState::ALIVE || tree.state == TreeState::CHOPPED_ONCE) {
+                tree.fireTriggerTime = dis_fire_time(gen);
+                tree.burnOutTime = tree.fireTriggerTime + dis_burn_duration(gen);
+            }
+        }
+    }
+}
+
+bool intersectRayAABB(const glm::vec3& ray_origin, const glm::vec3& ray_dir, const glm::vec3& aabb_min, const glm::vec3& aabb_max, float& t) {
+    glm::vec3 inv_dir;
+    inv_dir.x = (ray_dir.x == 0.0f) ? std::numeric_limits<float>::infinity() : 1.0f / ray_dir.x;
+    inv_dir.y = (ray_dir.y == 0.0f) ? std::numeric_limits<float>::infinity() : 1.0f / ray_dir.y;
+    inv_dir.z = (ray_dir.z == 0.0f) ? std::numeric_limits<float>::infinity() : 1.0f / ray_dir.z;
+    glm::vec3 tMin = (aabb_min - ray_origin) * inv_dir;
+    glm::vec3 tMax = (aabb_max - ray_origin) * inv_dir;
+    glm::vec3 t1 = glm::min(tMin, tMax);
+    glm::vec3 t2 = glm::max(tMin, tMax);
+    float tNear = glm::max(glm::max(t1.x, t1.y), t1.z);
+    float tFar = glm::min(glm::min(t2.x, t2.y), t2.z);
+    if (tNear > tFar || tFar < 0.0f) {
+        return false;
+    }
+    t = tNear < 0.0f ? tFar : tNear;
+    return true;
+}
+
+void Frustum::extractPlanes(const glm::mat4& vp) {
+    planes[0].normal = glm::vec3(vp[0][3] + vp[0][0], vp[1][3] + vp[1][0], vp[2][3] + vp[2][0]);
+    planes[0].distance = vp[3][3] + vp[3][0];
+    planes[1].normal = glm::vec3(vp[0][3] - vp[0][0], vp[1][3] - vp[1][0], vp[2][3] - vp[2][0]);
+    planes[1].distance = vp[3][3] - vp[3][0];
+    planes[2].normal = glm::vec3(vp[0][3] + vp[0][1], vp[1][3] + vp[1][1], vp[2][3] + vp[2][1]);
+    planes[2].distance = vp[3][3] + vp[3][1];
+    planes[3].normal = glm::vec3(vp[0][3] - vp[0][1], vp[1][3] - vp[1][1], vp[2][3] - vp[2][1]);
+    planes[3].distance = vp[3][3] - vp[3][1];
+    planes[4].normal = glm::vec3(vp[0][3] + vp[0][2], vp[1][3] + vp[1][2], vp[2][3] + vp[2][2]);
+    planes[4].distance = vp[3][3] + vp[3][2];
+    planes[5].normal = glm::vec3(vp[0][3] - vp[0][2], vp[1][3] - vp[1][2], vp[2][3] - vp[2][2]);
+    planes[5].distance = vp[3][3] - vp[3][2];
+    for (int i = 0; i < 6; ++i) {
+        planes[i].normalize();
+    }
+}
+
+bool Frustum::isBoxInFrustum(const glm::vec3& min, const glm::vec3& max) const {
+    for (int i = 0; i < 6; ++i) {
+        glm::vec3 p_vertex = min;
+        if (planes[i].normal.x >= 0) {
+            p_vertex.x = max.x;
+        }
+        if (planes[i].normal.y >= 0) {
+            p_vertex.y = max.y;
+        }
+        if (planes[i].normal.z >= 0) {
+            p_vertex.z = max.z;
+        }
+        if (planes[i].getSignedDistanceToPoint(p_vertex) < 0) {
+            return false;
+        }
+    }
+    return true;
+}

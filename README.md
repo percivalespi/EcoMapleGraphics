@@ -63,3 +63,13 @@ Para mover el sol y la luna se mueve con las teclas de arriba, abajo, izqueirdaa
 * [] Verificar el funcionamiento
 * [] Implementación de funciones de utilidad
 * [] Implementación de los shaders para varias fuentes de iluminación (ver con angel las diferencias)
+
+# CAMBIOS IMPORTANTES
+
+Se modifico el archivo `modelstructs.h` se añadio a la palabra clave `inline` para que no marque error, asegura que todas las copias de esta función son iguales
+~~~c++
+inline unsigned int TextureFromFile(const char* path, const std::string& directory, bool gamma = false)
+{
+    // ...
+}
+~~~

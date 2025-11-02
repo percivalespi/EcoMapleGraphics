@@ -1,4 +1,5 @@
-#pragma once // Evita que este archivo se incluya varias veces
+#ifndef GLOBALS_H
+#define GLOBALS_H
 
 // --- 1. INCLUDES ---
 // Aquí van TODAS las librerías del proyecto
@@ -113,7 +114,7 @@ extern float sunElevationAngle;
 
 // --- Globales Random ---
 extern std::random_device rd;
-std::mt19937;
+extern std::mt19937 gen;
 extern const float CHUNK_SIZE;
 extern const float fireDuration;
 extern const float minBurnDuration;
@@ -231,3 +232,5 @@ extern float fireStartTime;
 
 // --- Audio ---
 extern ISoundEngine* SoundEngine;
+
+#endif
