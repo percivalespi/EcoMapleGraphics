@@ -4,7 +4,7 @@
 
 Funcionalidades: (Con Chunks, In<stancias, Montaña, Luz de Phong, Sol/Luna Esféricos, Ciclo Día/Noche, Nubes, Hojas y Talar/Plantar Árboles + Incendio Secuencial)
 
-Ultimas Implementaciones: (Incendio Secuencial + Scope Global + Estilo Súper Estricto)
+Ultimas Implementaciones: (IA para el lobo
 */
 
 /* ---------------------------------------- Encabezados del Proyecto -------------------------------------------------*/
@@ -17,8 +17,8 @@ Ultimas Implementaciones: (Incendio Secuencial + Scope Global + Estilo Súper Es
 #include "src_manager.h"
 
 // Bandera Para activar entorno de prueba
-bool g_runTestEnvironment = false;
-//miau
+bool g_runTestEnvironment = false; // <-- CAMBIADO A FALSE
+
 // Firmas de Funciones - Estructura Básica OpenGL
 bool Start();
 bool Update();
@@ -40,17 +40,15 @@ float lastFrame = 0.0f;
 float sunAngle = 0.0f;
 float sunElevationAngle = 45.0f;
 
-// --> Variables Globales Para Definir las [Reglas del Mundo]
+
 const float CHUNK_SIZE = 20.0f;
-const float fireDuration = 80.0f; // 1 Minuto
+const float fireDuration = 80.0f; // 80 segundos
 const float minBurnDuration = 15.0f; // [Mínimo que un árbol arde]
 const float maxBurnDuration = 40.0f; // Máximo que un árbol arde]
 const float minCloudDistanceSq = 60.0f * 60.0f;
 const int maxPlacementTries = 20;
 
-// --> Variables Globales Para la Generacion Aleatoria del Bosque
 
-// Generando Semilla Aleatora
 std::random_device rd;
 std::mt19937 gen(rd());
 
@@ -92,6 +90,8 @@ Shader* crosshairShader = nullptr;
 Shader* mLightsShader = nullptr;
 // Shader Interfaz Grafica (UI)
 Shader* uiShader = nullptr;
+// Shader de Skinning
+Shader* dynamicShader = nullptr; // <-- AÑADIDO
 
 
 // --> Variables Globales Para el estado del mundo [Iluminacion y Materiales]
@@ -103,10 +103,18 @@ std::vector<glm::mat4> leaf_matrices;
 int next_tree_id = 0;
 bool isDay = true;
 
-// --> Variable Globale Para el Tamano del Mundo
+// --- NUEVO: Definición de globales de IA y Mundo ---
+float WORLD_MIN_X, WORLD_MAX_X, WORLD_MIN_Z, WORLD_MAX_Z;
+std::vector<AnimalInstance> g_animals;
+std::uniform_real_distribution<float> dis_ai_time(3.0f, 10.0f); // 3-10 segundos por estado
+std::uniform_real_distribution<float> dis_ai_target_dist(5.0f, 15.0f); // Caminar 5-15 metros
+// --- FIN NUEVO ---
+std::uniform_real_distribution<float> dis_spawn_chance(0.0f, 1.0f);
+
+
 const int WORLD_SIZE = 10;
 
-// --> Variable Globale Para lo que la camara puede ver
+
 Frustum cameraFrustum;
 
 // -> Variables Globales Mecanica (Talado de Árboles)
@@ -173,10 +181,10 @@ int main() {
     if (ui.treeTextureID != 0) { glDeleteTextures(1, &ui.treeTextureID); }
     if (ui.highlightTextureID != 0) { glDeleteTextures(1, &ui.highlightTextureID); }
 
-    // --- NUEVO: Limpieza de leyendas ---
+
     if (ui.legendFireTextureID != 0) { glDeleteTextures(1, &ui.legendFireTextureID); }
     if (ui.legendTreeTextureID != 0) { glDeleteTextures(1, &ui.legendTreeTextureID); }
-    // -----------------------------------
+
 
     delete phongShader;
     delete instancePhongShader;
@@ -185,6 +193,9 @@ int main() {
     delete sunShader;
     delete crosshairShader;
     delete uiShader;
+    delete dynamicShader;
+
+    delete fa.character01;
     delete fa.terrain_model;
     delete fa.grass_model;
     delete fa.rock_model;
@@ -244,7 +255,9 @@ bool Start() {
     //Shader de Luces Multiples de Phong
     mLightsShader = new Shader("shaders/11_PhongShaderMultLights.vs", "shaders/11_PhongShaderMultLights.fs");
 
- 
+    // --- NUEVO: Cargar Shader de Skinning ---
+    dynamicShader = new Shader("shaders/10_vertex_skinning-IT.vs", "shaders/10_fragment_skinning-IT.fs");
+
     if (!phongShader || phongShader->ID == 0 ||
         !instancePhongShader || instancePhongShader->ID == 0 ||
         !instanceAlphaTestPhongShader || instanceAlphaTestPhongShader->ID == 0 ||
@@ -252,7 +265,8 @@ bool Start() {
         !sunShader || sunShader->ID == 0 ||
         !crosshairShader || crosshairShader->ID == 0 ||
         !uiShader || uiShader->ID == 0 ||
-        !mLightsShader || mLightsShader->ID == 0
+        !mLightsShader || mLightsShader->ID == 0 ||
+        !dynamicShader || dynamicShader->ID == 0
         )
     {
         std::cerr << "ERROR: Shaders failed to load." << std::endl;
@@ -264,22 +278,33 @@ bool Start() {
         delete crosshairShader;
         delete uiShader;
         delete mLightsShader;
+        delete dynamicShader;
         return false;
     }
 
     // Carga de Modelos y Recursos
     loadUI(ui);
     loadTest(ta);
-    loadForest(fa); 
-    
-    // Inicialiacion de los Buffer de Renderizado
+    loadForest(fa);
+
+
     initializeRenderBuffers(ui);
 
     // Depuración (Se debe de Borrar)
     std::cout << "Using Manual Tree Trunk AABB Min: (" << tree_trunk_aabb_min.x << ", " << tree_trunk_aabb_min.y << ", " << tree_trunk_aabb_min.z << ")" << std::endl;
     std::cout << "Using Manual Tree Trunk AABB Max: (" << tree_trunk_aabb_max.x << ", " << tree_trunk_aabb_max.y << ", " << tree_trunk_aabb_max.z << ")" << std::endl;
 
+    //generateForest();
+
+
+    float world_half_width = (WORLD_SIZE / 2.0f) * CHUNK_SIZE;
+    WORLD_MIN_X = -world_half_width;
+    WORLD_MAX_X = world_half_width;
+    WORLD_MIN_Z = -world_half_width;
+    WORLD_MAX_Z = world_half_width;
+
     generateForest();
+
     initializeInstanceBuffers(fa);
 
     return true;

@@ -74,7 +74,7 @@ void processInput(GLFWwindow* window) {
         if (!g_key_pressed) {
             if (isFireActive) {
                 isFireActive = false;
-                std::cout << "¡Incendio detenido manualmente!" << std::endl;
+                std::cout << "Incendio detenido manualmente!" << std::endl;
             }
             g_key_pressed = true;
         }
@@ -158,7 +158,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         }
 
         if (hit_tree_id != -1) {
-            std::cout << "¡Arbol golpeado! ID: " << hit_tree_id << " Estado: ";
+            std::cout << "Arbol golpeado! ID: " << hit_tree_id << " Estado: ";
             if (hit_chunk_idx >= 0 && hit_tree_idx < terrain_chunks[hit_chunk_idx].tree_instances.size()) {
                 TreeInstance& hit_tree = terrain_chunks[hit_chunk_idx].tree_instances[hit_tree_idx];
 
@@ -216,7 +216,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
                 }
             }
             else {
-                std::cerr << "ERROR: Indices de árbol golpeado inválidos!" << std::endl;
+                std::cerr << "ERROR: Indices de rbol golpeado invlidos!" << std::endl;
             }
         }
     }

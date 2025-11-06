@@ -1,8 +1,6 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-// --- 1. INCLUDES ---
-// Aquí van TODAS las librerías del proyecto
 #include <iostream>
 #include <stdlib.h>
 #include <vector>
@@ -35,7 +33,7 @@ using namespace irrklang;
 
 
 // --- 2. ESTRUCTURAS ---
-// Aquí van TODAS las definiciones de structs y enums
+// Aqu  van TODAS las definiciones de structs y enums
 struct Plane {
     glm::vec3 normal;
     float distance;
@@ -94,7 +92,7 @@ struct Leaf {
     bool is_explosion_leaf = false;
 };
 
-struct UIAssets{//Buffers
+struct UIAssets {//Buffers
     unsigned int crosshairVAO = 0;
     unsigned int crosshairVBO = 0;
     unsigned int uiVAO = 0;
@@ -109,7 +107,37 @@ struct UIAssets{//Buffers
 };
 
 
-//Estructura con los modelos de los assets
+// --- NUEVO: Constantes y Estructuras para Animales ---
+const unsigned int ANIMALS_PER_CHUNK = 1;
+const float ANIMAL_MOVE_SPEED = 2.0f; // Metros por segundo
+const float ANIMAL_TREE_AVOIDANCE_RADIUS = 1.5f; // Radio para evitar  rboles
+const int ANIMAL_MAX_PATHFIND_TRIES = 10; // Intentos para encontrar un destino
+
+enum class AnimalState {
+    IDLE,
+    WALKING
+};
+const float ANIMAL_SPAWN_PROBABILITY = 0.25f;
+struct AnimalInstance {
+    glm::vec3 position;
+    float rotationY;
+    AnimalState state;
+    float stateTimer; // Tiempo restante en el estado actual
+    glm::vec3 targetPosition;
+
+
+    float elapsedTime;
+    int animationCount;
+    glm::mat4 gBones[MAX_RIGGING_BONES];
+};
+
+
+extern std::uniform_real_distribution<float> dis_ai_time; // Tiempo en estado
+extern std::uniform_real_distribution<float> dis_ai_target_dist; // Distancia a caminar
+
+extern std::uniform_real_distribution<float> dis_spawn_chance;
+
+
 struct ForestAssets {
     // Modelos
     Model* terrain_model;
@@ -126,6 +154,7 @@ struct ForestAssets {
     Model* moon_model;
     Model* cloud_model;
     Model* leaf_model;
+    AnimatedModel* character01;
     // --- Luz
     Light theLight;
     // Material
@@ -166,9 +195,7 @@ extern UIAssets ui;
 // -- Assets de Test
 extern TestAssets ta;
 
-// --- 3. DECLARACIONES GLOBALES (EXTERN) ---
-// 'extern' le dice al compilador: "esta variable existe,
-// pero su memoria está definida en OTRO archivo .cpp"
+
 
 extern GLFWwindow* window;
 extern const unsigned int SCR_WIDTH;
@@ -191,7 +218,7 @@ extern const float CHUNK_SIZE;
 extern const float fireDuration;
 extern const float minBurnDuration;
 extern const float maxBurnDuration;
-
+extern bool isDay;
 extern std::uniform_real_distribution<float> dis_pos;
 extern std::uniform_real_distribution<float> dis_scale_grass;
 extern std::uniform_real_distribution<float> dis_scale_rock;
@@ -209,6 +236,11 @@ extern std::uniform_real_distribution<float> dis_explode_fall;
 extern std::uniform_real_distribution<float> dis_explode_spin;
 extern std::uniform_real_distribution<float> dis_fire_time;
 extern std::uniform_real_distribution<float> dis_burn_duration;
+
+
+extern std::uniform_real_distribution<float> dis_ai_time; // Tiempo en estado
+extern std::uniform_real_distribution<float> dis_ai_target_dist; // Distancia a caminar
+
 extern const float minCloudDistanceSq;
 extern const int maxPlacementTries;
 extern std::uniform_real_distribution<float> dis_cloud_distant_x;
@@ -225,12 +257,17 @@ extern Shader* instanceAlphaTestPhongShader;
 extern Shader* skyboxShader;
 extern Shader* sunShader;
 extern Shader* crosshairShader;
-
-extern bool isDay;
+extern Shader* dynamicShader;
 
 // --- Contenedores del Mundo ---
 extern std::vector<Chunk> terrain_chunks;
 extern const int WORLD_SIZE;
+
+
+extern float WORLD_MIN_X, WORLD_MAX_X, WORLD_MIN_Z, WORLD_MAX_Z;
+extern std::vector<AnimalInstance> g_animals;
+
+
 extern Frustum cameraFrustum;
 
 // -- Arreglo de Camaras
@@ -256,7 +293,7 @@ extern int next_tree_id;
 extern const glm::vec3 tree_trunk_aabb_min;
 extern const glm::vec3 tree_trunk_aabb_max;
 
-// --- Globales de Lógica ---
+// --- Globales de L gica ---
 extern bool p_key_pressed;
 extern bool f_key_pressed;
 extern bool g_key_pressed;
