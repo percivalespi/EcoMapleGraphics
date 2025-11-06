@@ -78,6 +78,33 @@ void renderTestEnvironment(const glm::mat4& projection, const glm::mat4& view) {
     drawObject(mLightsShader, ta.luminaire, ta.steel, model);
     drawObject(mLightsShader, ta.stop, ta.steel, model);
     drawObject(mLightsShader, ta.floor, ta.asphalt, model);
+
+
+    {
+        character01->UpdateAnimation(deltaTime);
+
+        // Activación del shader del personaje
+        dynamicShader->use();
+
+        // Aplicamos transformaciones de proyección y cámara (si las hubiera)
+        dynamicShader->setMat4("projection", projection);
+        dynamicShader->setMat4("view", view);
+
+        // Aplicamos transformaciones del modelo
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, position); // translate it down so it's at the center of the scene
+        model = glm::rotate(model, glm::radians(rotateCharacter), glm::vec3(0.0, 1.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));	// it's a bit too big for our scene, so scale it down
+
+        dynamicShader->setMat4("model", model);
+
+        dynamicShader->setMat4("gBones", MAX_RIGGING_BONES, character01->gBones);
+
+        // Dibujamos el modelo
+        character01->Draw(*dynamicShader);
+    }
+
+
     glUseProgram(0);
 
 }

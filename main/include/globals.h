@@ -155,6 +155,7 @@ struct TestAssets { //Elementos Para el entorno de Prueba
     Model* luminaire;
     Model* stop;
     Model* floor;
+    AnimatedModel *character01;
 };
 
 // -- Assets del Bosque
@@ -225,6 +226,8 @@ extern Shader* instanceAlphaTestPhongShader;
 extern Shader* skyboxShader;
 extern Shader* sunShader;
 extern Shader* crosshairShader;
+extern Shader* dynamicShader;
+
 
 extern bool isDay;
 
@@ -269,6 +272,10 @@ extern ISoundEngine* SoundEngine;
 
 // Bandera Para Entorno de Prueba
 extern bool g_runTestEnvironment;
+
+
+// Modelos animados
+extern AnimatedModel* character01;
 
 
 #endif

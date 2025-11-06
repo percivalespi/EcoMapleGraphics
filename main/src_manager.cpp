@@ -7,6 +7,8 @@ void initializeModelsTest(TestAssets& ta) {
     ta.luminaire = new Model("models/luminaire.fbx");
     ta.stop = new Model("models/stop.fbx");
     ta.floor = new Model("models/floor02.fbx");
+    ta.character01 = new AnimatedModel("models/IllumModels/KAYA.fbx");
+
 }
 
 void initilizeMaterialsTest(TestAssets& ta) {

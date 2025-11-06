@@ -92,6 +92,8 @@ Shader* crosshairShader = nullptr;
 Shader* mLightsShader = nullptr;
 // Shader Interfaz Grafica (UI)
 Shader* uiShader = nullptr;
+// Shader por animaciones
+Shader* dynamicShader;
 
 
 // --> Variables Globales Para el estado del mundo [Iluminacion y Materiales]
@@ -244,7 +246,12 @@ bool Start() {
     //Shader de Luces Multiples de Phong
     mLightsShader = new Shader("shaders/11_PhongShaderMultLights.vs", "shaders/11_PhongShaderMultLights.fs");
 
- 
+    //Shader para animaciones
+    dynamicShader = new Shader("shaders/10_vertex_skinning-IT.vs", "shaders/10_fragment_skinning-IT.fs");
+
+    // Máximo número de huesos: 100
+    dynamicShader->setBonesIDs(MAX_RIGGING_BONES);
+
     if (!phongShader || phongShader->ID == 0 ||
         !instancePhongShader || instancePhongShader->ID == 0 ||
         !instanceAlphaTestPhongShader || instanceAlphaTestPhongShader->ID == 0 ||
