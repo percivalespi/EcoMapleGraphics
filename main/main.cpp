@@ -17,8 +17,8 @@ Ultimas Implementaciones: (Incendio Secuencial + Scope Global + Estilo Súper Es
 #include "src_manager.h"
 
 // Bandera Para activar entorno de prueba
-bool g_runTestEnvironment = true;
-
+bool g_runTestEnvironment = false;
+//miau
 // Firmas de Funciones - Estructura Básica OpenGL
 bool Start();
 bool Update();
