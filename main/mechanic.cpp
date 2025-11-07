@@ -11,7 +11,7 @@ void plantTree() {
     glm::vec3 ray_wor = glm::normalize(glm::vec3(glm::inverse(view) * ray_eye));
     glm::vec3 ray_origin = camera.Position;
 
-    // 2. Intersecci n Rayo-Plano (Suelo en Y=0)
+    // 2. Intersección Rayo-Plano (Suelo en Y=0)
     glm::vec3 plane_normal(0.0f, 1.0f, 0.0f);
     float plane_d = 0.0f;
     float denom = glm::dot(plane_normal, ray_wor);
@@ -26,8 +26,8 @@ void plantTree() {
         }
     }
 
-    // 3. Intersecci n Rayo-Bases de  rboles (CHOPPED_TWICE)
-    float closest_t_tree_local = std::numeric_limits<float>::max();
+    // 3. Intersección Rayo-Bases de Árboles (CHOPPED_TWICE)
+    float closest_t_tree_local = std::numeric_limits<float>::max(); // CORREGIDO: Declarado
     float closest_t_tree_world = std::numeric_limits<float>::max();
     int hit_chunk_idx = -1;
     size_t hit_tree_idx = -1;
@@ -67,7 +67,7 @@ void plantTree() {
         }
     }
 
-    // 4. Decidir d nde plantar
+    // 4. Decidir dónde plantar
     bool hit_ground = (t_ground > 0.0f);
     bool hit_tree_base = (hit_tree_id != -1);
 
@@ -110,7 +110,7 @@ void plantTree() {
             Chunk& target_chunk = terrain_chunks[target_chunk_idx];
 
             if (remove_old_base) {
-                std::cout << "Reemplazando base de  rbol ID: " << hit_tree_id << std::endl;
+                std::cout << "Reemplazando base de árbol ID: " << hit_tree_id << std::endl;
                 if (old_base_index < target_chunk.tree_instances.size() &&
                     target_chunk.tree_instances[old_base_index].id == hit_tree_id)
                 {
@@ -126,15 +126,15 @@ void plantTree() {
                         }
                     }
                     if (!found) {
-                        std::cerr << "ERROR: No se pudo encontrar la base del  rbol para borrarla." << std::endl;
+                        std::cerr << "ERROR: No se pudo encontrar la base del árbol para borrarla." << std::endl;
                     }
                 }
             }
             else {
-                std::cout << "Plantando nuevo  rbol en el suelo." << std::endl;
+                std::cout << "Plantando nuevo árbol en el suelo." << std::endl;
             }
 
-            // Crear nueva instancia de  rbol
+            // Crear nueva instancia de árbol
             TreeInstance new_tree;
             new_tree.id = next_tree_id++;
             new_tree.state = TreeState::ALIVE;
@@ -148,10 +148,10 @@ void plantTree() {
                     std::uniform_real_distribution<float> dis_new_fire_time(fire_elapsed, fireDuration - maxBurnDuration);
                     new_tree.fireTriggerTime = dis_new_fire_time(gen);
                     new_tree.burnOutTime = new_tree.fireTriggerTime + dis_burn_duration(gen);
-                    std::cout << " ->  rbol plantado se quemar  en " << (new_tree.fireTriggerTime - fire_elapsed) << "s" << std::endl;
+                    std::cout << " -> Árbol plantado se quemará en " << (new_tree.fireTriggerTime - fire_elapsed) << "s" << std::endl;
                 }
                 else {
-                    std::cout << " ->  rbol plantado demasiado tarde, no se quemar ." << std::endl;
+                    std::cout << " -> Árbol plantado demasiado tarde, no se quemará." << std::endl;
                 }
             }
 
@@ -164,7 +164,12 @@ void plantTree() {
 
             target_chunk.tree_instances.push_back(new_tree);
 
-            // A adir hojas para el nuevo  rbol
+            // --- NUEVO: Incrementar salud del bosque ---
+            g_currentLivingTrees++;
+            // --- FIN NUEVO ---
+
+
+            // Añadir hojas para el nuevo árbol
             glm::vec3 treeBasePos = final_plant_pos;
             for (int j = 0; j < LEAVES_PER_TREE; j++) {
                 Leaf leaf;
@@ -187,18 +192,18 @@ void plantTree() {
 
         }
         else {
-            std::cout << "Intento de plantar en un chunk inv lido." << std::endl;
+            std::cout << "Intento de plantar en un chunk inválido." << std::endl;
         }
     }
 }
 
 void startFire() {
     if (isFireActive) {
-        std::cout << "El incendio ya est  en progreso." << std::endl;
+        std::cout << "El incendio ya está en progreso." << std::endl;
         return;
     }
 
-    std::cout << " Iniciando incendio!" << std::endl;
+    std::cout << "¡Iniciando incendio!" << std::endl;
     isFireActive = true;
     fireStartTime = (float)glfwGetTime();
 
@@ -267,15 +272,17 @@ bool Frustum::isBoxInFrustum(const glm::vec3& min, const glm::vec3& max) const {
     return true;
 }
 
+// --- NUEVA FUNCIÓN: Comprueba si una posición es válida (dentro del mundo y no en un árbol) ---
 bool isPositionSafe(glm::vec3 pos) {
-    // 1. Comprobar l mites del mundo
+    // 1. Comprobar límites del mundo
     if (pos.x < WORLD_MIN_X || pos.x > WORLD_MAX_X || pos.z < WORLD_MIN_Z || pos.z > WORLD_MAX_Z) {
         return false;
     }
 
-
+    // 2. Comprobar colisión con árboles
+    // (Optimización: podríamos usar una grid, pero esto es más simple por ahora)
     for (const auto& chunk : terrain_chunks) {
-
+        // Optimización rápida: si el chunk está muy lejos, no lo compruebes
         if (glm::distance2(glm::vec2(pos.x, pos.z), glm::vec2(chunk.position.x, chunk.position.z)) > (CHUNK_SIZE * 2.0f) * (CHUNK_SIZE * 2.0f)) {
             continue;
         }
@@ -285,7 +292,7 @@ bool isPositionSafe(glm::vec3 pos) {
 
             glm::vec3 treePos = glm::vec3(tree.matrix[3]);
             if (glm::distance(glm::vec2(pos.x, pos.z), glm::vec2(treePos.x, treePos.z)) < ANIMAL_TREE_AVOIDANCE_RADIUS) {
-                return false; // Demasiado cerca de un  rbol
+                return false; // Demasiado cerca de un árbol
             }
         }
     }
@@ -293,21 +300,28 @@ bool isPositionSafe(glm::vec3 pos) {
     return true; // Es seguro
 }
 
-
+// --- NUEVA FUNCIÓN: Actualiza la IA de todos los animales ---
 void updateAnimalAI(float deltaTime) {
     if (fa.character01 == nullptr) return; // No hay modelo de lobo cargado
 
     for (AnimalInstance& animal : g_animals) {
+
+        // --- NUEVO: Saltarse a los muertos ---
+        if (animal.state == AnimalState::DEAD) {
+            continue;
+        }
+        // --- FIN NUEVO ---
+
         animal.stateTimer -= deltaTime;
 
-        // --- L gica de cambio de estado ---
+        // --- Lógica de cambio de estado ---
         if (animal.stateTimer <= 0.0f) {
             if (animal.state == AnimalState::IDLE) {
-
+                // Cambiar a WALKING
                 animal.state = AnimalState::WALKING;
-                animal.stateTimer = dis_ai_time(gen); // Tiempo que pasar  caminando
+                animal.stateTimer = dis_ai_time(gen); // Tiempo que pasará caminando
 
-
+                // Encontrar un nuevo destino válido
                 int tries = 0;
                 bool foundTarget = false;
                 do {
@@ -319,34 +333,36 @@ void updateAnimalAI(float deltaTime) {
                     tries++;
                 } while (!foundTarget && tries < ANIMAL_MAX_PATHFIND_TRIES);
 
-                if (!foundTarget) {
+                if (!foundTarget) { // No se encontró destino, quedarse quieto
                     animal.state = AnimalState::IDLE;
-                    animal.stateTimer = dis_ai_time(gen) / 2.0f;
+                    animal.stateTimer = dis_ai_time(gen) / 2.0f; // Esperar menos tiempo
                 }
 
             }
-            else {
+            else { // animal.state == AnimalState::WALKING
                 // Cambiar a IDLE
                 animal.state = AnimalState::IDLE;
-                animal.stateTimer = dis_ai_time(gen); // Tiempo que pasar  quieto
+                animal.stateTimer = dis_ai_time(gen); // Tiempo que pasará quieto
             }
         }
 
-
+        // --- Lógica de movimiento y animación ---
         if (animal.state == AnimalState::WALKING) {
             glm::vec3 direction = glm::normalize(animal.targetPosition - animal.position);
             float distanceToTarget = glm::distance(animal.position, animal.targetPosition);
 
             if (distanceToTarget < 0.5f) {
-                // Lleg  al destino
+                // Llegó al destino
                 animal.state = AnimalState::IDLE;
                 animal.stateTimer = dis_ai_time(gen);
             }
             else {
                 // Moverse hacia el destino
                 animal.position += direction * ANIMAL_MOVE_SPEED * deltaTime;
-                animal.rotationY = atan2(direction.x, direction.z);
+                animal.rotationY = atan2(direction.x, direction.z); // Rotar para mirar en la dirección
 
+                // --- ¡ACTUALIZAR ANIMACIÓN! ---
+                // Esto cumple el requisito de animar SOLO al moverse
                 animal.elapsedTime += deltaTime;
                 if (animal.elapsedTime > 1.0f / fa.character01->fps) {
                     animal.elapsedTime = 0.0f;
@@ -359,16 +375,96 @@ void updateAnimalAI(float deltaTime) {
                 }
             }
         }
+        // Si el estado es IDLE, no se actualiza la animación, por lo que se queda en el último frame
+    }
+}
 
+
+// --- NUEVA FUNCIÓN ---
+// Esta función ahora maneja la IA y la simulación de vida/muerte
+void updateForestHealthAndAnimals(float deltaTime) {
+    // 1. Actualizar Salud del Bosque
+    if (g_totalInitialTrees > 0) {
+        g_forestHealth = (float)g_currentLivingTrees / (float)g_totalInitialTrees;
+    }
+    else {
+        g_forestHealth = 0.0f; // No había árboles para empezar
+    }
+    g_forestHealth = glm::clamp(g_forestHealth, 0.0f, 1.0f);
+
+    // --- NUEVO: Imprimir solo si la salud cambia ---
+    if (g_forestHealth != g_previousForestHealth) {
+        std::cout << "Vida del Bosque: " << (g_forestHealth * 100.0f) << "% (" << g_currentLivingTrees << "/" << g_totalInitialTrees << ")" << std::endl;
+        g_previousForestHealth = g_forestHealth; // Actualizar el valor anterior
+    }
+    // --- FIN NUEVO ---
+
+    // 2. Actualizar IA de animales vivos
+    updateAnimalAI(deltaTime);
+
+    // 3. Lógica de Muerte de Animales
+    if (g_forestHealth <= FOREST_HEALTH_TRIGGER) {
+        g_animalDeathTimer -= deltaTime;
+        if (g_animalDeathTimer <= 0.0f) {
+            g_animalDeathTimer = ANIMAL_DEATH_RATE; // Reiniciar temporizador
+
+            // Buscar un animal vivo para matarlo
+            for (AnimalInstance& animal : g_animals) {
+                if (animal.state != AnimalState::DEAD) {
+                    animal.state = AnimalState::DEAD;
+                    std::cout << "Un animal ha muerto." << std::endl;
+                    break; // Solo matar uno por ciclo
+                }
+            }
+        }
+    }
+
+    // 4. Lógica de Respawn de Animales
+    // Contar cuántos animales están vivos actualmente
+    int living_animals = 0;
+    for (const auto& animal : g_animals) {
+        if (animal.state != AnimalState::DEAD) {
+            living_animals++;
+        }
+    }
+
+    if (!isFireActive && g_forestHealth > FOREST_HEALTH_TRIGGER && living_animals < g_maxAnimalsInWorld) {
+        g_animalRespawnTimer -= deltaTime;
+        if (g_animalRespawnTimer <= 0.0f) {
+            g_animalRespawnTimer = ANIMAL_RESPAWN_RATE; // Reiniciar temporizador
+
+            // Buscar un animal muerto para reaparecer
+            bool respawned = false;
+            for (AnimalInstance& animal : g_animals) {
+                if (animal.state == AnimalState::DEAD) {
+                    // ¡Reaparecer este!
+                    // Encontrar un chunk aleatorio
+                    Chunk& randomChunk = terrain_chunks[gen() % terrain_chunks.size()];
+                    glm::vec3 spawnPos = randomChunk.position + glm::vec3(dis_pos(gen), 0.0f, dis_pos(gen));
+
+                    if (isPositionSafe(spawnPos)) {
+                        animal.position = spawnPos;
+                        animal.rotationY = glm::radians(dis_rot(gen));
+                        animal.state = AnimalState::IDLE;
+                        animal.stateTimer = dis_ai_time(gen);
+                        animal.targetPosition = animal.position;
+                        animal.elapsedTime = 0.0f;
+                        animal.animationCount = 0;
+                        fa.character01->SetPose(0.0f, animal.gBones);
+
+                        std::cout << "Un animal ha reaparecido." << std::endl;
+                        respawned = true;
+                        break;
+                    }
+                }
+            }
+        }
     }
 }
 
 
 void updateGameLogic() {
     if (g_runTestEnvironment) return;
-
-    // --- NUEVO: Llamar a la IA ---
-    updateAnimalAI(deltaTime);
 
     if (isFireActive) {
         float fire_elapsed = (float)glfwGetTime() - fireStartTime;
@@ -386,7 +482,7 @@ void updateGameLogic() {
         else {
             for (Chunk& chunk : terrain_chunks) {
                 for (TreeInstance& tree : chunk.tree_instances) {
-                    // Transici n 1: ALIVE/CHOPPED_ONCE -> BURNING
+                    // Transición 1: ALIVE/CHOPPED_ONCE -> BURNING
                     if (tree.fireTriggerTime >= 0.0f && fire_elapsed >= tree.fireTriggerTime) {
                         if (tree.state == TreeState::ALIVE || tree.state == TreeState::CHOPPED_ONCE) {
                             if (tree.state == TreeState::ALIVE) {
@@ -395,12 +491,13 @@ void updateGameLogic() {
                                         leaf.is_active = false;
                                     }
                                 }
+                                g_currentLivingTrees--; // <-- PIERDE VIDA POR FUEGO
                             }
                             tree.state = TreeState::BURNING;
                             tree.fireTriggerTime = -1.0f;
                         }
                     }
-                    // Transici n 2: BURNING -> CHOPPED_TWICE
+                    // Transición 2: BURNING -> CHOPPED_TWICE
                     if (tree.burnOutTime >= 0.0f && fire_elapsed >= tree.burnOutTime) {
                         if (tree.state == TreeState::BURNING) {
                             tree.state = TreeState::CHOPPED_TWICE;
@@ -441,6 +538,10 @@ void updateGameLogic() {
         model = glm::scale(model, glm::vec3(0.009f));
         leaf_matrices.push_back(model);
     }
+
+    // --- NUEVO: Llamar a la función de simulación ---
+    // (Esto también llama a updateAnimalAI internamente)
+    updateForestHealthAndAnimals(deltaTime);
 }
 
 void generateForest() {
@@ -450,7 +551,7 @@ void generateForest() {
     }
 
     const float TERRAIN_AABB_HEIGHT = 35.0f;
-    // Las distribuciones ya est n globales
+    // Las distribuciones ya están globales
 
     for (int chunk_idx_x = 0; chunk_idx_x < WORLD_SIZE; ++chunk_idx_x) {
         for (int chunk_idx_z = 0; chunk_idx_z < WORLD_SIZE; ++chunk_idx_z) {
@@ -536,19 +637,20 @@ void generateForest() {
             }
             terrain_chunks.push_back(chunk);
 
-
+            // --- NUEVO: Generar animales para este chunk (CON PROBABILIDAD) ---
             if (fa.character01 != nullptr) {
 
-
+                // "Lanzar el dado": ¿Este chunk generará animales?
                 if (dis_spawn_chance(gen) < ANIMAL_SPAWN_PROBABILITY)
                 {
-
+                    // Sí, la probabilidad se cumplió.
+                    // Ahora genera el NÚMERO de animales (que tienes en 1)
                     for (unsigned int i = 0; i < ANIMALS_PER_CHUNK; i++) {
                         AnimalInstance animal;
                         animal.position = chunk.position + glm::vec3(dis_pos(gen), 0.0f, dis_pos(gen));
 
                         if (!isPositionSafe(animal.position)) {
-                            continue;
+                            continue; // No es seguro, saltar este animal
                         }
 
                         animal.rotationY = glm::radians(dis_rot(gen));
@@ -565,10 +667,11 @@ void generateForest() {
                 }
             }
             // --- FIN NUEVO ---
+
         }
     }
 
-    // Generaci n Nubes
+    // Generación Nubes
     for (unsigned int i = 0; i < NUM_DISTANT_CLOUDS; i++) {
         glm::mat4 model = glm::mat4(1.0f);
         glm::vec3 pos;
@@ -622,6 +725,10 @@ void generateForest() {
             cloud_matrices.push_back(model);
         }
     }
+
+    // --- NUEVO: Comprobación ---
+    std::cout << "Se generaron " << g_animals.size() << " animales en el mundo." << std::endl;
+    // --- FIN NUEVO ---
 }
 
 void generateCity() {

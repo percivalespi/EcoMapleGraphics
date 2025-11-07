@@ -45,15 +45,16 @@ void loadTest(TestAssets& ta) {
 
 /* -------------------------------------------- - Manejo de Recursos UI------------------------------------------*/
 void loadUI(UIAssets& ui) {
-
+    // --- MODIFICADO: CARGAR LEYENDAS ---
+    // --- Cargar Texturas UI ---
     ui.fireTextureID = TextureFromFile("fire.png", "models/image");
     ui.treeTextureID = TextureFromFile("tree.png", "models/image");
     ui.highlightTextureID = TextureFromFile("highlight.png", "models/image");
 
-
+    // --- NUEVO: Cargar texturas de leyendas ---
     ui.legendFireTextureID = TextureFromFile("legend_fire.png", "models/image");
     ui.legendTreeTextureID = TextureFromFile("legend_tree.png", "models/image");
-
+    // -------------------------------------------
 
     if (ui.fireTextureID == 0) {
         std::cerr << "ERROR: Failed to load 'models/image/fire.png'" << std::endl;
@@ -65,7 +66,7 @@ void loadUI(UIAssets& ui) {
         std::cerr << "ERROR: Failed to load 'models/image/highlight.png'" << std::endl;
     }
 
-
+    // --- NUEVO: Comprobaciones de error para leyendas ---
     if (ui.legendFireTextureID == 0) {
         std::cerr << "ERROR: Failed to load 'models/image/legend_fire.png'" << std::endl;
     }
@@ -93,8 +94,9 @@ void initializeModelsForest(ForestAssets& fa) {
     fa.cubeenv_noche = new Model("models/noche/mycube.fbx");
 
     fa.character01 = new AnimatedModel("models/LoboAnimation.fbx");
+    fa.skull_model = new Model("models/Craneo.fbx"); // <-- NUEVO
 
-
+    // Ver si se cargaron los modelos (Se va?)
     if (!fa.chopped_once_model) {
         std::cerr << "ERROR: Could not load troncomuerto.fbx" << std::endl;
     }
@@ -104,7 +106,10 @@ void initializeModelsForest(ForestAssets& fa) {
     if (!fa.chopped_twice_model) {
         std::cerr << "ERROR: Could not load basecortada.fbx" << std::endl;
     }
-
+    if (!fa.skull_model) { // <-- NUEVO
+        std::cerr << "ERROR: Could not load Craneo.fbx" << std::endl;
+    }
+    // CORREGIDO: Usar -> en punteros
     if (!fa.cubeenv || fa.cubeenv->meshes.empty() || fa.cubeenv->meshes[0].textures.empty()) {
         std::cout << "ERROR: Skybox DIA" << std::endl;
     }
@@ -145,4 +150,3 @@ void loadForest(ForestAssets& fa) {
     initilizeMaterialsForest(fa);
     initializeModelsForest(fa);
 }
-

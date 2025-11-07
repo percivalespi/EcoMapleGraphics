@@ -64,7 +64,9 @@ void renderTestEnvironment(const glm::mat4& projection, const glm::mat4& view) {
         SetLightUniformFloat(mLightsShader, "distance", i, gLights[i].distance);
     }
 
-
+    //Configuracion de una Matriz de Modelo
+    //Si se aplico en blender el [set Origin -> Origin to 3D Cursor]
+    //No es necesario ajustar al mapa
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
     model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -150,7 +152,7 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
 
 
 
-    // --- 1. DIBUJAR OBJETOS OPACOS ESTTICOS ---
+    // --- 1. DIBUJAR OBJETOS OPACOS ESTÁTICOS ---
     if (phongShader != nullptr && phongShader->ID != 0) {
         phongShader->use();
         phongShader->setMat4("projection", projection);
@@ -277,7 +279,7 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
         instanceAlphaTestPhongShader->setInt("alphaIndex", fa.theLight.alphaIndex);
         instanceAlphaTestPhongShader->setFloat("transparency", 1.0f);
 
-        // rboles Vivos
+        // Árboles Vivos
         if (fa.tree_model != nullptr && !visible_trees_alive.empty()) {
             instanceAlphaTestPhongShader->setVec4("MaterialAmbientColor", fa.treeMaterial.ambient);
             instanceAlphaTestPhongShader->setVec4("MaterialSpecularColor", fa.treeMaterial.specular);
@@ -396,7 +398,7 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
         }
     }
 
-    // --- 3.5 DIBUJAR RBOLES GOLPEADOS UNA VEZ ---
+    // --- 3.5 DIBUJAR ÁRBOLES GOLPEADOS UNA VEZ ---
     if (instancePhongShader != nullptr && instancePhongShader->ID != 0 && fa.chopped_once_model != nullptr && !visible_trees_chopped_once.empty()) {
         instancePhongShader->use();
         instancePhongShader->setMat4("projection", projection);
@@ -431,7 +433,7 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
-    // --- 3.6 DIBUJAR RBOLES QUEMNDOSE ---
+    // --- 3.6 DIBUJAR ÁRBOLES QUEMÁNDOSE ---
     if (instancePhongShader != nullptr && instancePhongShader->ID != 0 && fa.burning_tree_model != nullptr && !visible_trees_burning.empty()) {
         instancePhongShader->use();
         instancePhongShader->setMat4("projection", projection);
@@ -466,7 +468,7 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
-    // --- 3.7 DIBUJAR RBOLES GOLPEADOS DOS VECES ---
+    // --- 3.7 DIBUJAR ÁRBOLES GOLPEADOS DOS VECES ---
     if (instancePhongShader != nullptr && instancePhongShader->ID != 0 && fa.chopped_twice_model != nullptr && !visible_trees_chopped_twice.empty()) {
         instancePhongShader->use();
         instancePhongShader->setMat4("projection", projection);
@@ -503,44 +505,72 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
 
 
     // --- 3.8 DIBUJAR MODELOS ANIMADOS (LOBO) ---
-
-    if (dynamicShader != nullptr && dynamicShader->ID != 0 && !g_animals.empty() && fa.character01 != nullptr)
+    // --- CÓDIGO MODIFICADO PARA DIBUJAR LOBOS O CRÁNEOS ---
+    if ((dynamicShader != nullptr || phongShader != nullptr) && !g_animals.empty())
     {
-        dynamicShader->use();
-        dynamicShader->setMat4("projection", projection);
-        dynamicShader->setMat4("view", view);
-
-
-        dynamicShader->setVec3("lightPosition", fa.theLight.Position);
-        dynamicShader->setVec4("LightColor", fa.theLight.Color);
-        dynamicShader->setVec4("LightPower", dimmedLightPower);
-        dynamicShader->setInt("alphaIndex", fa.theLight.alphaIndex);
-        dynamicShader->setVec4("MaterialAmbientColor", fa.defaultMaterial.ambient);
-        dynamicShader->setVec4("MaterialSpecularColor", fa.defaultMaterial.specular);
-        dynamicShader->setFloat("transparency", 1.0f);
-
-
         for (const AnimalInstance& animal : g_animals)
         {
+            if (animal.state == AnimalState::DEAD)
+            {
+                // --- DIBUJAR CRÁNEO ---
+                if (fa.skull_model == nullptr || phongShader == nullptr) continue;
 
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, animal.position);
-            model = glm::rotate(model, animal.rotationY, glm::vec3(0.0f, 1.0f, 0.0f)); // Rotar en Y
-            //model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Ajuste FBX
-            model = glm::scale(model, glm::vec3(0.05f));
-            dynamicShader->setMat4("model", model);
+                phongShader->use(); // Usar el shader simple de Phong
+                // Configurar uniformes que pudieron cambiar
+                phongShader->setMat4("projection", projection);
+                phongShader->setMat4("view", view);
+                phongShader->setVec3("lightPosition", fa.theLight.Position);
+                phongShader->setVec4("LightColor", fa.theLight.Color);
+                phongShader->setVec4("LightPower", dimmedLightPower);
+                phongShader->setInt("alphaIndex", fa.theLight.alphaIndex);
+                phongShader->setVec4("MaterialAmbientColor", fa.defaultMaterial.ambient);
+                phongShader->setVec4("MaterialSpecularColor", fa.defaultMaterial.specular);
+                phongShader->setFloat("transparency", 1.0f);
+                phongShader->setBool("isTerrain", false);
 
+                glm::mat4 model = glm::mat4(1.0f);
+                model = glm::translate(model, animal.position);
+                model = glm::rotate(model, animal.rotationY, glm::vec3(0.0f, 1.0f, 0.0f));
+                model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+                model = glm::scale(model, glm::vec3(0.5f)); // <-- Ajusta la escala del cráneo si es necesario
+                phongShader->setMat4("model", model);
 
-            for (unsigned int i = 0; i < MAX_RIGGING_BONES; ++i) {
-                std::string uniformName = "gBones[" + std::to_string(i) + "]";
-                dynamicShader->setMat4(uniformName, animal.gBones[i]);
+                fa.skull_model->Draw(*phongShader);
             }
+            else
+            {
+                // --- DIBUJAR LOBO VIVO ---
+                if (fa.character01 == nullptr || dynamicShader == nullptr) continue;
 
+                dynamicShader->use(); // Usar el shader de skinning
+                // Configurar uniformes que pudieron cambiar
+                dynamicShader->setMat4("projection", projection);
+                dynamicShader->setMat4("view", view);
+                dynamicShader->setVec3("lightPosition", fa.theLight.Position);
+                dynamicShader->setVec4("LightColor", fa.theLight.Color);
+                dynamicShader->setVec4("LightPower", dimmedLightPower);
+                dynamicShader->setInt("alphaIndex", fa.theLight.alphaIndex);
+                dynamicShader->setVec4("MaterialAmbientColor", fa.defaultMaterial.ambient);
+                dynamicShader->setVec4("MaterialSpecularColor", fa.defaultMaterial.specular);
+                dynamicShader->setFloat("transparency", 1.0f);
 
-            fa.character01->Draw(*dynamicShader);
+                glm::mat4 model = glm::mat4(1.0f);
+                model = glm::translate(model, animal.position);
+                model = glm::rotate(model, animal.rotationY, glm::vec3(0.0f, 1.0f, 0.0f));
+                //model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+                model = glm::scale(model, glm::vec3(0.06f));
+                dynamicShader->setMat4("model", model);
+
+                for (unsigned int i = 0; i < MAX_RIGGING_BONES; ++i) {
+                    std::string uniformName = "gBones[" + std::to_string(i) + "]";
+                    dynamicShader->setMat4(uniformName, animal.gBones[i]);
+                }
+
+                fa.character01->Draw(*dynamicShader);
+            }
         }
     }
-
+    // --- FIN 3.8 ---
 
 
     // --- 4. DIBUJAR SKYBOX ---
@@ -620,7 +650,7 @@ void renderUI() {
     }
     // glDisable(GL_DEPTH_TEST) se queda desactivado para la UI
 
-    // --- 8. DIBUJAR UI (--- SECCIN COMPLETAMENTE MODIFICADA ---) ---
+    // --- 8. DIBUJAR UI (--- SECCIÓN COMPLETAMENTE MODIFICADA ---) ---
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -643,12 +673,12 @@ void renderUI() {
         // ----------------------------------------------
 
 
-        // --- Icono de rbol (P) ---
-        // MODIFICADO: Mover el X_pos aqu para reusarlo
+        // --- Icono de Árbol (P) ---
+        // MODIFICADO: Mover el X_pos aquí para reusarlo
         float tree_icon_x_pos = SCR_WIDTH - (icon_size * 2.0f) - (padding * 2.0f);
 
         if (ui.treeTextureID != 0) {
-            // MODIFICADO: Posicin Y
+            // MODIFICADO: Posición Y
             glm::vec3 tree_icon_pos(tree_icon_x_pos, y_pos_icon, 0.0f);
             glm::mat4 model_tree = glm::mat4(1.0f);
             model_tree = glm::translate(model_tree, tree_icon_pos);
@@ -659,7 +689,7 @@ void renderUI() {
             glBindTexture(GL_TEXTURE_2D, ui.treeTextureID);
             glDrawArrays(GL_TRIANGLES, 0, 6);
 
-            // Dibujar borde si P est presionada
+            // Dibujar borde si P está presionada
             if (p_key_pressed && ui.highlightTextureID != 0) {
                 glBindTexture(GL_TEXTURE_2D, ui.highlightTextureID);
                 glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -682,11 +712,11 @@ void renderUI() {
 
 
         // --- Icono de Fuego (F/G) ---
-        // MODIFICADO: Mover el X_pos aqu para reusarlo
+        // MODIFICADO: Mover el X_pos aquí para reusarlo
         float fire_icon_x_pos = SCR_WIDTH - icon_size - padding;
 
         if (ui.fireTextureID != 0) {
-            // MODIFICADO: Posicin Y
+            // MODIFICADO: Posición Y
             glm::vec3 fire_icon_pos(fire_icon_x_pos, y_pos_icon, 0.0f);
             glm::mat4 model_fire = glm::mat4(1.0f);
             model_fire = glm::translate(model_fire, fire_icon_pos);
@@ -697,7 +727,7 @@ void renderUI() {
             glBindTexture(GL_TEXTURE_2D, ui.fireTextureID);
             glDrawArrays(GL_TRIANGLES, 0, 6);
 
-            // Dibujar borde si el incendio est activo
+            // Dibujar borde si el incendio está activo
             if (isFireActive && ui.highlightTextureID != 0) {
                 glBindTexture(GL_TEXTURE_2D, ui.highlightTextureID);
                 glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -733,7 +763,7 @@ void renderUI() {
 }
 
 void initializeRenderBuffers(UIAssets& ui) {
-    // --- Configuracin Cruz ---
+    // --- Configuración Cruz ---
     float crosshairSize = 0.03f;
     float aspectRatio = (float)SCR_WIDTH / (float)SCR_HEIGHT;
     float crosshairVertices[] = {
@@ -754,7 +784,7 @@ void initializeRenderBuffers(UIAssets& ui) {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    // --- Configuraci n UI VAO/VBO ---
+    // --- Configuración UI VAO/VBO ---
     float uiQuadVertices[] = {
         // pos      // tex
         0.0f, 1.0f,  0.0f, 1.0f,
