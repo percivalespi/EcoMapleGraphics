@@ -7,6 +7,9 @@ Funcionalidades: (Con Chunks, In<stancias, Montaña, Luz de Phong, Sol/Luna Esf�
 Ultimas Implementaciones: (Incendio Secuencial + Scope Global + Estilo Súper Estricto)
 */
 
+
+/* Mensaje Para vic; Hola VIV :D*/
+
 /* ---------------------------------------- Encabezados del Proyecto -------------------------------------------------*/
 
 // Archivo de Encabezado con las Estrucuras y Bibliotecas del Proyecto
