@@ -8,7 +8,7 @@ Ultimas Implementaciones: (Incendio Secuencial + Scope Global + Estilo Súper Es
 */
 
 
-/* Mensaje Para vic; Hola VIV :D*/
+/* Mensaje Para Ale; Hola ALE :D*/
 
 /* ---------------------------------------- Encabezados del Proyecto -------------------------------------------------*/
 
