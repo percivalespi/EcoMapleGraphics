@@ -27,7 +27,7 @@ bool Start();
 bool Update();
 
 /* ------------------------------------------ Variables Globales ------------------------------------------------------ */
-
+//Creación rama
 // --> Variables Globales Para la <Ventana> 
 GLFWwindow* window;
 const unsigned int SCR_WIDTH = 1024;
