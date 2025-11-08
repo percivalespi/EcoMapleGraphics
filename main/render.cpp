@@ -1,5 +1,5 @@
 #include "render.h"
-#include "globals.h"
+#include "globals.h" //Angel no me pegues
 
 /* -------------------------------------------- - Manejo de Recursos TEST------------------------------------------*/
 static void drawObject(Shader* shader, Model* model, const Material& material, const glm::mat4& modelMatrix)
