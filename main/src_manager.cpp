@@ -1,5 +1,5 @@
 #include "src_manager.h"
-#include "globals.h"
+#include "globals.h" //pepe
 
 /* -------------------------------------------- - Manejo de Recursos TEST------------------------------------------*/
 void initializeModelsTest(TestAssets& ta) {
@@ -41,7 +41,7 @@ void loadTest(TestAssets& ta) {
 }
 
 
-
+//Tenchi es malo
 
 /* -------------------------------------------- - Manejo de Recursos UI------------------------------------------*/
 void loadUI(UIAssets& ui) {
