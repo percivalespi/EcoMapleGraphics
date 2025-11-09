@@ -1,5 +1,5 @@
 #include "src_manager.h"
-#include "globals.h" //pepe
+#include "globals.h"
 
 /* -------------------------------------------- - Manejo de Recursos TEST------------------------------------------*/
 void initializeModelsTest(TestAssets& ta) {
@@ -41,7 +41,6 @@ void loadTest(TestAssets& ta) {
 }
 
 
-//Tenchi es malo
 
 /* -------------------------------------------- - Manejo de Recursos UI------------------------------------------*/
 void loadUI(UIAssets& ui) {
@@ -93,7 +92,15 @@ void initializeModelsForest(ForestAssets& fa) {
     fa.cubeenv = new Model("models/mycube.fbx");
     fa.cubeenv_noche = new Model("models/noche/mycube.fbx");
 
-    fa.character01 = new AnimatedModel("models/LoboAnimation.fbx");
+    fa.character01 = new AnimatedModel("models/LoboAnimation.fbx"); // <-- MODELO DEL LOBO CORRIENDO
+    fa.character02 = new AnimatedModel("models/LoboAnimation.fbx"); // <-- MODELO DEL LOBO IDLE
+    fa.character03 = new AnimatedModel("models/castorW.fbx"); // <-- MODELO DEL CASTOR CORRIENDO
+    fa.character04 = new AnimatedModel("models/castorI.fbx"); // <-- MODELO DEL CASTOR IDLE
+    fa.character05 = new AnimatedModel("models/OsoNW.fbx"); // <-- MODELO DEL OSO NEGRO CORRIENDO
+    fa.character06 = new AnimatedModel("models/OsoNW.fbx"); // <-- MODELO DEL OSO NEGRO IDLE (sentado)
+    //fa.character07 = new AnimatedModel("models/castorW.fbx"); // <-- MODELO DEL ALCE CORRIENDO
+    //fa.character08 = new AnimatedModel("models/castorI.fbx"); // <-- MODELO DEL ALCE IDLE
+
     fa.skull_model = new Model("models/Craneo.fbx"); // <-- NUEVO
 
     // Ver si se cargaron los modelos (Se va?)

@@ -149,7 +149,7 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
     float nightDimFactor = glm::mix(minDimFactor, 1.0f, dayNightTransition);
     glm::vec4 dimmedLightPower = fa.theLight.Power * nightDimFactor;
     isDay = (normalizedSunY > -0.1f);
-
+    float escala;
 
 
     // --- 1. DIBUJAR OBJETOS OPACOS ESTÁTICOS ---
@@ -531,7 +531,7 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
                 glm::mat4 model = glm::mat4(1.0f);
                 model = glm::translate(model, animal.position);
                 model = glm::rotate(model, animal.rotationY, glm::vec3(0.0f, 1.0f, 0.0f));
-                model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+                //model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
                 model = glm::scale(model, glm::vec3(0.5f)); // <-- Ajusta la escala del cráneo si es necesario
                 phongShader->setMat4("model", model);
 
@@ -539,8 +539,24 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
             }
             else
             {
-                // --- DIBUJAR LOBO VIVO ---
-                if (fa.character01 == nullptr || dynamicShader == nullptr) continue;
+                glm::mat4 model = glm::mat4(1.0f);
+
+                // --- DIBUJAR ANIMAL CAMINANDO ---
+                if (animal.walk == fa.character01 || animal.walk == fa.character02) {//Ajustar escala lobo
+                    escala = 0.06f;
+                }
+                if (animal.walk == fa.character03 || animal.walk == fa.character04) {//Ajustar escala castor
+                    escala = 0.02f;
+                    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+                    model = glm::translate(model, glm::vec3(0.0f, 1.8f, 0.0f));
+                }
+                if (animal.walk == fa.character05 || animal.walk == fa.character06) {//Ajustar escala oso
+                    escala = 0.018f;
+                    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+                    model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f));
+                }
+
+                if (animal.walk == nullptr || dynamicShader == nullptr && animal.state == AnimalState:: WALKING) continue;
 
                 dynamicShader->use(); // Usar el shader de skinning
                 // Configurar uniformes que pudieron cambiar
@@ -554,11 +570,11 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
                 dynamicShader->setVec4("MaterialSpecularColor", fa.defaultMaterial.specular);
                 dynamicShader->setFloat("transparency", 1.0f);
 
-                glm::mat4 model = glm::mat4(1.0f);
+                
                 model = glm::translate(model, animal.position);
                 model = glm::rotate(model, animal.rotationY, glm::vec3(0.0f, 1.0f, 0.0f));
-                //model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-                model = glm::scale(model, glm::vec3(0.06f));
+                model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+                model = glm::scale(model, glm::vec3(escala));
                 dynamicShader->setMat4("model", model);
 
                 for (unsigned int i = 0; i < MAX_RIGGING_BONES; ++i) {
@@ -566,10 +582,42 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
                     dynamicShader->setMat4(uniformName, animal.gBones[i]);
                 }
 
-                fa.character01->Draw(*dynamicShader);
+                animal.walk->Draw(*dynamicShader);
+
+                // --- DIBUJAR ANIMAL ESTATICO ---
+                if (animal.idle == nullptr || dynamicShader == nullptr && animal.state == AnimalState::IDLE) continue;
+
+                dynamicShader->use(); // Usar el shader de skinning
+                // Configurar uniformes que pudieron cambiar
+                dynamicShader->setMat4("projection", projection);
+                dynamicShader->setMat4("view", view);
+                dynamicShader->setVec3("lightPosition", fa.theLight.Position);
+                dynamicShader->setVec4("LightColor", fa.theLight.Color);
+                dynamicShader->setVec4("LightPower", dimmedLightPower);
+                dynamicShader->setInt("alphaIndex", fa.theLight.alphaIndex);
+                dynamicShader->setVec4("MaterialAmbientColor", fa.defaultMaterial.ambient);
+                dynamicShader->setVec4("MaterialSpecularColor", fa.defaultMaterial.specular);
+                dynamicShader->setFloat("transparency", 1.0f);
+
+                //glm::mat4 model = glm::mat4(1.0f);
+                model = glm::translate(model, animal.position);
+                model = glm::rotate(model, animal.rotationY, glm::vec3(0.0f, 1.0f, 0.0f));
+                //model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+                model = glm::scale(model, glm::vec3(escala));
+                dynamicShader->setMat4("model", model);
+
+                for (unsigned int i = 0; i < MAX_RIGGING_BONES; ++i) {
+                    std::string uniformName = "gBones[" + std::to_string(i) + "]";
+                    dynamicShader->setMat4(uniformName, animal.gBones[i]);
+                }
+
+                animal.idle->Draw(*dynamicShader);
+
             }
         }
     }
+   
+
     // --- FIN 3.8 ---
 
 

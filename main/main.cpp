@@ -209,6 +209,7 @@ int main() {
     delete dynamicShader; // <-- NUEVO
 
     delete fa.character01; // <-- NUEVO
+    delete fa.character02; // <__ NUEVO MODELO DE CASTOR
     delete fa.skull_model; // <-- NUEVO
 
     delete fa.terrain_model;
