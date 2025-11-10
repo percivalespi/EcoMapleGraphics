@@ -92,14 +92,14 @@ void renderScene() {
 
 
     //2. ENRUTADOR DE ESCENA 
-    if (!g_runTestEnvironment)
-    {
+   // if (!g_runTestEnvironment)
+    //{
         renderForestScene(projection, view);
-    }
-    else
-    {
+        //}
+    //else
+   // {
         renderTestEnvironment(projection, view);
-    }
+        //}
 }
 
 /* --------------------------------------------- Renderizado Procedural------------------------------------------*/
