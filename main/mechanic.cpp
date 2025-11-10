@@ -1,6 +1,6 @@
 #include "mechanic.h"
 #include "globals.h"
-
+//Prueba 2
 void plantTree() {
     // 1. Calcular Rayo en Coordenadas del Mundo
     glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 2000.0f);
