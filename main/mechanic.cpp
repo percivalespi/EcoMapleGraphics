@@ -594,7 +594,7 @@ void generateForest() {
                 {fa.character01, fa.character02}, // LOBO: character01=walk, character02=idle
                 {fa.character03, fa.character04},  // CASTOR: character03=walk, character04=idle
                 { fa.character05, fa.character06 }  // OSO NEGRO: character05=walk, character06=idle
-                //,{ fa.character07, fa.character08 }  // ALCE: character07=walk, character08=idle
+                ,{ fa.character07, fa.character08 }  // ALCE: character07=walk, character08=idle
             };
 
             for (unsigned int i = 0; i < ROCKS_PER_CHUNK; i++) {

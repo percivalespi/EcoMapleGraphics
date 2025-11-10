@@ -171,8 +171,8 @@ struct ForestAssets {
     AnimatedModel* character04; // <-- MODELO DE CASTOR ESTATICO
     AnimatedModel* character05; // <-- MODELO DE OSO NEGRO CORRIENDO
     AnimatedModel* character06; // <-- MODELO DE OSO ESTATICO (PENDIENTE)
-    //AnimatedModel* character07; // <-- MODELO DE ALCE CORRIENDO
-    //AnimatedModel* character08; // <-- NUEVO DE ALCE ESTATICO
+    AnimatedModel* character07; // <-- MODELO DE ALCE CORRIENDO
+    AnimatedModel* character08; // <-- NUEVO DE ALCE ESTATICO
 
     Model* skull_model; // <-- NUEVO MODELO
     // --- Luz

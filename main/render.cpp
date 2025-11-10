@@ -542,18 +542,24 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
                 glm::mat4 model = glm::mat4(1.0f);
 
                 // --- DIBUJAR ANIMAL CAMINANDO ---
-                if (animal.walk == fa.character01 || animal.walk == fa.character02) {//Ajustar escala lobo
+                if (animal.walk == fa.character01 || animal.walk == fa.character02) {//Ajustar  lobo
                     escala = 0.06f;
                 }
-                if (animal.walk == fa.character03 || animal.walk == fa.character04) {//Ajustar escala castor
+                if (animal.walk == fa.character03 || animal.walk == fa.character04) {//Ajustar  castor
                     escala = 0.02f;
                     model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
                     model = glm::translate(model, glm::vec3(0.0f, 1.8f, 0.0f));
                 }
-                if (animal.walk == fa.character05 || animal.walk == fa.character06) {//Ajustar escala oso
-                    escala = 0.018f;
+                if (animal.walk == fa.character05 || animal.walk == fa.character06) {//Ajustar  oso
+                    escala = 0.016f;
                     model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
                     model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f));
+                }
+
+                if (animal.walk == fa.character07 || animal.walk == fa.character08) {//Ajustar  Alce
+                    escala = 0.02f;
+                    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+                    model = glm::translate(model, glm::vec3(0.0f, 3.7f, 0.0f));
                 }
 
                 if (animal.walk == nullptr || dynamicShader == nullptr && animal.state == AnimalState:: WALKING) continue;

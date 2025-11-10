@@ -98,8 +98,8 @@ void initializeModelsForest(ForestAssets& fa) {
     fa.character04 = new AnimatedModel("models/castorI.fbx"); // <-- MODELO DEL CASTOR IDLE
     fa.character05 = new AnimatedModel("models/OsoNW.fbx"); // <-- MODELO DEL OSO NEGRO CORRIENDO
     fa.character06 = new AnimatedModel("models/OsoNW.fbx"); // <-- MODELO DEL OSO NEGRO IDLE (sentado)
-    //fa.character07 = new AnimatedModel("models/castorW.fbx"); // <-- MODELO DEL ALCE CORRIENDO
-    //fa.character08 = new AnimatedModel("models/castorI.fbx"); // <-- MODELO DEL ALCE IDLE
+    fa.character07 = new AnimatedModel("models/AlceAnimation.fbx"); // <-- MODELO DEL ALCE CORRIENDO
+    fa.character08 = new AnimatedModel("models/AlceAnimation.fbx"); // <-- MODELO DEL ALCE IDLE
 
     fa.skull_model = new Model("models/Craneo.fbx"); // <-- NUEVO
 
