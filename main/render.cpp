@@ -541,6 +541,8 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
 
     // --- 3.8 DIBUJAR MODELOS ANIMADOS (LOBO) ---
     // --- CÓDIGO MODIFICADO PARA DIBUJAR LOBOS O CRÁNEOS ---
+    // --- 3.8 DIBUJAR MODELOS ANIMADOS (LOBO, CASTOR, OSO, ALCE) ---
+    // --- BLOQUE CORREGIDO (Lógica de cráneo + Rotaciones correctas) ---
     if ((dynamicShader != nullptr || phongShader != nullptr) && !g_animals.empty())
     {
         for (const AnimalInstance& animal : g_animals)
@@ -548,10 +550,10 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
             if (animal.state == AnimalState::DEAD)
             {
                 // --- DIBUJAR CRÁNEO ---
+                // (Esta lógica es correcta y dibuja el cráneo)
                 if (fa.skull_model == nullptr || phongShader == nullptr) continue;
 
-                phongShader->use(); // Usar el shader simple de Phong
-                // Configurar uniformes que pudieron cambiar
+                phongShader->use();
                 phongShader->setMat4("projection", projection);
                 phongShader->setMat4("view", view);
                 phongShader->setVec3("lightPosition", fa.theLight.Position);
@@ -566,41 +568,54 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
                 glm::mat4 model = glm::mat4(1.0f);
                 model = glm::translate(model, animal.position);
                 model = glm::rotate(model, animal.rotationY, glm::vec3(0.0f, 1.0f, 0.0f));
-                //model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-                model = glm::scale(model, glm::vec3(0.5f)); // <-- Ajusta la escala del cráneo si es necesario
+
+                // Rotación clave para que el cráneo mire hacia arriba
+                model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+                model = glm::scale(model, glm::vec3(0.5f));
                 phongShader->setMat4("model", model);
 
                 fa.skull_model->Draw(*phongShader);
             }
-            else
+            else // --- ANIMAL VIVO (WALKING o IDLE) ---
             {
-                glm::mat4 model = glm::mat4(1.0f);
+                // 1. Determinar qué modelo y escala usar
+                AnimatedModel* modelToDraw = nullptr;
+                float escala = 0.5f;
+                glm::mat4 speciesTransform = glm::mat4(1.0f); // Transformación base de la especie
 
-                // --- DIBUJAR ANIMAL CAMINANDO ---
-                if (animal.walk == fa.character01 || animal.walk == fa.character02) {//Ajustar  lobo
+                if (animal.state == AnimalState::WALKING) {
+                    modelToDraw = animal.walk;
+                }
+                else { // IDLE
+                    modelToDraw = animal.idle;
+                }
+
+                if (modelToDraw == nullptr || dynamicShader == nullptr) continue;
+
+                // 2. Determinar transformaciones de la especie (usando 'walk' como ID)
+                if (animal.walk == fa.character01 || animal.walk == fa.character02) { //Lobo
                     escala = 0.06f;
+                    // El lobo no necesita rotación base, pero su animación sí (manejado en mechanic.cpp)
                 }
-                if (animal.walk == fa.character03 || animal.walk == fa.character04) {//Ajustar  castor
+                else if (animal.walk == fa.character03 || animal.walk == fa.character04) { //Castor
                     escala = 0.02f;
-                    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-                    model = glm::translate(model, glm::vec3(0.0f, 1.8f, 0.0f));
+                    speciesTransform = glm::rotate(speciesTransform, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+                    speciesTransform = glm::translate(speciesTransform, glm::vec3(0.0f, 1.8f, 0.0f));
                 }
-                if (animal.walk == fa.character05 || animal.walk == fa.character06) {//Ajustar  oso
+                else if (animal.walk == fa.character05 || animal.walk == fa.character06) { //Oso
                     escala = 0.016f;
-                    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-                    model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f));
+                    speciesTransform = glm::rotate(speciesTransform, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+                    speciesTransform = glm::translate(speciesTransform, glm::vec3(0.0f, 0.5f, 0.0f));
                 }
-
-                if (animal.walk == fa.character07 || animal.walk == fa.character08) {//Ajustar  Alce
+                else if (animal.walk == fa.character07 || animal.walk == fa.character08) { //Alce
                     escala = 0.02f;
-                    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-                    model = glm::translate(model, glm::vec3(0.0f, 3.7f, 0.0f));
+                    speciesTransform = glm::rotate(speciesTransform, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+                    speciesTransform = glm::translate(speciesTransform, glm::vec3(0.0f, 3.7f, 0.0f));
                 }
 
-                if (animal.walk == nullptr || dynamicShader == nullptr && animal.state == AnimalState:: WALKING) continue;
-
-                dynamicShader->use(); // Usar el shader de skinning
-                // Configurar uniformes que pudieron cambiar
+                // 3. Configurar Shader
+                dynamicShader->use();
                 dynamicShader->setMat4("projection", projection);
                 dynamicShader->setMat4("view", view);
                 dynamicShader->setVec3("lightPosition", fa.theLight.Position);
@@ -611,52 +626,31 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
                 dynamicShader->setVec4("MaterialSpecularColor", fa.defaultMaterial.specular);
                 dynamicShader->setFloat("transparency", 1.0f);
 
-                
+                // 4. Aplicar TODAS las transformaciones en el orden correcto
+                // Orden: Escala -> Rotación Especie -> Rotación Dirección -> Posición
+                // (Se aplica al revés en código: Posición * Rotación Dirección * Rotación Especie * Escala)
+
+                glm::mat4 model = glm::mat4(1.0f);
                 model = glm::translate(model, animal.position);
                 model = glm::rotate(model, animal.rotationY, glm::vec3(0.0f, 1.0f, 0.0f));
-                model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+                // Aplicamos la rotación/translación base de la especie
+                model = model * speciesTransform;
+
                 model = glm::scale(model, glm::vec3(escala));
                 dynamicShader->setMat4("model", model);
 
+                // 5. Enviar huesos y dibujar
                 for (unsigned int i = 0; i < MAX_RIGGING_BONES; ++i) {
                     std::string uniformName = "gBones[" + std::to_string(i) + "]";
                     dynamicShader->setMat4(uniformName, animal.gBones[i]);
                 }
 
-                animal.walk->Draw(*dynamicShader);
-
-                // --- DIBUJAR ANIMAL ESTATICO ---
-                if (animal.idle == nullptr || dynamicShader == nullptr && animal.state == AnimalState::IDLE) continue;
-
-                dynamicShader->use(); // Usar el shader de skinning
-                // Configurar uniformes que pudieron cambiar
-                dynamicShader->setMat4("projection", projection);
-                dynamicShader->setMat4("view", view);
-                dynamicShader->setVec3("lightPosition", fa.theLight.Position);
-                dynamicShader->setVec4("LightColor", fa.theLight.Color);
-                dynamicShader->setVec4("LightPower", dimmedLightPower);
-                dynamicShader->setInt("alphaIndex", fa.theLight.alphaIndex);
-                dynamicShader->setVec4("MaterialAmbientColor", fa.defaultMaterial.ambient);
-                dynamicShader->setVec4("MaterialSpecularColor", fa.defaultMaterial.specular);
-                dynamicShader->setFloat("transparency", 1.0f);
-
-                //glm::mat4 model = glm::mat4(1.0f);
-                model = glm::translate(model, animal.position);
-                model = glm::rotate(model, animal.rotationY, glm::vec3(0.0f, 1.0f, 0.0f));
-                //model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-                model = glm::scale(model, glm::vec3(escala));
-                dynamicShader->setMat4("model", model);
-
-                for (unsigned int i = 0; i < MAX_RIGGING_BONES; ++i) {
-                    std::string uniformName = "gBones[" + std::to_string(i) + "]";
-                    dynamicShader->setMat4(uniformName, animal.gBones[i]);
-                }
-
-                animal.idle->Draw(*dynamicShader);
-
+                modelToDraw->Draw(*dynamicShader);
             }
         }
     }
+    // --- FIN 3.8 ---
    
 
     // --- FIN 3.8 ---
