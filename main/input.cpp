@@ -31,7 +31,7 @@ void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
         camera.ProcessKeyboard(FORWARD, deltaTime);
     }
-    if(glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) {
         if (!z_key_pressed) { // ¿Es el primer frame que se presiona?
             // ¡SÍ! Hacemos el cambio UNA SOLA VEZ
             g_runTestEnvironment = !g_runTestEnvironment; // Interruptor simple

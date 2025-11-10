@@ -2,34 +2,50 @@
 #include "globals.h" //Angel no me pegues
 
 /* -------------------------------------------- - Manejo de Recursos TEST------------------------------------------*/
-static void drawObject(Shader* shader, Model* model, const Material& material, const glm::mat4& modelMatrix)
-{
-    // 1. Manejar Transparencia (basado en el material)
+
+// --- HELPER 1: Configuración básica ---
+static void setupStaticShader(Shader* shader, const glm::mat4& projection, const glm::mat4& view) {
+    shader->use();
+    shader->setMat4("projection", projection);
+    shader->setMat4("view", view);
+}
+
+// --- HELPER 2: Luces (Envía TODO, el shader decidirá qué usar) ---
+static void setupShaderLights(Shader* shader, const std::vector<Light>& lights) {
+    shader->setInt("numLights", (int)lights.size());
+    for (size_t i = 0; i < lights.size(); ++i) {
+        std::string base = "allLights[" + std::to_string(i) + "]";
+        shader->setVec3(base + ".Position", lights[i].Position);
+        shader->setVec3(base + ".Direction", lights[i].Direction);
+        shader->setVec4(base + ".Color", lights[i].Color);
+        shader->setVec4(base + ".Power", lights[i].Power);
+        shader->setInt(base + ".alphaIndex", lights[i].alphaIndex);
+        shader->setFloat(base + ".distance", lights[i].distance);
+    }
+}
+
+// --- HELPER 3: Dibujado (Envía TODO el material) ---
+static void drawObject(Shader* shader, Model* model, const Material& material, const glm::mat4& modelMatrix) {
     if (material.transparency < 1.0f) {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
-    // 2. Aplicar transformaciones del modelo (el argumento que pasamos)
     shader->setMat4("model", modelMatrix);
-
-    // 3. Aplicar propiedades materiales (los argumentos que pasamos)
     shader->setVec4("MaterialAmbientColor", material.ambient);
     shader->setVec4("MaterialDiffuseColor", material.diffuse);
+    // Estos dos se enviarán siempre. Lambert los ignorará, Phong los usará.
     shader->setVec4("MaterialSpecularColor", material.specular);
     shader->setFloat("transparency", material.transparency);
 
-    // 4. Dibujar el modelo (el argumento que pasamos)
     model->Draw(*shader);
 
-    // 5. Limpiar el estado de blending
     if (material.transparency < 1.0f) {
         glDisable(GL_BLEND);
     }
 }
 
 void renderTestEnvironment(const glm::mat4& projection, const glm::mat4& view) {
-    // Carga del Skybox usando codigo de tenshi
     if (skyboxShader != nullptr && skyboxShader->ID != 0) {
         glDepthFunc(GL_LEQUAL);
         skyboxShader->use();
@@ -37,7 +53,6 @@ void renderTestEnvironment(const glm::mat4& projection, const glm::mat4& view) {
         glm::mat4 view_skybox = glm::mat4(glm::mat3(view));
         skyboxShader->setMat4("view", view_skybox);
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, (-WORLD_SIZE * 35) - 2.5));
         model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(1000.0f));
         Model* currentSkybox = isDay ? fa.cubeenv : fa.cubeenv_noche;
@@ -48,39 +63,53 @@ void renderTestEnvironment(const glm::mat4& projection, const glm::mat4& view) {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
+    setupStaticShader(mLightsShader, projection, view);
+    setupShaderLights(mLightsShader, gLights);
 
-    mLightsShader->use();
-    mLightsShader->setMat4("projection", projection);
-    mLightsShader->setMat4("view", view);
-    mLightsShader->setVec3("eye", camera.Position);
-
-    // Configuramos propiedades de fuentes de luz
-    mLightsShader->setInt("numLights", (int)gLights.size());
-    for (size_t i = 0; i < gLights.size(); ++i) {
-        SetLightUniformVec3(mLightsShader, "Position", i, gLights[i].Position);
-        SetLightUniformVec3(mLightsShader, "Direction", i, gLights[i].Direction);
-        SetLightUniformVec4(mLightsShader, "Color", i, gLights[i].Color);
-        SetLightUniformVec4(mLightsShader, "Power", i, gLights[i].Power);
-        SetLightUniformInt(mLightsShader, "alphaIndex", i, gLights[i].alphaIndex);
-        SetLightUniformFloat(mLightsShader, "distance", i, gLights[i].distance);
-    }
-
-    //Configuracion de una Matriz de Modelo
-    //Si se aplico en blender el [set Origin -> Origin to 3D Cursor]
-    //No es necesario ajustar al mapa
+    // Coche (Metálico -> Phong)
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+    model = glm::translate(model, glm::vec3(0.0f, 0.0f, (-WORLD_SIZE * 35) - 2.5));
     model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
 
-    //Dibujado de los Objetos
-    drawObject(mLightsShader, ta.car, ta.steel, model);
-    drawObject(mLightsShader, ta.luminaire, ta.steel, model);
-    drawObject(mLightsShader, ta.stop, ta.steel, model);
-    drawObject(mLightsShader, ta.floor, ta.asphalt, model);
+    drawObject(mLightsShader, ta.suelo, ta.asphalt, model);
+    drawObject(mLightsShader, ta.suelo_verde, ta.cesped, model);
+    drawObject(mLightsShader, ta.metales, ta.steel, model);
+    drawObject(mLightsShader, ta.objMadera, ta.madera, model);
+    drawObject(mLightsShader, ta.objCristales, ta.traslucido, model);
+    drawObject(mLightsShader, ta.objPlasticos, ta.plastic, model);
+    drawObject(mLightsShader, ta.objConcreto, ta.concreto, model);
+    drawObject(mLightsShader, ta.objLlantas, ta.goma, model);
+    drawObject(mLightsShader, ta.objLadrillo, ta.ladrillo, model);
+    drawObject(mLightsShader, ta.grafitis, ta.plastic, model);
+    drawObject(mLightsShader, ta.bandera, ta.tela, model);
+    drawObject(mLightsShader, ta.fabrica, ta.concreto, model);
+    drawObject(mLightsShader, ta.rascacielos, ta.concreto, model);
+    drawObject(mLightsShader, ta.edificio2, ta.concreto, model);
+    drawObject(mLightsShader, ta.tienda, ta.concreto, model);
+    drawObject(mLightsShader, ta.hopstial, ta.concreto, model);
+    drawObject(mLightsShader, ta.banco, ta.concreto, model);
+    drawObject(mLightsShader, ta.policia, ta.concreto, model);
+    drawObject(mLightsShader, ta.luzSemaforo, ta.traslucido, model);
+    drawObject(mLightsShader, ta.co2, ta.gases, model);
+
+
+
+
+
+
+
+
+
+
+
+
     glUseProgram(0);
 
+
 }
+
+
 
 void renderScene() {
     glClearColor(0.1f, 0.15f, 0.2f, 1.0f);
@@ -92,14 +121,19 @@ void renderScene() {
 
 
     //2. ENRUTADOR DE ESCENA 
-   // if (!g_runTestEnvironment)
+    //if (!g_runTestEnvironment)
     //{
-        renderForestScene(projection, view);
-        //}
+    //    renderForestScene(projection, view);
+    //}
     //else
-   // {
-        renderTestEnvironment(projection, view);
-        //}
+    //{
+    //    renderTestEnvironment(projection, view);
+    //}
+
+    renderForestScene(projection, view);
+    renderTestEnvironment(projection, view);
+
+
 }
 
 /* --------------------------------------------- Renderizado Procedural------------------------------------------*/
@@ -617,7 +651,7 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
         }
     }
     // --- FIN 3.8 ---
-   
+
 
     // --- FIN 3.8 ---
 

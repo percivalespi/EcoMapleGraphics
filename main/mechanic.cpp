@@ -394,8 +394,8 @@ void updateAnimalAI(float deltaTime) {
         }
 
         // --- CORRECCIÓN: Forzar la posición dentro de los límites del mundo ---
-        animal.position.x = glm::clamp(animal.position.x, WORLD_MIN_X, WORLD_MAX_X-20.0f);
-        animal.position.z = glm::clamp(animal.position.z, WORLD_MIN_Z, WORLD_MAX_Z-20.0f);
+        animal.position.x = glm::clamp(animal.position.x, WORLD_MIN_X, WORLD_MAX_X - 20.0f);
+        animal.position.z = glm::clamp(animal.position.z, WORLD_MIN_Z, WORLD_MAX_Z - 20.0f);
     }
 }
 
