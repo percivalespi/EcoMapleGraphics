@@ -1,4 +1,5 @@
 bin/models/
+bin/*.zip
 *.exe
 *.pdb
 /main/EcoMapleGraphics/
