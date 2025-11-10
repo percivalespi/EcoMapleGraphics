@@ -19,7 +19,7 @@ Ultimas Implementaciones: (Incendio Secuencial + Scope Global + Estilo Súper Es
 #include "src_manager.h"
 
 // Bandera Para activar entorno de prueba
-bool g_runTestEnvironment = true; // <-- CAMBIADO A FALSE PARA VER EL BOSQUE
+bool g_runTestEnvironment = false; // <-- CAMBIADO A FALSE PARA VER EL BOSQUE
 
 // Firmas de Funciones - Estructura Básica OpenGL
 bool Start();
@@ -149,6 +149,7 @@ const float max_plant_distance = 15.0f;
 bool p_key_pressed = false;
 bool f_key_pressed = false;
 bool g_key_pressed = false;
+bool z_key_pressed = false;
 bool isFireActive = false;
 float fireStartTime = 0.0f;
 

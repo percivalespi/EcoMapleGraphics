@@ -484,8 +484,8 @@ void updateGameLogic() {
         ta.cameraLight.Position = camera.Position + offset;
         ta.cameraLight.Position = camera.Position;
 
-        // 2. (Opcional) Si tu luz es tipo "spot" (tiene dirección),
-        //    haz que apunte a donde mira la cámara:
+        // 2. (Opcional) Si tu luz es tipo "spot" (tiene direcciï¿½n),
+        //    haz que apunte a donde mira la cï¿½mara:
         ta.cameraLight.Direction = camera.Front;
  
         return;

@@ -355,6 +355,7 @@ extern const glm::vec3 tree_trunk_aabb_max;
 extern bool p_key_pressed;
 extern bool f_key_pressed;
 extern bool g_key_pressed;
+extern bool z_key_pressed;
 extern const float max_plant_distance;
 extern bool isFireActive;
 extern float fireStartTime;

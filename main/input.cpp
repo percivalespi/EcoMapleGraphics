@@ -31,6 +31,27 @@ void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
         camera.ProcessKeyboard(FORWARD, deltaTime);
     }
+    if(glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) {
+        if (!z_key_pressed) { // ¿Es el primer frame que se presiona?
+            // ¡SÍ! Hacemos el cambio UNA SOLA VEZ
+            g_runTestEnvironment = !g_runTestEnvironment; // Interruptor simple
+
+            if (g_runTestEnvironment) {
+                printf("\n Cambio de Escena: Ciudad (Test) \n");
+            }
+            else {
+                printf("\n Cambio de Escena: Bosque \n");
+            }
+
+            z_key_pressed = true; // Marcamos que ya la procesamos
+        }
+    }
+    else {
+        // Si la tecla NO está presionada, reseteamos la bandera
+        // para que pueda volver a ser presionada en el futuro.
+        z_key_pressed = false;
+    }
+
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
         camera.ProcessKeyboard(BACKWARD, deltaTime);
     }
