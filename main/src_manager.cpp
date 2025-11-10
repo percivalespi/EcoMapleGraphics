@@ -3,35 +3,131 @@
 
 /* -------------------------------------------- - Manejo de Recursos TEST------------------------------------------*/
 void initializeModelsTest(TestAssets& ta) {
-    ta.car = new Model("models/car.fbx");
-    ta.luminaire = new Model("models/luminaire.fbx");
-    ta.stop = new Model("models/stop.fbx");
-    ta.floor = new Model("models/floor02.fbx");
+
+    ta.suelo = new Model("models/city/Prod/suelo.fbx");
+    ta.suelo_verde = new Model("models/city/Prod/sueloVerde.fbx");
+    ta.metales = new Model("models/city/Prod/metales.fbx");
+    ta.objMadera = new Model("models/city/Prod/elementosMadera.fbx");
+    ta.objCristales = new Model("models/city/Prod/objCristales3.fbx");
+    ta.objPlasticos = new Model("models/city/Prod/objPlasticos3.fbx");
+    ta.objConcreto = new Model("models/city/Prod/objConcreto.fbx");
+    ta.objLlantas = new Model("models/city/Prod/objLlantafbx.fbx");
+    ta.objLadrillo = new Model("models/city/Prod/objLadrillo.fbx");
+    ta.grafitis = new Model("models/city/Prod/objMurofbx.fbx");
+    ta.bandera = new Model("models/city/Prod/bandera.fbx");
+
+    ta.luzSemaforo = new Model("models/city/Prod/luzSemaforo.fbx");
+    ta.co2 = new Model("models/city/Prod/CO2.fbx");
+
+    //Modelos IA
+
+    ta.fabrica = new Model("models/city/Prod/fabrica.fbx");
+    ta.rascacielos = new Model("models/city/Prod/rascacielos.fbx");
+    ta.edificio2 = new Model("models/city/Prod/edificioIA2.fbx");
+    ta.tienda = new Model("models/city/Prod/tienda.fbx");
+
+    ta.hopstial = new Model("models/city/Prod/hospital.fbx");
+    ta.banco = new Model("models/city/Prod/banco.fbx");
+    ta.policia = new Model("models/city/Prod/policia.fbx");
+
+
+
+
+
+
+
+
+
+
+ 
+    //ta.character01 = new AnimatedModel("models/IllumModels/KAYA.fbx");
+
 }
 
 void initilizeMaterialsTest(TestAssets& ta) {
+    // --- ACERO (Metálico y brillante) ---
     ta.steel.ambient = glm::vec4(0.25f, 0.25f, 0.25f, 1.0f);
     ta.steel.diffuse = glm::vec4(0.4f, 0.4f, 0.4f, 1.0f);
-    ta.steel.specular = glm::vec4(0.7745f, 0.774f, 0.774f, 1.0f);
+    ta.steel.specular = glm::vec4(0.77f, 0.77f, 0.77f, 1.0f);
+    ta.steel.transparency = 1.0f; // ¡Siempre inicializa esto!
 
-    ta.asphalt.ambient = glm::vec4(0.02f, 0.02f, 0.02f, 1.0f);
-    ta.asphalt.diffuse = glm::vec4(0.12f, 0.12f, 0.12f, 1.0f);
-    ta.asphalt.specular = glm::vec4(0.05f, 0.05f, 0.05f, 1.0f);
+    // --- ASFALTO - Carretera - Mate
 
+    ta.asphalt.ambient = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
+    ta.asphalt.diffuse = glm::vec4(0.15f, 0.15f, 0.15f, 1.0f);
+    ta.asphalt.specular = glm::vec4(0.02f, 0.02f, 0.02f, 1.0f); // Casi sin brillo
+    ta.asphalt.transparency = 1.0f;
+
+    //Plastico
+    ta.plastic.ambient = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);;
+    ta.plastic.diffuse = glm::vec4(0.7f, 0.7f, 0.7f, 1.0f);
+    ta.plastic.specular = glm::vec4(0.9f, 0.9f, 0.9f, 1.0f); // Casi sin brillo
+    ta.plastic.transparency = 1.0f;
+
+    //Traslucido
+    ta.traslucido.ambient = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);;
+    ta.traslucido.diffuse = glm::vec4(0.588f, 0.588f, 0.588f, 1.0f);
+    ta.traslucido.specular = glm::vec4(0.9f, 0.9f, 0.9f, 1.0f); // Casi sin brillo
+    ta.traslucido.transparency = 0.3f;
+
+    //Traslucido - Focos
+    ta.focos.ambient = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);;
+    ta.focos.diffuse = glm::vec4(0.588f, 0.588f, 0.588f, 1.0f);
+    ta.focos.specular = glm::vec4(0.9f, 0.9f, 0.9f, 1.0f); // Casi sin brillo
+    ta.focos.transparency = 0.5f;
+
+
+    //Traslucido - Gases
+    ta.gases.ambient = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);;
+    ta.gases.diffuse = glm::vec4(0.588f, 0.588f, 0.588f, 1.0f);
+    ta.gases.specular = glm::vec4(0.9f, 0.9f, 0.9f, 1.0f); // Casi sin brillo
+    ta.gases.transparency = 0.8f;
+
+    //Madera - Mate
+    ta.madera.ambient = glm::vec4(0.3f, 0.3f, 0.2f, 1.0f);
+    ta.madera.diffuse = glm::vec4(0.55f, 0.55f, 0.5f, 1.0f);
+    ta.madera.specular = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
+    ta.madera.transparency = 1.0f;
+
+    //Cesped - Mate
+    ta.cesped.ambient = glm::vec4(0.05f, 0.2f, 0.05f, 1.0f);
+    ta.cesped.diffuse = glm::vec4(0.1f, 0.6f, 0.15f, 1.0f);
+    ta.cesped.specular = glm::vec4(0.02f, 0.02f, 0.02f, 1.0f);
+    ta.cesped.transparency = 1.0f;
+
+    //Concreto -Mate
+    ta.concreto.ambient = glm::vec4(0.15f, 0.15f, 0.15f, 1.0f);
+    ta.concreto.diffuse = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
+    ta.concreto.specular = glm::vec4(0.05f, 0.05f, 0.05f, 1.0f);
+    ta.concreto.transparency = 1.0f;
+
+    //Gome -mate
+    ta.goma.ambient = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
+    ta.goma.diffuse = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
+    ta.goma.specular = glm::vec4(0.05f, 0.05f, 0.05f, 1.0f);
+    ta.goma.transparency = 1.0f;
+
+    //Ladrillo
+    ta.ladrillo.ambient = glm::vec4(0.3f, 0.15f, 0.1f, 1.0f);
+    ta.ladrillo.diffuse = glm::vec4(0.7f, 0.35f, 0.25f, 1.0f);
+    ta.ladrillo.specular = glm::vec4(0.05f, 0.05f, 0.05f, 1.0f);
+    ta.ladrillo.transparency = 1.0f;
+
+    //Tela -Mate
+    ta.tela.ambient = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
+    ta.tela.diffuse = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
+    ta.tela.specular = glm::vec4(0.05f, 0.05f, 0.05f, 1.0f);
+    ta.tela.transparency = 1.0f;
 }
 
 void initilizeLightsTest(TestAssets& ta) {
     ta.light01.Position = glm::vec3(1.4895f, 1.8836f, -1.1042f);
-    ta.light01.Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-    ta.light01.Power = glm::vec4(90.0f, 90.0f, 90.0f, 1.0f); // Potencia en Watts
+    ta.light01.Color = glm::vec4(0.2f, 0.2f, 0.2f, 0.5f);
+    ta.light01.Power = glm::vec4(60.0f, 60.0f, 60.0f, 1.0f); // Potencia en Watts
     ta.light01.alphaIndex = 50;
-    ta.light01.distance = 7.0f;
-    gLights.push_back(ta.light01);
+    ta.light01.distance = 2.0f;
 
-    ta.light02.Position = glm::vec3(-1.8224f, 0.1272f, 1.1042f);
-    ta.light02.Color = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
-    ta.light01.alphaIndex = 16;
-    gLights.push_back(ta.light02);
+    gLights.push_back(ta.light01);
 }
 
 void loadTest(TestAssets& ta) {

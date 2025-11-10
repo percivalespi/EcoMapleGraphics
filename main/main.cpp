@@ -160,6 +160,15 @@ ForestAssets fa;
 UIAssets ui;
 TestAssets ta;
 
+// Shaders para materiales
+Shader* lambertShader;
+
+
+
+
+
+
+
 // -> Variable Global Para el Manejo del [Audio]
 ISoundEngine* SoundEngine = createIrrKlangDevice();
 
@@ -297,6 +306,12 @@ bool Start() {
         delete dynamicShader; // <-- NUEVO DELETE
         return false;
     }
+
+    //ta.light02.Position = glm::vec3(camera.Position);
+    //ta.light02.Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    //ta.light02.Power = glm::vec4(10.0f, 10.0f, 10.0f, 1.0f); // Potencia en Watts
+    //ta.light02.alphaIndex = 16;
+    //gLights.push_back(ta.light02);
 
     // Carga de Modelos y Recursos
     loadUI(ui);
