@@ -7,8 +7,7 @@ Funcionalidades: (Con Chunks, In<stancias, Montaña, Luz de Phong, Sol/Luna Esf�
 Ultimas Implementaciones: (Incendio Secuencial + Scope Global + Estilo Súper Estricto)
 */
 
-
-/* Mensaje Para Ale; Hola ALE :D*/
+/*Si lo aprendiste bien dale like y sucribete*/
 
 /* ---------------------------------------- Encabezados del Proyecto -------------------------------------------------*/
 
@@ -210,6 +209,7 @@ int main() {
     delete dynamicShader; // <-- NUEVO
 
     delete fa.character01; // <-- NUEVO
+    delete fa.character02; // <__ NUEVO MODELO DE CASTOR
     delete fa.skull_model; // <-- NUEVO
 
     delete fa.terrain_model;

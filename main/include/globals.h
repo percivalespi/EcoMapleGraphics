@@ -135,10 +135,15 @@ struct AnimalInstance {
     float stateTimer; // Tiempo restante en el estado actual
     glm::vec3 targetPosition;
 
+
+    AnimatedModel* walk; //  <-- NUEVO. Puntero para el modelo de animal que estemos usando
+    AnimatedModel* idle;
+
     // Estado de animación (movido de AnimatedModel)
     float elapsedTime;
     int animationCount;
     glm::mat4 gBones[MAX_RIGGING_BONES]; // MAX_RIGGING_BONES se define en animatedmodel.h
+
 };
 // --- FIN NUEVO ---
 
@@ -160,7 +165,15 @@ struct ForestAssets {
     Model* moon_model;
     Model* cloud_model;
     Model* leaf_model;
-    AnimatedModel* character01;
+    AnimatedModel* character01; // <-- MODELO DE LOBO CORRIENDO
+    AnimatedModel* character02; // <-- MODELO DE LOBO ESTATICO (PENDIENTE)
+    AnimatedModel* character03; // <-- MODELO DE CASTOR CORRIENDO
+    AnimatedModel* character04; // <-- MODELO DE CASTOR ESTATICO
+    AnimatedModel* character05; // <-- MODELO DE OSO NEGRO CORRIENDO
+    AnimatedModel* character06; // <-- MODELO DE OSO ESTATICO (PENDIENTE)
+    AnimatedModel* character07; // <-- MODELO DE ALCE CORRIENDO
+    AnimatedModel* character08; // <-- NUEVO DE ALCE ESTATICO
+
     Model* skull_model; // <-- NUEVO MODELO
     // --- Luz
     Light theLight;
