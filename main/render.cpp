@@ -68,7 +68,7 @@ void renderTestEnvironment(const glm::mat4& projection, const glm::mat4& view) {
 
     // Coche (Metálico -> Phong)
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+    model = glm::translate(model, glm::vec3(0.0f, 0.0f, (- WORLD_SIZE * 35) - 2.5));
     model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
 
@@ -121,14 +121,19 @@ void renderScene() {
 
 
     //2. ENRUTADOR DE ESCENA 
-    if (!g_runTestEnvironment)
-    {
-        renderForestScene(projection, view);
-    }
-    else
-    {
-        renderTestEnvironment(projection, view);
-    }
+    //if (!g_runTestEnvironment)
+    //{
+    //    renderForestScene(projection, view);
+    //}
+    //else
+    //{
+    //    renderTestEnvironment(projection, view);
+    //}
+
+    renderForestScene(projection, view);
+    renderTestEnvironment(projection, view);
+
+
 }
 
 /* --------------------------------------------- Renderizado Procedural------------------------------------------*/
