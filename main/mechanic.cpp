@@ -302,16 +302,13 @@ bool isPositionSafe(glm::vec3 pos) {
 
 // --- NUEVA FUNCIÓN: Actualiza la IA de todos los animales ---
 void updateAnimalAI(float deltaTime) {
-    if (fa.character01 == nullptr) return; // No hay modelo de lobo cargado
-    if (fa.character02 == nullptr) return; // No hay modelo de Castor cargado
-
+    // No se necesitan comprobaciones iniciales, el bucle manejará una lista vacía.
     for (AnimalInstance& animal : g_animals) {
 
-        // --- NUEVO: Saltarse a los muertos ---
-        if (animal.state == AnimalState::DEAD) {
+        // Saltarse a los muertos o a los que no tienen modelos de animación asignados
+        if (animal.state == AnimalState::DEAD || animal.walk == nullptr || animal.idle == nullptr) {
             continue;
         }
-        // --- FIN NUEVO ---
 
         animal.stateTimer -= deltaTime;
 
@@ -330,6 +327,7 @@ void updateAnimalAI(float deltaTime) {
                     float dist = dis_ai_target_dist(gen);
                     animal.targetPosition = animal.position + glm::vec3(sin(angle) * dist, 0.0f, cos(angle) * dist);
 
+                    // isPositionSafe ya comprueba los límites del mundo y la colisión con árboles
                     foundTarget = isPositionSafe(animal.targetPosition);
                     tries++;
                 } while (!foundTarget && tries < ANIMAL_MAX_PATHFIND_TRIES);
@@ -344,6 +342,7 @@ void updateAnimalAI(float deltaTime) {
                 // Cambiar a IDLE
                 animal.state = AnimalState::IDLE;
                 animal.stateTimer = dis_ai_time(gen); // Tiempo que pasará quieto
+                animal.animationCount = 0; // Reiniciar conteo de animación para un bucle limpio
             }
         }
 
@@ -356,41 +355,55 @@ void updateAnimalAI(float deltaTime) {
                 // Llegó al destino
                 animal.state = AnimalState::IDLE;
                 animal.stateTimer = dis_ai_time(gen);
+                animal.animationCount = 0; // Reiniciar conteo de animación
             }
             else {
                 // Moverse hacia el destino
                 animal.position += direction * ANIMAL_MOVE_SPEED * deltaTime;
-                animal.rotationY = atan2(direction.x, direction.z); // Rotar para mirar en la dirección
 
-                // --- ¡ACTUALIZAR ANIMACIÓN! ---
-                // Esto cumple el requisito de animar SOLO al moverse
+                // --- CORRECCIÓN DE ROTACIÓN ---
+                // Calcular el ángulo base
+                float baseAngle = atan2(direction.x, direction.z);
+
+                // Si el animal es un lobo (usando su modelo de caminar como identificador), aplicar un desfase.
+                // El valor -1.5708f es -PI/2, que corresponde a -90 grados.
+                if (animal.walk == fa.character01) {
+                    baseAngle -= 1.5708f;
+                }
+                animal.rotationY = baseAngle;
+                // --- FIN CORRECCIÓN ---
+
+
+                // Actualizar animación de caminar (WALKING)
                 animal.elapsedTime += deltaTime;
                 if (animal.elapsedTime > 1.0f / animal.walk->fps) {
                     animal.elapsedTime = 0.0f;
                     animal.animationCount++;
-                    if (animal.animationCount > animal.walk->keys - 1) {
-                        animal.animationCount = 0;
+                    if (animal.animationCount >= animal.walk->keys) {
+                        animal.animationCount = 0; // Bucle de animación
                     }
-                    // Actualiza el array gBones de ESTA instancia
+                    // Actualiza el array gBones de ESTA instancia con SU animación de caminar
                     animal.walk->SetPose((float)animal.animationCount, animal.gBones);
                 }
-
             }
-
         }
-
-        if (animal.state == AnimalState::IDLE){
+        else if (animal.state == AnimalState::IDLE) {
+            // Actualizar animación de reposo (IDLE)
             animal.elapsedTime += deltaTime;
             if (animal.elapsedTime > 1.0f / animal.idle->fps) {
                 animal.elapsedTime = 0.0f;
                 animal.animationCount++;
-                if (animal.animationCount > animal.idle->keys - 1) {
-                    animal.animationCount = 0;
+                if (animal.animationCount >= animal.idle->keys) {
+                    animal.animationCount = 0; // Bucle de animación
                 }
-                // Actualiza el array gBones de ESTA instancia
+                // Actualiza el array gBones de ESTA instancia con SU animación de reposo
                 animal.idle->SetPose((float)animal.animationCount, animal.gBones);
             }
         }
+
+        // --- CORRECCIÓN: Forzar la posición dentro de los límites del mundo ---
+        animal.position.x = glm::clamp(animal.position.x, WORLD_MIN_X, WORLD_MAX_X);
+        animal.position.z = glm::clamp(animal.position.z, WORLD_MIN_Z, WORLD_MAX_Z);
     }
 }
 
@@ -407,12 +420,11 @@ void updateForestHealthAndAnimals(float deltaTime) {
     }
     g_forestHealth = glm::clamp(g_forestHealth, 0.0f, 1.0f);
 
-    // --- NUEVO: Imprimir solo si la salud cambia ---
+    // Imprimir solo si la salud cambia
     if (g_forestHealth != g_previousForestHealth) {
         std::cout << "Vida del Bosque: " << (g_forestHealth * 100.0f) << "% (" << g_currentLivingTrees << "/" << g_totalInitialTrees << ")" << std::endl;
         g_previousForestHealth = g_forestHealth; // Actualizar el valor anterior
     }
-    // --- FIN NUEVO ---
 
     // 2. Actualizar IA de animales vivos
     updateAnimalAI(deltaTime);
@@ -427,7 +439,7 @@ void updateForestHealthAndAnimals(float deltaTime) {
             for (AnimalInstance& animal : g_animals) {
                 if (animal.state != AnimalState::DEAD) {
                     animal.state = AnimalState::DEAD;
-                    std::cout << "Un animal ha muerto." << std::endl;
+                    std::cout << "Un animal ha muerto debido a la baja salud del bosque." << std::endl;
                     break; // Solo matar uno por ciclo
                 }
             }
@@ -449,27 +461,37 @@ void updateForestHealthAndAnimals(float deltaTime) {
             g_animalRespawnTimer = ANIMAL_RESPAWN_RATE; // Reiniciar temporizador
 
             // Buscar un animal muerto para reaparecer
-            bool respawned = false;
             for (AnimalInstance& animal : g_animals) {
                 if (animal.state == AnimalState::DEAD) {
-                    // ¡Reaparecer este!
-                    // Encontrar un chunk aleatorio
-                    Chunk& randomChunk = terrain_chunks[gen() % terrain_chunks.size()];
-                    glm::vec3 spawnPos = randomChunk.position + glm::vec3(dis_pos(gen), 0.0f, dis_pos(gen));
+                    // ¡Reaparecer este! Encontrar una posición segura
+                    int tries = 0;
+                    bool respawned = false;
+                    do {
+                        Chunk& randomChunk = terrain_chunks[gen() % terrain_chunks.size()];
+                        glm::vec3 spawnPos = randomChunk.position + glm::vec3(dis_pos(gen), 0.0f, dis_pos(gen));
 
-                    if (isPositionSafe(spawnPos)) {
-                        animal.position = spawnPos;
-                        animal.rotationY = glm::radians(dis_rot(gen));
-                        animal.state = AnimalState::IDLE;
-                        animal.stateTimer = dis_ai_time(gen);
-                        animal.targetPosition = animal.position;
-                        animal.elapsedTime = 0.0f;
-                        animal.animationCount = 0;
-                        fa.character01->SetPose(0.0f, animal.gBones);
+                        if (isPositionSafe(spawnPos)) {
+                            animal.position = spawnPos;
+                            animal.rotationY = glm::radians(dis_rot(gen));
+                            animal.state = AnimalState::IDLE;
+                            animal.stateTimer = dis_ai_time(gen);
+                            animal.targetPosition = animal.position;
+                            animal.elapsedTime = 0.0f;
+                            animal.animationCount = 0;
+                            // Asegurarse de que la pose inicial es la de reposo (idle)
+                            if (animal.idle) {
+                                animal.idle->SetPose(0.0f, animal.gBones);
+                            }
 
-                        std::cout << "Un animal ha reaparecido." << std::endl;
-                        respawned = true;
-                        break;
+                            std::cout << "Un animal ha reaparecido." << std::endl;
+                            respawned = true;
+                            break; // Salir del bucle for
+                        }
+                        tries++;
+                    } while (tries < 10); // Intentar 10 veces encontrar un lugar
+
+                    if (respawned) {
+                        break; // Salir del bucle for principal si ya se ha reaparecido uno
                     }
                 }
             }
@@ -479,18 +501,8 @@ void updateForestHealthAndAnimals(float deltaTime) {
 
 
 void updateGameLogic() {
-    if (g_runTestEnvironment) {
-        glm::vec3 offset = (camera.Right * 0.3f) - (camera.Up * 0.2f);
-        ta.cameraLight.Position = camera.Position + offset;
-        ta.cameraLight.Position = camera.Position;
+    if (g_runTestEnvironment) return;
 
-        // 2. (Opcional) Si tu luz es tipo "spot" (tiene direcci�n),
-        //    haz que apunte a donde mira la c�mara:
-        ta.cameraLight.Direction = camera.Front;
- 
-        return;
-    }
-        
     if (isFireActive) {
         float fire_elapsed = (float)glfwGetTime() - fireStartTime;
         if (fire_elapsed >= fireDuration) {

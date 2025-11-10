@@ -29,19 +29,6 @@ void initializeModelsTest(TestAssets& ta) {
     ta.hopstial = new Model("models/city/Prod/hospital.fbx");
     ta.banco = new Model("models/city/Prod/banco.fbx");
     ta.policia = new Model("models/city/Prod/policia.fbx");
-
-
-
-
-
-
-
-
-
-
- 
-    //ta.character01 = new AnimatedModel("models/IllumModels/KAYA.fbx");
-
 }
 
 void initilizeMaterialsTest(TestAssets& ta) {
@@ -135,7 +122,6 @@ void loadTest(TestAssets& ta) {
     initilizeMaterialsTest(ta);
     initializeModelsTest(ta);
 }
-
 
 
 /* -------------------------------------------- - Manejo de Recursos UI------------------------------------------*/
