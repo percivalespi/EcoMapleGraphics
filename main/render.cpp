@@ -1,4 +1,4 @@
-#include "render.h"
+﻿#include "render.h"
 #include "globals.h"
 
 /* -------------------------------------------- - Manejo de Recursos TEST------------------------------------------*/
@@ -89,16 +89,429 @@ void renderScene() {
     glm::mat4 view = camera.GetViewMatrix();
     cameraFrustum.extractPlanes(projection * view);
 
-
     //2. ENRUTADOR DE ESCENA 
-    if (!g_runTestEnvironment)
-    {
+    if (escena == 0) {
+        renderEspacioScene(projection, view);
+    }
+    else if (escena == 1) {
         renderForestScene(projection, view);
+        renderGlaciarScene(projection, view);
     }
-    else
+    if (menu)renderMenuScene(projection, view);
+
+}
+
+//Renderizado Tierra glaciar 
+void renderMenuScene(const glm::mat4& projection, const glm::mat4& view) {
     {
-        renderTestEnvironment(projection, view);
+        basicShader->use();
+
+        basicShader->setMat4("projection", projection);
+        basicShader->setMat4("view", view);
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 10.0f, DT1));
+        model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+        basicShader->setMat4("model", model);
+
+        ma.Texto1->Draw(*basicShader);
+
     }
+    glUseProgram(0);
+    {
+        basicShader->use();
+
+        basicShader->setMat4("projection", projection);
+        basicShader->setMat4("view", view);
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 10.0f, DT2));
+        model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+        basicShader->setMat4("model", model);
+
+        ma.Texto2->Draw(*basicShader);
+    }
+    glUseProgram(0);
+    {
+        basicShader->use();
+
+        basicShader->setMat4("projection", projection);
+        basicShader->setMat4("view", view);
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 10.0f, DT3));
+        model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+        basicShader->setMat4("model", model);
+
+        ma.Texto3->Draw(*basicShader);
+    }
+    glUseProgram(0);
+    {
+        basicShader->use();
+
+        basicShader->setMat4("projection", projection);
+        basicShader->setMat4("view", view);
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 10.0f, DT4));
+        model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+        basicShader->setMat4("model", model);
+
+        ma.Texto4->Draw(*basicShader);
+    }
+    glUseProgram(0);
+    {
+        basicShader->use();
+
+        basicShader->setMat4("projection", projection);
+        basicShader->setMat4("view", view);
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 10.0f, DT5));
+        model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+        basicShader->setMat4("model", model);
+
+        ma.Texto5->Draw(*basicShader);
+    }
+    glUseProgram(0);
+    {
+        basicShader->use();
+
+        basicShader->setMat4("projection", projection);
+        basicShader->setMat4("view", view);
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 10.0f, DT6));
+        model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+        basicShader->setMat4("model", model);
+
+        ma.Texto6->Draw(*basicShader);
+    }
+    glUseProgram(0);
+    {
+        basicShader->use();
+
+        basicShader->setMat4("projection", projection);
+        basicShader->setMat4("view", view);
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 10.0f, DHoja));
+        model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+        basicShader->setMat4("model", model);
+
+        ma.HojaArce_Menu->Draw(*basicShader);
+        Time += 0.05f;
+    }
+    glUseProgram(0);
+    {
+        basicShader->use();
+
+        basicShader->setMat4("projection", projection);
+        basicShader->setMat4("view", view);
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 10.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+        basicShader->setMat4("model", model);
+
+        ma.Fondo_Menu->Draw(*basicShader);
+    }
+    glUseProgram(0);
+
+}
+
+void renderEspacioScene(const glm::mat4& projection, const glm::mat4& view) {
+    // Carga del Skybox usando codigo de tenshi
+    if (skyboxShader != nullptr && skyboxShader->ID != 0) {
+        glDepthFunc(GL_LEQUAL);
+        skyboxShader->use();
+        skyboxShader->setMat4("projection", projection);
+        glm::mat4 view_skybox = glm::mat4(glm::mat3(view));
+        skyboxShader->setMat4("view", view_skybox);
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(1000.0f));
+        Model* currentSkybox = ea.cubeenv;
+        if (currentSkybox != nullptr) {
+            currentSkybox->Draw(*skyboxShader);
+        }
+        glDepthFunc(GL_LESS);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
+
+    // Dibujamos un objeto cualquiera
+    {
+        // Activamos el shader de Phong
+        phongShader2->use();
+
+        // Activamos para objetos transparentes
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        // Aplicamos transformaciones de proyección y cámara (si las hubiera)
+        phongShader2->setMat4("projection", projection);
+        phongShader2->setMat4("view", view);
+
+        // Aplicamos transformaciones del modelo
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(Time), glm::vec3(0.0f, 0.0f, 1.0f));
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+        phongShader2->setMat4("model", model);
+
+        // Configuramos propiedades de fuentes de luz
+        phongShader2->setVec4("LightColor", ea.theLight.Color);
+        phongShader2->setVec4("LightPower", ea.theLight.Power);
+        phongShader2->setInt("alphaIndex", ea.theLight.alphaIndex);
+        phongShader2->setFloat("distance",ea.theLight.distance);
+        phongShader2->setVec3("lightPosition", ea.theLight.Position);
+        phongShader2->setVec3("lightDirection", ea.theLight.Direction);
+        phongShader2->setVec3("eye", camera.Position);
+
+        // Aplicamos propiedades materiales
+        phongShader2->setVec4("MaterialAmbientColor", ea.defaultMaterial.ambient);
+        phongShader2->setVec4("MaterialDiffuseColor", ea.defaultMaterial.diffuse);
+        phongShader2->setVec4("MaterialSpecularColor", ea.defaultMaterial.specular);
+        phongShader2->setFloat("transparency", ea.defaultMaterial.transparency);
+
+        ea.Tierra->Draw(*phongShader2);
+
+        phongShader2->setFloat("transparency", transparenciaC);
+
+        ea.Canada->Draw(*phongShader2);
+
+
+
+    }
+
+    glUseProgram(0);
+
+    {
+        moonShader->use();
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(0.37f, 0.37f, 0.37f));
+
+        moonShader->setMat4("projection", projection);
+        moonShader->setMat4("view", view);
+
+        moonShader->setMat4("model", model);
+
+        moonShader->setFloat("time", Time / 20);
+        moonShader->setFloat("radius", 5.0f);
+        moonShader->setFloat("height", 5.0f);
+
+        ea.Luna->Draw(*moonShader);
+    }
+
+    glUseProgram(0);
+
+}
+
+void renderGlaciarScene(const glm::mat4& projection, const glm::mat4& view) {
+
+
+    if (temperatura > 0.0f && glacierScaleY > 0.0f) {
+        float speed = meltSpeedBase * temperatura;     // más calor → más rápido
+        glacierScaleY = glm::max(0.0f, glacierScaleY - speed * deltaTime);
+    }
+
+    // Dibujamos un objeto cualquiera
+    {
+        // Activamos el shader de Phong
+        phongShader2->use();
+
+        // Activamos para objetos transparentes
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        // Aplicamos transformaciones de proyección y cámara (si las hubiera)
+        phongShader->setMat4("projection", projection);
+        phongShader->setMat4("view", view);
+
+        // Base para la escena 1
+        glm::mat4 baseM = glm::mat4(1.0f);
+        baseM = glm::translate(baseM, glm::vec3(0.0f, 0.0f, -250.0f));
+        baseM = glm::rotate(baseM, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        baseM = glm::scale(baseM, glm::vec3(1.0f, 1.0f, 1.0f));
+
+        // Luz y material
+        phongShader2->setVec4("LightColor", ga.theLight.Color);
+        phongShader2->setVec4("LightPower", ga.theLight.Power);
+        phongShader2->setInt("alphaIndex", ga.theLight.alphaIndex);
+        phongShader2->setFloat("distance", ga.theLight.distance);
+        phongShader2->setVec3("lightPosition", ga.theLight.Position);
+        phongShader2->setVec3("lightDirection", ga.theLight.Direction);
+        phongShader2->setVec3("eye", camera.Position);
+
+        phongShader2->setVec4("MaterialAmbientColor", ga.defaultMaterial.ambient);
+        phongShader2->setVec4("MaterialDiffuseColor", ga.defaultMaterial.diffuse);
+        phongShader2->setVec4("MaterialSpecularColor", ga.defaultMaterial.specular);
+        phongShader2->setFloat("transparency", ga.defaultMaterial.transparency);
+
+        // Iceberg, placa y trozos: sin cambios
+        phongShader2->setMat4("model", baseM);
+        ga.Glaciares->Draw(*phongShader2);
+        ga.PlacaHielo->Draw(*phongShader2);
+
+        // Glaciares/Iceberg según escala
+        if (glacierScaleY > 0.0f)
+        {
+            glm::mat4 mG = baseM;
+            mG = glm::scale(mG, glm::vec3(1.0f, 1.0f, glacierScaleY));
+            phongShader2->setMat4("model", mG);
+            ga.Iceberg->Draw(*phongShader2);
+        }
+    }
+    {
+        wavesShader2->use();
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, -250.0f));
+        model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+
+        wavesShader2->setMat4("projection", projection);
+        wavesShader2->setMat4("view", view);
+
+        wavesShader2->setMat4("model", model);
+
+        wavesShader2->setFloat("time", wavesTime);
+        if (calor) {
+            wavesShader2->setFloat("radius", 0.7f);
+            wavesShader2->setFloat("height", 0.7f);
+        }
+        else {
+            wavesShader2->setFloat("radius", 0.2f);
+            wavesShader2->setFloat("height", 0.2f);
+        }
+
+        ga.Agua->Draw(*wavesShader2);
+
+        wavesTime += 0.01f;
+    }
+    glUseProgram(0);
+    // Descenso de osos 1 y 2 en función del derretimiento
+    float osoDown = 8 * glacierScaleY - 8; // 0→sin bajar, 1→máximo
+    if (glacierScaleY > 0.0f) {
+        // Activamos el shader de Phong
+        phongShader2->use();
+
+        // Activamos para objetos transparentes
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        // Aplicamos transformaciones de proyección y cámara (si las hubiera)
+        phongShader2->setMat4("projection", projection);
+        phongShader2->setMat4("view", view);
+
+        // Base para la escena 1
+        glm::mat4 baseM = glm::mat4(1.0f);
+        baseM = glm::translate(baseM, glm::vec3(0.0f, 0.0f, -250.0f+ osoDown));
+        baseM = glm::rotate(baseM, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        baseM = glm::scale(baseM, glm::vec3(1.0f, 1.0f, glacierScaleY));
+
+        // Luz y material
+        phongShader2->setVec4("LightColor", ga.theLight.Color);
+        phongShader2->setVec4("LightPower", ga.theLight.Power);
+        phongShader2->setInt("alphaIndex", ga.theLight.alphaIndex);
+        phongShader2->setFloat("distance", ga.theLight.distance);
+        phongShader2->setVec3("lightPosition", ga.theLight.Position);
+        phongShader2->setVec3("lightDirection", ga.theLight.Direction);
+        phongShader2->setVec3("eye", camera.Position);
+
+        phongShader2->setVec4("MaterialAmbientColor", ga.defaultMaterial.ambient);
+        phongShader2->setVec4("MaterialDiffuseColor", ga.defaultMaterial.diffuse);
+        phongShader2->setVec4("MaterialSpecularColor", ga.defaultMaterial.specular);
+        phongShader2->setFloat("transparency", ga.defaultMaterial.transparency);
+
+        phongShader2->setMat4("model", baseM);
+
+        ga.TrozoH1->Draw(*phongShader2);
+        ga.TrozoH2->Draw(*phongShader2);
+    }
+    glUseProgram(0);
+    if (!menu) {
+        {
+            // === Termómetro pegado a la cámara (lateral izquierdo) ===
+            basicShader->use();
+            basicShader->setMat4("projection", projection);
+            basicShader->setMat4("view", view);
+
+            // Base de cámara desde la vista
+            glm::mat4 invV = glm::inverse(view);
+            glm::vec3 eye = glm::vec3(invV[3]);
+            glm::vec3 f = glm::normalize(glm::vec3(invV * glm::vec4(0, 0, -1, 0))); // forward
+            glm::vec3 u = glm::normalize(glm::vec3(invV * glm::vec4(0, 1, 0, 0))); // up
+            glm::vec3 r = glm::normalize(glm::cross(f, u));                       // right
+
+            // Colocación
+            const float d = 0.5f;      // distancia fija delante
+            const float x = 0.25f;     // desplazamiento a la izquierda (en unidades de mundo)
+            const float y = 0.00f;     // desplazamiento vertical
+
+            glm::vec3 center = eye + f * d - r * x + u * y;
+
+            // Orientación tipo billboard: columnas = (right, up, -forward)
+            glm::mat4 R(1.0f);
+            R[0] = glm::vec4(r, 0.0f);
+            R[1] = glm::vec4(u, 0.0f);
+            R[2] = glm::vec4(-f, 0.0f);
+
+            // Escala del icono
+            glm::vec3 S(0.05f, 0.05f, 0.06f);
+
+            glm::mat4 B = glm::rotate(glm::mat4(1.0f), glm::radians(-66.0f), glm::vec3(0, 1, 0));
+            glm::mat4 C = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1, 0, 0));
+            // Modelo final
+            glm::mat4 model =
+                glm::translate(glm::mat4(1.0f), center) *
+                R *
+                B *
+                C *
+                glm::scale(glm::mat4(1.0f), S);
+
+            basicShader->setMat4("model", model);
+            if (temperatura < 0.0f) {
+                // Contorno
+                ga.TerAzulBase->Draw(*basicShader);
+
+                model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f + barraTF));
+
+                basicShader->setMat4("model", model);
+               ga. BarraAzul->Draw(*basicShader);
+            }
+            else {
+                // Contorno
+                ga.TerRojoBase->Draw(*basicShader);
+                model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f + barraTC));
+                basicShader->setMat4("model", model);
+                ga.BarraRoja->Draw(*basicShader);
+            }
+        }
+        glUseProgram(0);
+    }
+
 }
 
 /* --------------------------------------------- Renderizado Procedural------------------------------------------*/
@@ -152,7 +565,7 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
 
 
 
-    // --- 1. DIBUJAR OBJETOS OPACOS EST�TICOS ---
+    // --- 1. DIBUJAR OBJETOS OPACOS ESTÁTICOS ---
     if (phongShader != nullptr && phongShader->ID != 0) {
         phongShader->use();
         phongShader->setMat4("projection", projection);
@@ -279,7 +692,7 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
         instanceAlphaTestPhongShader->setInt("alphaIndex", fa.theLight.alphaIndex);
         instanceAlphaTestPhongShader->setFloat("transparency", 1.0f);
 
-        // �rboles Vivos
+        // Árboles Vivos
         if (fa.tree_model != nullptr && !visible_trees_alive.empty()) {
             instanceAlphaTestPhongShader->setVec4("MaterialAmbientColor", fa.treeMaterial.ambient);
             instanceAlphaTestPhongShader->setVec4("MaterialSpecularColor", fa.treeMaterial.specular);
@@ -398,7 +811,7 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
         }
     }
 
-    // --- 3.5 DIBUJAR �RBOLES GOLPEADOS UNA VEZ ---
+    // --- 3.5 DIBUJAR ÁRBOLES GOLPEADOS UNA VEZ ---
     if (instancePhongShader != nullptr && instancePhongShader->ID != 0 && fa.chopped_once_model != nullptr && !visible_trees_chopped_once.empty()) {
         instancePhongShader->use();
         instancePhongShader->setMat4("projection", projection);
@@ -433,7 +846,7 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
-    // --- 3.6 DIBUJAR �RBOLES QUEM�NDOSE ---
+    // --- 3.6 DIBUJAR ÁRBOLES QUEMÁNDOSE ---
     if (instancePhongShader != nullptr && instancePhongShader->ID != 0 && fa.burning_tree_model != nullptr && !visible_trees_burning.empty()) {
         instancePhongShader->use();
         instancePhongShader->setMat4("projection", projection);
@@ -468,7 +881,7 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
-    // --- 3.7 DIBUJAR �RBOLES GOLPEADOS DOS VECES ---
+    // --- 3.7 DIBUJAR ÁRBOLES GOLPEADOS DOS VECES ---
     if (instancePhongShader != nullptr && instancePhongShader->ID != 0 && fa.chopped_twice_model != nullptr && !visible_trees_chopped_twice.empty()) {
         instancePhongShader->use();
         instancePhongShader->setMat4("projection", projection);
@@ -505,14 +918,14 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
 
 
     // --- 3.8 DIBUJAR MODELOS ANIMADOS (LOBO) ---
-    // --- C�DIGO MODIFICADO PARA DIBUJAR LOBOS O CR�NEOS ---
+    // --- CÓDIGO MODIFICADO PARA DIBUJAR LOBOS O CRÁNEOS ---
     if ((dynamicShader != nullptr || phongShader != nullptr) && !g_animals.empty())
     {
         for (const AnimalInstance& animal : g_animals)
         {
             if (animal.state == AnimalState::DEAD)
             {
-                // --- DIBUJAR CR�NEO ---
+                // --- DIBUJAR CRÁNEO ---
                 if (fa.skull_model == nullptr || phongShader == nullptr) continue;
 
                 phongShader->use(); // Usar el shader simple de Phong
@@ -532,7 +945,7 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
                 model = glm::translate(model, animal.position);
                 model = glm::rotate(model, animal.rotationY, glm::vec3(0.0f, 1.0f, 0.0f));
                 model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-                model = glm::scale(model, glm::vec3(0.5f)); // <-- Ajusta la escala del cr�neo si es necesario
+                model = glm::scale(model, glm::vec3(0.5f)); // <-- Ajusta la escala del cráneo si es necesario
                 phongShader->setMat4("model", model);
 
                 fa.skull_model->Draw(*phongShader);
@@ -650,7 +1063,7 @@ void renderUI() {
     }
     // glDisable(GL_DEPTH_TEST) se queda desactivado para la UI
 
-    // --- 8. DIBUJAR UI (--- SECCI�N COMPLETAMENTE MODIFICADA ---) ---
+    // --- 8. DIBUJAR UI (--- SECCIÓN COMPLETAMENTE MODIFICADA ---) ---
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -673,12 +1086,12 @@ void renderUI() {
         // ----------------------------------------------
 
 
-        // --- Icono de �rbol (P) ---
-        // MODIFICADO: Mover el X_pos aqu� para reusarlo
+        // --- Icono de Árbol (P) ---
+        // MODIFICADO: Mover el X_pos aquí para reusarlo
         float tree_icon_x_pos = SCR_WIDTH - (icon_size * 2.0f) - (padding * 2.0f);
 
         if (ui.treeTextureID != 0) {
-            // MODIFICADO: Posici�n Y
+            // MODIFICADO: Posición Y
             glm::vec3 tree_icon_pos(tree_icon_x_pos, y_pos_icon, 0.0f);
             glm::mat4 model_tree = glm::mat4(1.0f);
             model_tree = glm::translate(model_tree, tree_icon_pos);
@@ -689,7 +1102,7 @@ void renderUI() {
             glBindTexture(GL_TEXTURE_2D, ui.treeTextureID);
             glDrawArrays(GL_TRIANGLES, 0, 6);
 
-            // Dibujar borde si P est� presionada
+            // Dibujar borde si P está presionada
             if (p_key_pressed && ui.highlightTextureID != 0) {
                 glBindTexture(GL_TEXTURE_2D, ui.highlightTextureID);
                 glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -712,11 +1125,11 @@ void renderUI() {
 
 
         // --- Icono de Fuego (F/G) ---
-        // MODIFICADO: Mover el X_pos aqu� para reusarlo
+        // MODIFICADO: Mover el X_pos aquí para reusarlo
         float fire_icon_x_pos = SCR_WIDTH - icon_size - padding;
 
         if (ui.fireTextureID != 0) {
-            // MODIFICADO: Posici�n Y
+            // MODIFICADO: Posición Y
             glm::vec3 fire_icon_pos(fire_icon_x_pos, y_pos_icon, 0.0f);
             glm::mat4 model_fire = glm::mat4(1.0f);
             model_fire = glm::translate(model_fire, fire_icon_pos);
@@ -727,7 +1140,7 @@ void renderUI() {
             glBindTexture(GL_TEXTURE_2D, ui.fireTextureID);
             glDrawArrays(GL_TRIANGLES, 0, 6);
 
-            // Dibujar borde si el incendio est� activo
+            // Dibujar borde si el incendio está activo
             if (isFireActive && ui.highlightTextureID != 0) {
                 glBindTexture(GL_TEXTURE_2D, ui.highlightTextureID);
                 glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -763,7 +1176,7 @@ void renderUI() {
 }
 
 void initializeRenderBuffers(UIAssets& ui) {
-    // --- Configuraci�n Cruz ---
+    // --- Configuración Cruz ---
     float crosshairSize = 0.03f;
     float aspectRatio = (float)SCR_WIDTH / (float)SCR_HEIGHT;
     float crosshairVertices[] = {
@@ -784,7 +1197,7 @@ void initializeRenderBuffers(UIAssets& ui) {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    // --- Configuraci�n UI VAO/VBO ---
+    // --- Configuración UI VAO/VBO ---
     float uiQuadVertices[] = {
         // pos      // tex
         0.0f, 1.0f,  0.0f, 1.0f,

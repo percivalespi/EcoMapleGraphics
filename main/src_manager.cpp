@@ -150,3 +150,104 @@ void loadForest(ForestAssets& fa) {
     initilizeMaterialsForest(fa);
     initializeModelsForest(fa);
 }
+
+/* -------------------------------------------- - Manejo de Recursos Glaciar------------------------------------------*/
+void initializeModelsEspacio(EspacioAssets& ea) {
+    ea.Tierra = new Model("models/Tierra.fbx");
+    ea.Canada = new Model("models/Canada.fbx");
+    ea.Luna = new Model("models/IllumModels/moon.fbx");
+    ea.cubeenv = new Model("models/mycube.fbx");
+    ea.cubeenv_noche = new Model("models/noche/mycube.fbx");
+
+    // CORREGIDO: Usar -> en punteros
+    if (!fa.cubeenv || fa.cubeenv->meshes.empty() || fa.cubeenv->meshes[0].textures.empty()) {
+        std::cout << "ERROR: Skybox DIA" << std::endl;
+    }
+    if (!fa.cubeenv_noche || fa.cubeenv_noche->meshes.empty() || fa.cubeenv_noche->meshes[0].textures.empty()) {
+        std::cout << "ERROR: Skybox NIGHT" << std::endl;
+    }
+}
+
+void initilizeMaterialsEspacio(EspacioAssets& ea) {
+    ea.defaultMaterial.ambient = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
+    ea.defaultMaterial.specular = glm::vec4(1.0f, 0.01f, 0.01f, 1.0f);
+    ea.defaultMaterial.diffuse = glm::vec4(1.0f, 1.0f, 0.01f, 1.0f);
+    ea.defaultMaterial.transparency = 1.0f;
+}
+
+void initilizeLightsEspacio(EspacioAssets& ea) {
+    ea.theLight.Position = glm::vec3(-20.0f, 0.0f, 3.0f);
+    ea.theLight.Color = glm::vec4(1.0, 0.97, 0.92, 1.0);
+    ea.theLight.Power = glm::vec4(60.0f, 60.0f, 60.0f, 1.0f);
+    ea.theLight.alphaIndex = 120;
+    ea.theLight.distance = 5.0f;
+}
+
+void loadEspacio(EspacioAssets& ea) {
+    initilizeLightsEspacio(ea);
+    initilizeMaterialsEspacio(ea);
+    initializeModelsEspacio(ea);
+}
+
+void initializeModelsMenu(MenuAssets& ma) {
+    ma.Texto1 = new Model("models/Texto1.fbx");
+    ma.Texto2 = new Model("models/Texto2.fbx");
+    ma.Texto3 = new Model("models/Texto3.fbx");
+    ma.Texto4 = new Model("models/Texto4.fbx");
+    ma.Texto5 = new Model("models/Texto5.fbx");
+    ma.Texto6 = new Model("models/Texto6.fbx");
+    ma.Fondo_Menu = new Model("models/Fondo_Menu.fbx");
+    ma.HojaArce_Menu = new Model("models/HojaArce_Menu.fbx");
+}
+
+void loadMenu(MenuAssets& ma) {
+    initializeModelsMenu(ma);
+}
+
+void initializeModelsGlaciar(GlaciarAssets& ga) {
+    ga.Agua = new Model("models/Agua.fbx");
+    ga.Iceberg = new Model("models/Iceberg.fbx");
+    ga.TrozoH1 = new Model("models/TrozoH1.fbx");
+    ga.TrozoH2 = new Model("models/TrozoH2.fbx");
+    ga.Glaciares = new Model("models/Glaciares.fbx");
+    ga.PlacaHielo = new Model("models/PlacaHielo.fbx");
+    ga.BarraAzul = new Model("models/BarraAzul.fbx");
+    ga.BarraRoja = new Model("models/BarraRoja.fbx");
+    ga.TerAzulBase = new Model("models/TerAzulBase.fbx");
+    ga.TerRojoBase = new Model("models/TerRojoBase.fbx");
+
+    ga.Oso1 = new AnimatedModel("models/Oso1.fbx");
+    ga.Oso2 = new AnimatedModel("models/Oso2.fbx");
+    ga.Oso3 = new AnimatedModel("models/Oso3.fbx");
+    ga.Oso4 = new AnimatedModel("models/Oso4.fbx");
+    ga.Oso5 = new AnimatedModel("models/Oso5.fbx");
+
+    // CORREGIDO: Usar -> en punteros
+    if (!fa.cubeenv || fa.cubeenv->meshes.empty() || fa.cubeenv->meshes[0].textures.empty()) {
+        std::cout << "ERROR: Skybox DIA" << std::endl;
+    }
+    if (!fa.cubeenv_noche || fa.cubeenv_noche->meshes.empty() || fa.cubeenv_noche->meshes[0].textures.empty()) {
+        std::cout << "ERROR: Skybox NIGHT" << std::endl;
+    }
+}
+
+void initilizeMaterialsGlaciar(GlaciarAssets& ga) {
+    ga.defaultMaterial.ambient = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
+    ga.defaultMaterial.diffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    ga.defaultMaterial.specular = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    ga.defaultMaterial.transparency = 1.0f;
+}
+
+void initilizeLightsGlaciar(GlaciarAssets& ga) {
+    ga.theLight.Position = glm::vec3(0.0f, 20.0f, 0.0f);
+    ga.theLight.Color = glm::vec4(1.0, 1.0, 1.0, 1.0);
+    ga.theLight.Power = glm::vec4(60.0f, 60.0f, 60.0f, 1.0f);
+    ga.theLight.alphaIndex = 120;
+    ga.theLight.distance = 10.0f;
+}
+
+void loadGlaciar(GlaciarAssets& ga) {
+    initilizeLightsGlaciar(ga);
+    initilizeMaterialsGlaciar(ga);
+    initializeModelsGlaciar(ga);
+}

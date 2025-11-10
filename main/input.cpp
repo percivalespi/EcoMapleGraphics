@@ -28,83 +28,102 @@ void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        camera.ProcessKeyboard(FORWARD, deltaTime);
-    }
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        camera.ProcessKeyboard(BACKWARD, deltaTime);
-    }
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        camera.ProcessKeyboard(LEFT, deltaTime);
-    }
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        camera.ProcessKeyboard(RIGHT, deltaTime);
-    }
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-        camera.ProcessKeyboard(UPWARD, deltaTime);
-    }
-    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
-        camera.ProcessKeyboard(DOWNWARD, deltaTime);
-    }
-
-    // --- Control Tecla P (Plantar) ---
-    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
-        if (!p_key_pressed) {
-            plantTree();
-            p_key_pressed = true;
+    if (!animacion1 && !menu) {
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+            camera.ProcessKeyboard(FORWARD, deltaTime);
         }
-    }
-    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_RELEASE) {
-        p_key_pressed = false;
-    }
-
-    // --- Control Tecla F (Iniciar Incendio) ---
-    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
-        if (!f_key_pressed) {
-            startFire();
-            f_key_pressed = true;
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+            camera.ProcessKeyboard(BACKWARD, deltaTime);
         }
-    }
-    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_RELEASE) {
-        f_key_pressed = false;
-    }
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+            camera.ProcessKeyboard(LEFT, deltaTime);
+        }
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+            camera.ProcessKeyboard(RIGHT, deltaTime);
+        }
+        if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+            camera.ProcessKeyboard(UPWARD, deltaTime);
+        }
+        if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
+            camera.ProcessKeyboard(DOWNWARD, deltaTime);
+        }
 
-    // --- Control Tecla G (Detener Incendio) ---
-    if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS) {
-        if (!g_key_pressed) {
-            if (isFireActive) {
-                isFireActive = false;
-                std::cout << "?Incendio detenido manualmente!" << std::endl;
+        if (escena == 1) {
+            // --- Control Tecla P (Plantar) ---
+            if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
+                if (!p_key_pressed) {
+                    plantTree();
+                    p_key_pressed = true;
+                }
             }
-            g_key_pressed = true;
+            if (glfwGetKey(window, GLFW_KEY_P) == GLFW_RELEASE) {
+                p_key_pressed = false;
+            }
+
+            // --- Control Tecla F (Iniciar Incendio) ---
+            if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
+                if (!f_key_pressed) {
+                    startFire();
+                    f_key_pressed = true;
+                }
+            }
+            if (glfwGetKey(window, GLFW_KEY_F) == GLFW_RELEASE) {
+                f_key_pressed = false;
+            }
+
+            // --- Control Tecla G (Detener Incendio) ---
+            if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS) {
+                if (!g_key_pressed) {
+                    if (isFireActive) {
+                        isFireActive = false;
+                        std::cout << "?Incendio detenido manualmente!" << std::endl;
+                    }
+                    g_key_pressed = true;
+                }
+            }
+            if (glfwGetKey(window, GLFW_KEY_G) == GLFW_RELEASE) {
+                g_key_pressed = false;
+            }
+
+            float horizontalSpeed = 50.0f;
+            float verticalSpeed = 40.0f;
+            if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+                sunAngle += horizontalSpeed * deltaTime;
+            }
+            if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+                sunAngle -= horizontalSpeed * deltaTime;
+            }
+            if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+                sunElevationAngle += verticalSpeed * deltaTime;
+            }
+            if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+                sunElevationAngle -= verticalSpeed * deltaTime;
+            }
+            sunAngle = fmod(sunAngle, 360.0f);
+            if (sunAngle < 0.0f) {
+                sunAngle += 360.0f;
+            }
+            sunElevationAngle = fmod(sunElevationAngle, 360.0f);
+            if (sunElevationAngle < 0.0f) {
+                sunElevationAngle += 360.0f;
+            }
+            if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
+                if (temperatura < 40.00)temperatura += 0.35f;
+                if (temperatura > 0)calor = true;
+            }
+            if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS) {
+                if (temperatura > -40.00 && !calor)temperatura -= 0.35f;
+            }
+        }
+       
+        if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
+            Time += 0.05f;
+        }
+        if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
+            Time -= 0.05f;
         }
     }
-    if (glfwGetKey(window, GLFW_KEY_G) == GLFW_RELEASE) {
-        g_key_pressed = false;
-    }
-
-    float horizontalSpeed = 50.0f;
-    float verticalSpeed = 40.0f;
-    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-        sunAngle += horizontalSpeed * deltaTime;
-    }
-    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-        sunAngle -= horizontalSpeed * deltaTime;
-    }
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-        sunElevationAngle += verticalSpeed * deltaTime;
-    }
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-        sunElevationAngle -= verticalSpeed * deltaTime;
-    }
-    sunAngle = fmod(sunAngle, 360.0f);
-    if (sunAngle < 0.0f) {
-        sunAngle += 360.0f;
-    }
-    sunElevationAngle = fmod(sunElevationAngle, 360.0f);
-    if (sunElevationAngle < 0.0f) {
-        sunElevationAngle += 360.0f;
-    }
+    
 }
 
 
@@ -219,6 +238,56 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
             }
             else {
                 std::cerr << "ERROR: Indices de árbol golpeado inválidos!" << std::endl;
+            }
+        }
+    }
+}
+
+void CalculoCamara(GLFWwindow* window) {
+    posicionActual = camera.Position;
+    float distancia = glm::length(posicionActual - posicionOrigen);
+    if (distancia <= 6) {
+        animacion1 = true;
+        camera.Position = posicionA1;
+        Time = 222.0f;
+    }
+}
+
+void Animacion1(GLFWwindow* window) {
+    transparenciaC += 0.00015f;
+    posicionActual = camera.Position + glm::vec3(0.0f, -avanceA1, -avanceA1);
+    camera.Position = posicionActual;
+    float distancia = glm::length(posicionActual - posicionOrigen);
+    if (distancia <= 3) {
+        menu = true;
+        camera.Position = posicionCarga;
+        escena = 1;
+        animacion1 = false;
+    }
+
+}
+
+void Trancision() {
+    if (DT1 < 1.0)DT1 += velocidadCarga;
+    else {
+        if (DT2 < 1.0)DT2 += velocidadCarga;
+        else {
+            if (DT3 < 1.0)DT3 += velocidadCarga;
+            else {
+                if (DT4 < 1.0)DT4 += velocidadCarga;
+                else {
+                    if (DT5 < 1.0)DT5 += velocidadCarga;
+                    else {
+                        if (DT6 < 1.0)DT6 += velocidadCarga;
+                        else {
+                            if (DHoja < 1.3)DHoja += velocidadCarga;
+                            else {
+                                menu = false;
+                                camera.Position = posicionEscenario1;
+                            }
+                        }
+                    }
+                }
             }
         }
     }
