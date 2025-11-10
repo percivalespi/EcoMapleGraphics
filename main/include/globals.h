@@ -149,13 +149,34 @@ struct ForestAssets {
 struct TestAssets { //Elementos Para el entorno de Prueba
     Light light01;
     Light light02;
-    Material steel;
-    Material asphalt;
     Model* car;
     Model* luminaire;
     Model* stop;
     Model* floor;
     AnimatedModel *character01;
+    Light cameraLight;
+
+    //Modelos
+    Model* suelo, *suelo_verde, *metales, *objMadera, *objCristales;
+    Model* objPlasticos, *objConcreto, *objLlantas, *objLadrillo;
+    Model* bandera, *grafitis, *luzSemaforo, *co2;
+
+
+    //Modelos IA
+    Model* hopstial, * fabrica, * policia, * tienda, * rascacielos, *edificio2, *banco;
+
+
+    
+
+
+    //Materiales
+    Material asphalt, cesped, concreto, goma, ladrillo, tela, gases, focos;
+    
+
+    Material steel;
+    Material plastic;
+    Material traslucido;
+    Material madera;
 };
 
 // -- Assets del Bosque
@@ -274,8 +295,8 @@ extern ISoundEngine* SoundEngine;
 extern bool g_runTestEnvironment;
 
 
-// Modelos animados
-extern AnimatedModel* character01;
+// Shaders para materiales
+extern Shader* lambertShader;
 
 
 #endif

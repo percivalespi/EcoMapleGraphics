@@ -141,6 +141,15 @@ ForestAssets fa;
 UIAssets ui;
 TestAssets ta;
 
+// Shaders para materiales
+Shader* lambertShader;
+
+
+
+
+
+
+
 // -> Variable Global Para el Manejo del [Audio]
 ISoundEngine* SoundEngine = createIrrKlangDevice();
 
@@ -249,6 +258,9 @@ bool Start() {
     //Shader para animaciones
     dynamicShader = new Shader("shaders/10_vertex_skinning-IT.vs", "shaders/10_fragment_skinning-IT.fs");
 
+    lambertShader = new Shader("shaders/lambert.vs", "shaders/lambert.fs");
+
+
     // Máximo número de huesos: 100
     dynamicShader->setBonesIDs(MAX_RIGGING_BONES);
 
@@ -273,6 +285,12 @@ bool Start() {
         delete mLightsShader;
         return false;
     }
+
+    //ta.light02.Position = glm::vec3(camera.Position);
+    //ta.light02.Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    //ta.light02.Power = glm::vec4(10.0f, 10.0f, 10.0f, 1.0f); // Potencia en Watts
+    //ta.light02.alphaIndex = 16;
+    //gLights.push_back(ta.light02);
 
     // Carga de Modelos y Recursos
     loadUI(ui);

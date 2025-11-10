@@ -268,8 +268,18 @@ bool Frustum::isBoxInFrustum(const glm::vec3& min, const glm::vec3& max) const {
 }
 
 void updateGameLogic() {
-    if (g_runTestEnvironment) return;
+    if (g_runTestEnvironment) {
+        glm::vec3 offset = (camera.Right * 0.3f) - (camera.Up * 0.2f);
+        ta.cameraLight.Position = camera.Position + offset;
+        ta.cameraLight.Position = camera.Position;
 
+        // 2. (Opcional) Si tu luz es tipo "spot" (tiene dirección),
+        //    haz que apunte a donde mira la cámara:
+        ta.cameraLight.Direction = camera.Front;
+ 
+        return;
+    }
+        
     if (isFireActive) {
         float fire_elapsed = (float)glfwGetTime() - fireStartTime;
         if (fire_elapsed >= fireDuration) {
