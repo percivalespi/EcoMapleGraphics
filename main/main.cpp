@@ -19,7 +19,7 @@ Ultimas Implementaciones: (Incendio Secuencial + Scope Global + Estilo Súper Es
 #include "src_manager.h"
 
 // Bandera Para activar entorno de prueba
-bool g_runTestEnvironment = false; // <-- CAMBIADO A FALSE PARA VER EL BOSQUE
+bool g_runTestEnvironment = true; // <-- CAMBIADO A FALSE PARA VER EL BOSQUE
 
 // Firmas de Funciones - Estructura Básica OpenGL
 bool Start();
