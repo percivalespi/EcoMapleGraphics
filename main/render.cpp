@@ -37,6 +37,7 @@ void renderTestEnvironment(const glm::mat4& projection, const glm::mat4& view) {
         glm::mat4 view_skybox = glm::mat4(glm::mat3(view));
         skyboxShader->setMat4("view", view_skybox);
         glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, (-WORLD_SIZE * 35) - 2.5));
         model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(1000.0f));
         Model* currentSkybox = isDay ? fa.cubeenv : fa.cubeenv_noche;

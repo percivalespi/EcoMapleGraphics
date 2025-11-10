@@ -505,9 +505,13 @@ void updateGameLogic() {
 
     if (isFireActive) {
         float fire_elapsed = (float)glfwGetTime() - fireStartTime;
+
+        // --- LÓGICA DE FIN DE INCENDIO ---
+        // Comprueba si el tiempo total del incendio ha terminado
         if (fire_elapsed >= fireDuration) {
             isFireActive = false;
             std::cout << "El incendio ha terminado." << std::endl;
+            // Limpieza: Cualquier árbol que SIGA quemándose, se convierte en tronco
             for (Chunk& chunk : terrain_chunks) {
                 for (TreeInstance& tree : chunk.tree_instances) {
                     if (tree.state == TreeState::BURNING) {
@@ -516,10 +520,13 @@ void updateGameLogic() {
                 }
             }
         }
+        // --- LÓGICA DURANTE EL INCENDIO ---
         else {
             for (Chunk& chunk : terrain_chunks) {
                 for (TreeInstance& tree : chunk.tree_instances) {
+
                     // Transición 1: ALIVE/CHOPPED_ONCE -> BURNING
+                    // Comprueba si es hora de que este árbol comience a arder
                     if (tree.fireTriggerTime >= 0.0f && fire_elapsed >= tree.fireTriggerTime) {
                         if (tree.state == TreeState::ALIVE || tree.state == TreeState::CHOPPED_ONCE) {
                             if (tree.state == TreeState::ALIVE) {
@@ -531,14 +538,17 @@ void updateGameLogic() {
                                 g_currentLivingTrees--; // <-- PIERDE VIDA POR FUEGO
                             }
                             tree.state = TreeState::BURNING;
-                            tree.fireTriggerTime = -1.0f;
+                            tree.fireTriggerTime = -1.0f; // Previene que se active de nuevo
                         }
                     }
+
+                    // --- ¡¡LÓGICA CLAVE FALTANTE!! ---
                     // Transición 2: BURNING -> CHOPPED_TWICE
+                    // Comprueba si este árbol ya terminó de quemarse (su tiempo individual)
                     if (tree.burnOutTime >= 0.0f && fire_elapsed >= tree.burnOutTime) {
                         if (tree.state == TreeState::BURNING) {
                             tree.state = TreeState::CHOPPED_TWICE;
-                            tree.burnOutTime = -1.0f;
+                            tree.burnOutTime = -1.0f; // Previene que se active de nuevo
                         }
                     }
                 }
@@ -546,6 +556,7 @@ void updateGameLogic() {
         }
     }
 
+    // --- Lógica de Hojas ---
     leaf_matrices.clear();
     for (size_t i = 0; i < falling_leaves.size(); ++i) {
         Leaf& leaf = falling_leaves[i];
@@ -576,8 +587,7 @@ void updateGameLogic() {
         leaf_matrices.push_back(model);
     }
 
-    // --- NUEVO: Llamar a la función de simulación ---
-    // (Esto también llama a updateAnimalAI internamente)
+    // --- Lógica de Animales ---
     updateForestHealthAndAnimals(deltaTime);
 }
 
