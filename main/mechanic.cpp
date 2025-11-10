@@ -363,15 +363,7 @@ void updateAnimalAI(float deltaTime) {
 
                 // --- CORRECCIÓN DE ROTACIÓN ---
                 // Calcular el ángulo base
-                float baseAngle = atan2(direction.x, direction.z);
-
-                // Si el animal es un lobo (usando su modelo de caminar como identificador), aplicar un desfase.
-                // El valor -1.5708f es -PI/2, que corresponde a -90 grados.
-                if (animal.walk == fa.character01) {
-                    baseAngle -= 1.5708f;
-                }
-                animal.rotationY = baseAngle;
-                // --- FIN CORRECCIÓN ---
+                animal.rotationY = atan2(direction.x, direction.z); // Rotar para mirar en la dirección
 
 
                 // Actualizar animación de caminar (WALKING)
@@ -402,8 +394,8 @@ void updateAnimalAI(float deltaTime) {
         }
 
         // --- CORRECCIÓN: Forzar la posición dentro de los límites del mundo ---
-        animal.position.x = glm::clamp(animal.position.x, WORLD_MIN_X, WORLD_MAX_X);
-        animal.position.z = glm::clamp(animal.position.z, WORLD_MIN_Z, WORLD_MAX_Z);
+        animal.position.x = glm::clamp(animal.position.x, WORLD_MIN_X, WORLD_MAX_X-20.0f);
+        animal.position.z = glm::clamp(animal.position.z, WORLD_MIN_Z, WORLD_MAX_Z-20.0f);
     }
 }
 
