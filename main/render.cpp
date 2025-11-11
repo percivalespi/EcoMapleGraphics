@@ -710,6 +710,7 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
     glm::vec4 dimmedLightPower = fa.theLight.Power * nightDimFactor;
     isDay = (normalizedSunY > -0.1f);
     float escala;
+    glm::mat4 view_skybox = glm::mat4(glm::mat3(view));
 
 
     // --- 1. DIBUJAR OBJETOS OPACOS ESTÁTICOS ---
@@ -1179,14 +1180,44 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
 
 
     // --- FIN 3.8 ---
+    // --- 5. DIBUJAR EL SOL (ANTES DEL SKYBOX) ---
+    if (sunShader != nullptr && sunShader->ID != 0 && fa.sun_model != nullptr) {
+        // Escribir en depth para que montañas puedan ocultarlo
+        sunShader->use();
+        sunShader->setMat4("projection", projection);
+        sunShader->setMat4("view", view_skybox); // sin traslación
+        float sunVisibleDistance = 950.0f;
+        glm::vec3 sunVisiblePosition = glm::vec3(sunVisibleDistance * cos(sunElevRad) * sin(sunAngleRad), sunVisibleDistance * sin(sunElevRad), sunVisibleDistance * cos(sunElevRad) * cos(sunAngleRad));
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, sunVisiblePosition);
+        model = glm::scale(model, glm::vec3(15.0f));
+        sunShader->setMat4("model", model);
+        glm::vec4 sunTintColor = glm::vec4(1.0f, 1.0f, 0.8f, 1.0f) * nightDimFactor;
+        sunShader->setVec4("tintColor", sunTintColor);
+        fa.sun_model->Draw(*sunShader);
+    }
 
+    // --- 6. DIBUJAR LA LUNA (ANTES DEL SKYBOX) ---
+    if (sunShader != nullptr && sunShader->ID != 0 && fa.moon_model != nullptr) {
+        sunShader->use();
+        sunShader->setMat4("projection", projection);
+        sunShader->setMat4("view", view_skybox);
+        float moonVisibleDistance = 900.0f;
+        glm::vec3 moonVisiblePosition = glm::vec3(-moonVisibleDistance * cos(sunElevRad) * sin(sunAngleRad), -moonVisibleDistance * sin(sunElevRad), -moonVisibleDistance * cos(sunElevRad) * cos(sunAngleRad));
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, moonVisiblePosition);
+        model = glm::scale(model, glm::vec3(12.0f));
+        sunShader->setMat4("model", model);
+        glm::vec4 moonTintColor = glm::vec4(0.8f, 0.85f, 0.95f, 1.0f) * (1.0f - dayNightTransition);
+        sunShader->setVec4("tintColor", moonTintColor);
+        fa.moon_model->Draw(*sunShader);
+    }
 
-    // --- 4. DIBUJAR SKYBOX ---
+    // --- 4. DIBUJAR SKYBOX (AL FINAL PARA NO TAPAR SOL/LUNA) ---
     if (skyboxShader != nullptr && skyboxShader->ID != 0) {
         glDepthFunc(GL_LEQUAL);
         skyboxShader->use();
         skyboxShader->setMat4("projection", projection);
-        glm::mat4 view_skybox = glm::mat4(glm::mat3(view));
         skyboxShader->setMat4("view", view_skybox);
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -1197,52 +1228,15 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
             currentSkybox->Draw(*skyboxShader);
         }
         glDepthFunc(GL_LESS);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, 0);
     }
 
-    // --- 5. DIBUJAR EL SOL ---
-    if (sunShader != nullptr && sunShader->ID != 0 && fa.sun_model != nullptr) {
-        glDepthMask(GL_FALSE);
-        sunShader->use();
-        sunShader->setMat4("projection", projection);
-        sunShader->setMat4("view", view);
-        float sunVisibleDistance = 950.0f;
-        glm::vec3 sunVisiblePosition = glm::vec3(sunVisibleDistance * cos(sunElevRad) * sin(sunAngleRad), sunVisibleDistance * sin(sunElevRad), sunVisibleDistance * cos(sunElevRad) * cos(sunAngleRad));
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, sunVisiblePosition);
-        model = glm::scale(model, glm::vec3(15.0f));
-        sunShader->setMat4("model", model);
-        glm::vec4 sunTintColor = glm::vec4(1.0f, 1.0f, 0.8f, 1.0f) * nightDimFactor;
-        sunShader->setVec4("tintColor", sunTintColor);
-        fa.sun_model->Draw(*sunShader);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, 0);
-    }
-
-    // --- 6. DIBUJAR LA LUNA ---
-    if (sunShader != nullptr && sunShader->ID != 0 && fa.moon_model != nullptr) {
-        if (fa.sun_model == nullptr || !(sunShader && sunShader->ID != 0)) {
-            glDepthMask(GL_FALSE);
-        }
-        float moonVisibleDistance = 900.0f;
-        glm::vec3 moonVisiblePosition = glm::vec3(-moonVisibleDistance * cos(sunElevRad) * sin(sunAngleRad), -moonVisibleDistance * sin(sunElevRad), -moonVisibleDistance * cos(sunElevRad) * cos(sunAngleRad));
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, moonVisiblePosition);
-        model = glm::scale(model, glm::vec3(12.0f));
-        sunShader->setMat4("model", model);
-        glm::vec4 moonTintColor = glm::vec4(0.8f, 0.85f, 0.95f, 1.0f) * (1.0f - dayNightTransition);
-        sunShader->setVec4("tintColor", moonTintColor);
-        fa.moon_model->Draw(*sunShader);
-        glDepthMask(GL_TRUE);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, 0);
-    }
-    else {
-        glDepthMask(GL_TRUE);
-    }
-
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
+
+    
+
+
 
 void renderUI() {
     // --- 7. DIBUJAR LA CRUZ (CROSSHAIR) ---
