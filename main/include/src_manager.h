@@ -24,6 +24,22 @@ void initilizeMaterialsForest(ForestAssets& fa);
 void initilizeLightsForest(ForestAssets& fa);
 void loadForest(ForestAssets& fa);
 
+/* -------------------------------------------- Recursos Espacio, Menu y Glaciar ------------------------------------------*/
+void initializeModelsEspacio(EspacioAssets& ea);
+void initilizeMaterialsEspacio(EspacioAssets& ea);
+void initilizeLightsEspacio(EspacioAssets& ea);
+void loadEspacio(EspacioAssets& ea);
+
+void initializeModelsMenu(MenuAssets& ma);
+void loadMenu(MenuAssets& ma);
+
+void initializeModelsGlaciar(GlaciarAssets& ga);
+void initilizeMaterialsGlaciar(GlaciarAssets& ga);
+void initilizeLightsGlaciar(GlaciarAssets& ga);
+void loadGlaciar(GlaciarAssets& ga);
+
+
+
 
 
 

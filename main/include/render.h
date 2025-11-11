@@ -6,6 +6,9 @@
 // Manejo de Renderizado
 void renderForestScene(const glm::mat4& projection, const glm::mat4& view);
 void renderTestEnvironment(const glm::mat4& projection, const glm::mat4& view);
+void renderEspacioScene(const glm::mat4& projection, const glm::mat4& view);
+void renderMenuScene(const glm::mat4& projection, const glm::mat4& view);
+void renderGlaciarScene(const glm::mat4& projection, const glm::mat4& view);
 
 void setupInstanceVBO(unsigned int& vbo, size_t max_items, Model* model_to_setup);
 void renderScene(); 

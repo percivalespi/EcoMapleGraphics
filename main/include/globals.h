@@ -1,8 +1,8 @@
-#ifndef GLOBALS_H
+ï»¿#ifndef GLOBALS_H
 #define GLOBALS_H
 
 // --- 1. INCLUDES ---
-// Aquí van TODAS las librerías del proyecto
+// AquÃ­ van TODAS las librerÃ­as del proyecto
 #include <iostream>
 #include <stdlib.h>
 #include <vector>
@@ -35,7 +35,7 @@ using namespace irrklang;
 
 
 // --- 2. ESTRUCTURAS ---
-// Aquí van TODAS las definiciones de structs y enums
+// AquÃ­ van TODAS las definiciones de structs y enums
 struct Plane {
     glm::vec3 normal;
     float distance;
@@ -63,6 +63,7 @@ enum class TreeState {
     BURNING,
     CHOPPED_TWICE
 };
+
 
 struct TreeInstance {
     glm::mat4 matrix;
@@ -109,7 +110,7 @@ struct UIAssets {//Buffers
 };
 
 
-// --- NUEVO: Constantes de Simulación ---
+// --- NUEVO: Constantes de SimulaciÃ³n ---
 const float FOREST_HEALTH_TRIGGER = 0.25f;    // 25% de vida para que los animales mueran
 const float ANIMAL_DEATH_RATE = 5.0f;       // Un animal muere cada 5 segundos
 const float ANIMAL_RESPAWN_RATE = 10.0f;    // Un animal reaparece cada 10 segundos
@@ -118,7 +119,7 @@ const float ANIMAL_RESPAWN_RATE = 10.0f;    // Un animal reaparece cada 10 segun
 // --- Constantes y Estructuras para Animales ---
 const unsigned int ANIMALS_PER_CHUNK = 1; // Lo dejamos en 1 como pediste
 const float ANIMAL_MOVE_SPEED = 2.0f; // Metros por segundo
-const float ANIMAL_TREE_AVOIDANCE_RADIUS = 1.5f; // Radio para evitar árboles
+const float ANIMAL_TREE_AVOIDANCE_RADIUS = 1.5f; // Radio para evitar Ã¡rboles
 const int ANIMAL_MAX_PATHFIND_TRIES = 10; // Intentos para encontrar un destino
 const float ANIMAL_SPAWN_PROBABILITY = 0.25f; // 25% de probabilidad
 
@@ -139,7 +140,8 @@ struct AnimalInstance {
     AnimatedModel* walk; //  <-- NUEVO. Puntero para el modelo de animal que estemos usando
     AnimatedModel* idle;
 
-    // Estado de animación (movido de AnimatedModel)
+    // Estado de animaciï¿½n (movido de AnimatedModel)
+    // Estado de animaciÃ³n (movido de AnimatedModel)
     float elapsedTime;
     int animationCount;
     glm::mat4 gBones[MAX_RIGGING_BONES]; // MAX_RIGGING_BONES se define en animatedmodel.h
@@ -228,6 +230,57 @@ struct TestAssets { //Elementos Para el entorno de Prueba
     Material madera;
 };
 
+struct EspacioAssets {
+    // Modelos
+    Model* Tierra;
+    Model* Canada;
+    Model* Luna;
+    Model* cubeenv;
+    Model* cubeenv_noche;
+    // --- Luz
+    Light theLight;
+    // Material
+    Material defaultMaterial;
+
+};
+
+struct MenuAssets {
+    // Modelos
+    Model* Texto1;
+    Model* Texto2;
+    Model* Texto3;
+    Model* Texto4;
+    Model* Texto5;
+    Model* Texto6;
+    Model* HojaArce_Menu;
+    Model* Fondo_Menu;
+};
+
+struct GlaciarAssets {
+    // Modelos
+    Model* BarraAzul;
+    Model* BarraRoja;
+    Model* TerAzulBase;
+    Model* TerRojoBase;
+    Model* TrozoH1;
+    Model* TrozoH2;
+    Model* Agua;
+    Model* Iceberg;
+    Model* PlacaHielo;
+    Model* Glaciares;
+    AnimatedModel* Oso1;
+    AnimatedModel* Oso2;
+    AnimatedModel* Oso3;
+    AnimatedModel* Oso4;
+    AnimatedModel* Oso5;
+
+    // --- Luz
+    Light theLight;
+    // Material
+    Material defaultMaterial;
+};
+
+
 // -- Assets del Bosque
 extern ForestAssets fa;
 
@@ -237,9 +290,15 @@ extern UIAssets ui;
 // -- Assets de Test
 extern TestAssets ta;
 
+extern EspacioAssets ea;
+
+extern MenuAssets ma;
+
+extern GlaciarAssets ga;
+
 // --- 3. DECLARACIONES GLOBALES (EXTERN) ---
 // 'extern' le dice al compilador: "esta variable existe,
-// pero su memoria está definida en OTRO archivo .cpp"
+// pero su memoria estÃ¡ definida en OTRO archivo .cpp"
 
 extern GLFWwindow* window;
 extern const unsigned int SCR_WIDTH;
@@ -307,6 +366,7 @@ extern std::uniform_real_distribution<float> dis_cloud_scale;
 extern Shader* uiShader;
 extern Shader* mLightsShader;
 extern Shader* phongShader;
+extern Shader* phongShader2;
 extern Shader* instancePhongShader;
 extern Shader* instanceAlphaTestPhongShader;
 extern Shader* skyboxShader;
@@ -314,6 +374,10 @@ extern Shader* sunShader;
 extern Shader* crosshairShader;
 extern Shader* dynamicShader;
 
+extern Shader* moonShader;
+extern Shader* basicShader;
+extern Shader* wavesShader;
+extern Shader* wavesShader2;
 
 extern bool isDay;
 
@@ -321,7 +385,7 @@ extern bool isDay;
 extern std::vector<Chunk> terrain_chunks;
 extern const int WORLD_SIZE;
 
-// --- Límites del mundo y vector de animales ---
+// --- LÃ­mites del mundo y vector de animales ---
 extern float WORLD_MIN_X, WORLD_MAX_X, WORLD_MIN_Z, WORLD_MAX_Z;
 extern std::vector<AnimalInstance> g_animals;
 // --- FIN NUEVO ---
@@ -351,7 +415,7 @@ extern int next_tree_id;
 extern const glm::vec3 tree_trunk_aabb_min;
 extern const glm::vec3 tree_trunk_aabb_max;
 
-// --- Globales de Lógica ---
+// --- Globales de LÃ³gica ---
 extern bool p_key_pressed;
 extern bool f_key_pressed;
 extern bool g_key_pressed;
@@ -366,6 +430,50 @@ extern ISoundEngine* SoundEngine;
 // Bandera Para Entorno de Prueba
 extern bool g_runTestEnvironment;
 
+//Variables para Tierra y Glaciar
+extern float Time;
+extern float TimeA1;
+
+extern float transparenciaC;
+extern float wavesTime;
+extern float avanceA1;
+
+extern float DT1;
+extern float DT2;
+extern float DT3;
+extern float DT4;
+extern float DT5;
+extern float DT6;
+extern float DHoja;
+extern const float velocidadCarga;
+
+extern float temperatura;
+extern float barraTF;
+extern float barraTC;
+
+extern int escena;
+
+extern bool menu;
+extern bool animacion1;
+extern bool calor;
+
+// === Variables globales para derretimiento en escena 1 ===
+extern float glacierScaleY;          // escala vertical de Glaciares (1 â†’ 0)
+extern float meltSpeedBase;         // factor base de derretimiento por Â°C
+extern float osoDropFactor;          // descenso de osos por unidad derretida
+
+// === Movimiento aleatorio segmentado para Oso3, Oso4 y Oso5 ===
+// Recorren tramos de 10 unidades y giran Â±90Â° al azar al finalizar cada tramo.
+extern const float OSO_SEGMENTO;
+extern const float OSO_SPEED;            // unidades/segundo
+extern glm::vec3 osoPos[3];
+
+extern glm::vec3 posicionActual;
+extern glm::vec3 posicionA1;
+extern glm::vec3 posicionCarga;
+extern glm::vec3 posicionInicioG;
+extern glm::vec3 posicionOrigen;
+extern glm::vec3 posicionEscenario1;
 
 // Shaders para materiales
 extern Shader* lambertShader;

@@ -25,6 +25,8 @@ bool g_runTestEnvironment = false; // <-- CAMBIADO A FALSE PARA VER EL BOSQUE
 bool Start();
 bool Update();
 
+void processInput2(GLFWwindow* window);
+
 /* ------------------------------------------ Variables Globales ------------------------------------------------------ */
 
 // --> Variables Globales Para la <Ventana> 
@@ -97,6 +99,12 @@ Shader* uiShader = nullptr;
 // Shader de Skinning
 Shader* dynamicShader = nullptr;
 
+Shader* phongShader2 = nullptr;
+Shader* moonShader;
+Shader* basicShader;
+Shader* wavesShader;
+Shader* wavesShader2;
+
 
 // --> Variables Globales Para el estado del mundo [Iluminacion y Materiales]
 std::vector<Chunk> terrain_chunks;
@@ -160,6 +168,9 @@ std::vector<Light> gLights;
 ForestAssets fa;
 UIAssets ui;
 TestAssets ta;
+EspacioAssets ea;
+MenuAssets ma;
+GlaciarAssets ga;
 
 // Shaders para materiales
 Shader* lambertShader;
@@ -172,6 +183,51 @@ Shader* lambertShader;
 
 // -> Variable Global Para el Manejo del [Audio]
 ISoundEngine* SoundEngine = createIrrKlangDevice();
+
+//Variables tierra, glaciares
+float Time = 0.0f;
+float TimeA1 = 0.0f;
+
+float transparenciaC = 0.0f;
+float wavesTime = 0.0f;
+float avanceA1 = 0.0005f;
+
+float DT1 = 0.0f;
+float DT2 = 0.0f;
+float DT3 = 0.0f;
+float DT4 = 0.0f;
+float DT5 = 0.0f;
+float DT6 = 0.0f;
+float DHoja = 0.0f;
+const float velocidadCarga = 0.05f;
+
+float temperatura = -25.0f;
+float barraTF = 0.0f;
+float barraTC = 0.0f;
+
+int escena = 0;
+
+bool menu = false;
+bool animacion1 = false;
+bool calor = false;
+
+// === Variables globales para derretimiento en escena 1 ===
+float glacierScaleY = 1.0f;          // escala vertical de Glaciares (1 → 0)
+float meltSpeedBase = 0.01f;         // factor base de derretimiento por °C
+float osoDropFactor = 2.0f;          // descenso de osos por unidad derretida
+
+// === Movimiento aleatorio segmentado para Oso3, Oso4 y Oso5 ===
+// Recorren tramos de 10 unidades y giran ±90° al azar al finalizar cada tramo.
+const float OSO_SEGMENTO = 10.0f;
+const float OSO_SPEED = 1.0f;            // unidades/segundo
+glm::vec3 osoPos[3] = { {0,0,0}, {0,0,0}, {0,0,0} };
+
+glm::vec3 posicionActual(0.0f, 2.0f, 10.0f);
+glm::vec3 posicionA1(-0.6f, 6.0f, 5.0f);
+glm::vec3 posicionCarga(0.0f, 47.0f, 4.0f);
+glm::vec3 posicionInicioG(0.0f, 2.0f, 10.0f);
+glm::vec3 posicionOrigen(0.0f, 0.0f, 0.0f);
+glm::vec3 posicionEscenario1(0.0f, 40.0f, 340.0f);
 
 
 int main() {
@@ -278,7 +334,14 @@ bool Start() {
     crosshairShader = new Shader("shaders/crosshair.vs", "shaders/crosshair.fs");
     uiShader = new Shader("shaders/ui_shader.vs", "shaders/ui_shader.fs");
 
+    //Shaders de Tierra y Glaciares
+    moonShader = new Shader("shaders/16_moonAnimation.vs", "shaders/16_moonAnimation.fs");
+    basicShader = new Shader("shaders/10_vertex_simple.vs", "shaders/10_fragment_simple.fs");
+    wavesShader = new Shader("shaders/13_wavesAnimation.vs", "shaders/13_wavesAnimation.fs");
+    wavesShader2 = new Shader("shaders/13_wavesAnimation2.vs", "shaders/13_wavesAnimation2.fs");
+
     //Shader de Luces Multiples de Phong
+    phongShader2 = new Shader("shaders/11_BasicPhongShader2.vs", "shaders/11_BasicPhongShader2.fs");
     mLightsShader = new Shader("shaders/11_PhongShaderMultLights.vs", "shaders/11_PhongShaderMultLights.fs");
 
     // --- NUEVO: Cargar Shader de Skinning ---
@@ -319,6 +382,9 @@ bool Start() {
     loadTest(ta);
     loadForest(fa);
 
+    loadMenu(ma);
+    loadEspacio(ea);
+    loadGlaciar(ga);
     // Inicialiacion de los Buffer de Renderizado
     initializeRenderBuffers(ui);
 
@@ -363,7 +429,15 @@ bool Update() {
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
 
-    // Procesar Entradas por Hardware
+    if (!animacion1 && escena == 0)CalculoCamara(window);
+    else if (!menu && animacion1)Animacion1(window);
+    else if (menu)Trancision();
+
+    //Cálculo del desplazamiento de la barra del termómetro
+    barraTF = (temperatura + 25.0) * 0.04088f;
+    barraTC = temperatura * 0.0236f;
+
+    // Procesa la entrada del teclado o mouse
     processInput(window);
 
     //Actualizar la Logica de Mundo
@@ -373,9 +447,71 @@ bool Update() {
     renderScene();
 
     // Dibujar UI 2D 
-    renderUI();
-
+    if(escena==1 && !menu)renderUI();
     glfwSwapBuffers(window);
     glfwPollEvents();
+         
+    //processInput2(window);
+
+    
     return true;
+}
+
+// Procesamos entradas del teclado
+void processInput2(GLFWwindow* window)
+{
+    if (!animacion1 && !menu) {
+
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+            camera.ProcessKeyboard(FORWARD, deltaTime);
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+            camera.ProcessKeyboard(BACKWARD, deltaTime);
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+            camera.ProcessKeyboard(LEFT, deltaTime);
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+            camera.ProcessKeyboard(RIGHT, deltaTime);
+        if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS)
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
+            glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+
+        // Character movement
+        if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+            Time += 0.05f;
+        }
+        if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+            Time -= 0.05f;
+        }
+        if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS) {
+
+        }
+        if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS) {
+
+        }
+        if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS) {
+        }
+        if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
+
+        }
+        if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+            if (temperatura > -40.00 && !calor)temperatura -= 0.05f;
+        }
+        if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+            if (temperatura < 40.00)temperatura += 0.05f;
+            if (temperatura > 0)calor = true;
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS)
+        {
+
+        }
+        if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS)
+        {
+
+        }
+    }
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
 }

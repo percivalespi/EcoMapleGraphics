@@ -11,7 +11,7 @@ void plantTree() {
     glm::vec3 ray_wor = glm::normalize(glm::vec3(glm::inverse(view) * ray_eye));
     glm::vec3 ray_origin = camera.Position;
 
-    // 2. Intersección Rayo-Plano (Suelo en Y=0)
+    // 2. Intersecci�n Rayo-Plano (Suelo en Y=0)
     glm::vec3 plane_normal(0.0f, 1.0f, 0.0f);
     float plane_d = 0.0f;
     float denom = glm::dot(plane_normal, ray_wor);
@@ -26,7 +26,7 @@ void plantTree() {
         }
     }
 
-    // 3. Intersección Rayo-Bases de Árboles (CHOPPED_TWICE)
+    // 3. Intersecci�n Rayo-Bases de �rboles (CHOPPED_TWICE)
     float closest_t_tree_local = std::numeric_limits<float>::max(); // CORREGIDO: Declarado
     float closest_t_tree_world = std::numeric_limits<float>::max();
     int hit_chunk_idx = -1;
@@ -67,7 +67,7 @@ void plantTree() {
         }
     }
 
-    // 4. Decidir dónde plantar
+    // 4. Decidir d�nde plantar
     bool hit_ground = (t_ground > 0.0f);
     bool hit_tree_base = (hit_tree_id != -1);
 
@@ -110,7 +110,7 @@ void plantTree() {
             Chunk& target_chunk = terrain_chunks[target_chunk_idx];
 
             if (remove_old_base) {
-                std::cout << "Reemplazando base de árbol ID: " << hit_tree_id << std::endl;
+                std::cout << "Reemplazando base de �rbol ID: " << hit_tree_id << std::endl;
                 if (old_base_index < target_chunk.tree_instances.size() &&
                     target_chunk.tree_instances[old_base_index].id == hit_tree_id)
                 {
@@ -126,15 +126,15 @@ void plantTree() {
                         }
                     }
                     if (!found) {
-                        std::cerr << "ERROR: No se pudo encontrar la base del árbol para borrarla." << std::endl;
+                        std::cerr << "ERROR: No se pudo encontrar la base del �rbol para borrarla." << std::endl;
                     }
                 }
             }
             else {
-                std::cout << "Plantando nuevo árbol en el suelo." << std::endl;
+                std::cout << "Plantando nuevo �rbol en el suelo." << std::endl;
             }
 
-            // Crear nueva instancia de árbol
+            // Crear nueva instancia de �rbol
             TreeInstance new_tree;
             new_tree.id = next_tree_id++;
             new_tree.state = TreeState::ALIVE;
@@ -148,10 +148,10 @@ void plantTree() {
                     std::uniform_real_distribution<float> dis_new_fire_time(fire_elapsed, fireDuration - maxBurnDuration);
                     new_tree.fireTriggerTime = dis_new_fire_time(gen);
                     new_tree.burnOutTime = new_tree.fireTriggerTime + dis_burn_duration(gen);
-                    std::cout << " -> Árbol plantado se quemará en " << (new_tree.fireTriggerTime - fire_elapsed) << "s" << std::endl;
+                    std::cout << " -> �rbol plantado se quemar� en " << (new_tree.fireTriggerTime - fire_elapsed) << "s" << std::endl;
                 }
                 else {
-                    std::cout << " -> Árbol plantado demasiado tarde, no se quemará." << std::endl;
+                    std::cout << " -> �rbol plantado demasiado tarde, no se quemar�." << std::endl;
                 }
             }
 
@@ -169,7 +169,7 @@ void plantTree() {
             // --- FIN NUEVO ---
 
 
-            // Añadir hojas para el nuevo árbol
+            // A�adir hojas para el nuevo �rbol
             glm::vec3 treeBasePos = final_plant_pos;
             for (int j = 0; j < LEAVES_PER_TREE; j++) {
                 Leaf leaf;
@@ -192,18 +192,18 @@ void plantTree() {
 
         }
         else {
-            std::cout << "Intento de plantar en un chunk inválido." << std::endl;
+            std::cout << "Intento de plantar en un chunk inv�lido." << std::endl;
         }
     }
 }
 
 void startFire() {
     if (isFireActive) {
-        std::cout << "El incendio ya está en progreso." << std::endl;
+        std::cout << "El incendio ya est� en progreso." << std::endl;
         return;
     }
 
-    std::cout << "¡Iniciando incendio!" << std::endl;
+    std::cout << "�Iniciando incendio!" << std::endl;
     isFireActive = true;
     fireStartTime = (float)glfwGetTime();
 
@@ -272,17 +272,17 @@ bool Frustum::isBoxInFrustum(const glm::vec3& min, const glm::vec3& max) const {
     return true;
 }
 
-// --- NUEVA FUNCIÓN: Comprueba si una posición es válida (dentro del mundo y no en un árbol) ---
+// --- NUEVA FUNCI�N: Comprueba si una posici�n es v�lida (dentro del mundo y no en un �rbol) ---
 bool isPositionSafe(glm::vec3 pos) {
-    // 1. Comprobar límites del mundo
+    // 1. Comprobar l�mites del mundo
     if (pos.x < WORLD_MIN_X || pos.x > WORLD_MAX_X || pos.z < WORLD_MIN_Z || pos.z > WORLD_MAX_Z) {
         return false;
     }
 
-    // 2. Comprobar colisión con árboles
-    // (Optimización: podríamos usar una grid, pero esto es más simple por ahora)
+    // 2. Comprobar colisi�n con �rboles
+    // (Optimizaci�n: podr�amos usar una grid, pero esto es m�s simple por ahora)
     for (const auto& chunk : terrain_chunks) {
-        // Optimización rápida: si el chunk está muy lejos, no lo compruebes
+        // Optimizaci�n r�pida: si el chunk est� muy lejos, no lo compruebes
         if (glm::distance2(glm::vec2(pos.x, pos.z), glm::vec2(chunk.position.x, chunk.position.z)) > (CHUNK_SIZE * 2.0f) * (CHUNK_SIZE * 2.0f)) {
             continue;
         }
@@ -292,7 +292,7 @@ bool isPositionSafe(glm::vec3 pos) {
 
             glm::vec3 treePos = glm::vec3(tree.matrix[3]);
             if (glm::distance(glm::vec2(pos.x, pos.z), glm::vec2(treePos.x, treePos.z)) < ANIMAL_TREE_AVOIDANCE_RADIUS) {
-                return false; // Demasiado cerca de un árbol
+                return false; // Demasiado cerca de un �rbol
             }
         }
     }
@@ -300,26 +300,26 @@ bool isPositionSafe(glm::vec3 pos) {
     return true; // Es seguro
 }
 
-// --- NUEVA FUNCIÓN: Actualiza la IA de todos los animales ---
+// --- NUEVA FUNCI�N: Actualiza la IA de todos los animales ---
 void updateAnimalAI(float deltaTime) {
-    // No se necesitan comprobaciones iniciales, el bucle manejará una lista vacía.
+    // No se necesitan comprobaciones iniciales, el bucle manejar� una lista vac�a.
     for (AnimalInstance& animal : g_animals) {
 
-        // Saltarse a los muertos o a los que no tienen modelos de animación asignados
+        // Saltarse a los muertos o a los que no tienen modelos de animaci�n asignados
         if (animal.state == AnimalState::DEAD || animal.walk == nullptr || animal.idle == nullptr) {
             continue;
         }
 
         animal.stateTimer -= deltaTime;
 
-        // --- Lógica de cambio de estado ---
+        // --- L�gica de cambio de estado ---
         if (animal.stateTimer <= 0.0f) {
             if (animal.state == AnimalState::IDLE) {
                 // Cambiar a WALKING
                 animal.state = AnimalState::WALKING;
-                animal.stateTimer = dis_ai_time(gen); // Tiempo que pasará caminando
+                animal.stateTimer = dis_ai_time(gen); // Tiempo que pasar� caminando
 
-                // Encontrar un nuevo destino válido
+                // Encontrar un nuevo destino v�lido
                 int tries = 0;
                 bool foundTarget = false;
                 do {
@@ -327,12 +327,12 @@ void updateAnimalAI(float deltaTime) {
                     float dist = dis_ai_target_dist(gen);
                     animal.targetPosition = animal.position + glm::vec3(sin(angle) * dist, 0.0f, cos(angle) * dist);
 
-                    // isPositionSafe ya comprueba los límites del mundo y la colisión con árboles
+                    // isPositionSafe ya comprueba los l�mites del mundo y la colisi�n con �rboles
                     foundTarget = isPositionSafe(animal.targetPosition);
                     tries++;
                 } while (!foundTarget && tries < ANIMAL_MAX_PATHFIND_TRIES);
 
-                if (!foundTarget) { // No se encontró destino, quedarse quieto
+                if (!foundTarget) { // No se encontr� destino, quedarse quieto
                     animal.state = AnimalState::IDLE;
                     animal.stateTimer = dis_ai_time(gen) / 2.0f; // Esperar menos tiempo
                 }
@@ -341,74 +341,74 @@ void updateAnimalAI(float deltaTime) {
             else { // animal.state == AnimalState::WALKING
                 // Cambiar a IDLE
                 animal.state = AnimalState::IDLE;
-                animal.stateTimer = dis_ai_time(gen); // Tiempo que pasará quieto
-                animal.animationCount = 0; // Reiniciar conteo de animación para un bucle limpio
+                animal.stateTimer = dis_ai_time(gen); // Tiempo que pasar� quieto
+                animal.animationCount = 0; // Reiniciar conteo de animaci�n para un bucle limpio
             }
         }
 
-        // --- Lógica de movimiento y animación ---
+        // --- L�gica de movimiento y animaci�n ---
         if (animal.state == AnimalState::WALKING) {
             glm::vec3 direction = glm::normalize(animal.targetPosition - animal.position);
             float distanceToTarget = glm::distance(animal.position, animal.targetPosition);
 
             if (distanceToTarget < 0.5f) {
-                // Llegó al destino
+                // Lleg� al destino
                 animal.state = AnimalState::IDLE;
                 animal.stateTimer = dis_ai_time(gen);
-                animal.animationCount = 0; // Reiniciar conteo de animación
+                animal.animationCount = 0; // Reiniciar conteo de animaci�n
             }
             else {
                 // Moverse hacia el destino
                 animal.position += direction * ANIMAL_MOVE_SPEED * deltaTime;
 
-                // --- CORRECCIÓN DE ROTACIÓN ---
-                // Calcular el ángulo base
-                animal.rotationY = atan2(direction.x, direction.z); // Rotar para mirar en la dirección
+                // --- CORRECCI�N DE ROTACI�N ---
+                // Calcular el �ngulo base
+                animal.rotationY = atan2(direction.x, direction.z); // Rotar para mirar en la direcci�n
 
 
-                // Actualizar animación de caminar (WALKING)
+                // Actualizar animaci�n de caminar (WALKING)
                 animal.elapsedTime += deltaTime;
                 if (animal.elapsedTime > 1.0f / animal.walk->fps) {
                     animal.elapsedTime = 0.0f;
                     animal.animationCount++;
                     if (animal.animationCount >= animal.walk->keys) {
-                        animal.animationCount = 0; // Bucle de animación
+                        animal.animationCount = 0; // Bucle de animaci�n
                     }
-                    // Actualiza el array gBones de ESTA instancia con SU animación de caminar
+                    // Actualiza el array gBones de ESTA instancia con SU animaci�n de caminar
                     animal.walk->SetPose((float)animal.animationCount, animal.gBones);
                 }
             }
         }
         else if (animal.state == AnimalState::IDLE) {
-            // Actualizar animación de reposo (IDLE)
+            // Actualizar animaci�n de reposo (IDLE)
             animal.elapsedTime += deltaTime;
             if (animal.elapsedTime > 1.0f / animal.idle->fps) {
                 animal.elapsedTime = 0.0f;
                 animal.animationCount++;
                 if (animal.animationCount >= animal.idle->keys) {
-                    animal.animationCount = 0; // Bucle de animación
+                    animal.animationCount = 0; // Bucle de animaci�n
                 }
-                // Actualiza el array gBones de ESTA instancia con SU animación de reposo
+                // Actualiza el array gBones de ESTA instancia con SU animaci�n de reposo
                 animal.idle->SetPose((float)animal.animationCount, animal.gBones);
             }
         }
 
-        // --- CORRECCIÓN: Forzar la posición dentro de los límites del mundo ---
+        // --- CORRECCI�N: Forzar la posici�n dentro de los l�mites del mundo ---
         animal.position.x = glm::clamp(animal.position.x, WORLD_MIN_X, WORLD_MAX_X - 20.0f);
         animal.position.z = glm::clamp(animal.position.z, WORLD_MIN_Z, WORLD_MAX_Z - 20.0f);
     }
 }
 
 
-// --- NUEVA FUNCIÓN ---
-// Esta función ahora maneja la IA y la simulación de vida/muerte
+// --- NUEVA FUNCI�N ---
+// Esta funci�n ahora maneja la IA y la simulaci�n de vida/muerte
 void updateForestHealthAndAnimals(float deltaTime) {
     // 1. Actualizar Salud del Bosque
     if (g_totalInitialTrees > 0) {
         g_forestHealth = (float)g_currentLivingTrees / (float)g_totalInitialTrees;
     }
     else {
-        g_forestHealth = 0.0f; // No había árboles para empezar
+        g_forestHealth = 0.0f; // No hab�a �rboles para empezar
     }
     g_forestHealth = glm::clamp(g_forestHealth, 0.0f, 1.0f);
 
@@ -421,7 +421,7 @@ void updateForestHealthAndAnimals(float deltaTime) {
     // 2. Actualizar IA de animales vivos
     updateAnimalAI(deltaTime);
 
-    // 3. Lógica de Muerte de Animales
+    // 3. L�gica de Muerte de Animales
     if (g_forestHealth <= FOREST_HEALTH_TRIGGER) {
         g_animalDeathTimer -= deltaTime;
         if (g_animalDeathTimer <= 0.0f) {
@@ -438,8 +438,8 @@ void updateForestHealthAndAnimals(float deltaTime) {
         }
     }
 
-    // 4. Lógica de Respawn de Animales
-    // Contar cuántos animales están vivos actualmente
+    // 4. L�gica de Respawn de Animales
+    // Contar cu�ntos animales est�n vivos actualmente
     int living_animals = 0;
     for (const auto& animal : g_animals) {
         if (animal.state != AnimalState::DEAD) {
@@ -455,7 +455,7 @@ void updateForestHealthAndAnimals(float deltaTime) {
             // Buscar un animal muerto para reaparecer
             for (AnimalInstance& animal : g_animals) {
                 if (animal.state == AnimalState::DEAD) {
-                    // ¡Reaparecer este! Encontrar una posición segura
+                    // �Reaparecer este! Encontrar una posici�n segura
                     int tries = 0;
                     bool respawned = false;
                     do {
@@ -498,12 +498,12 @@ void updateGameLogic() {
     if (isFireActive) {
         float fire_elapsed = (float)glfwGetTime() - fireStartTime;
 
-        // --- LÓGICA DE FIN DE INCENDIO ---
+        // --- L�GICA DE FIN DE INCENDIO ---
         // Comprueba si el tiempo total del incendio ha terminado
         if (fire_elapsed >= fireDuration) {
             isFireActive = false;
             std::cout << "El incendio ha terminado." << std::endl;
-            // Limpieza: Cualquier árbol que SIGA quemándose, se convierte en tronco
+            // Limpieza: Cualquier �rbol que SIGA quem�ndose, se convierte en tronco
             for (Chunk& chunk : terrain_chunks) {
                 for (TreeInstance& tree : chunk.tree_instances) {
                     if (tree.state == TreeState::BURNING) {
@@ -512,13 +512,13 @@ void updateGameLogic() {
                 }
             }
         }
-        // --- LÓGICA DURANTE EL INCENDIO ---
+        // --- L�GICA DURANTE EL INCENDIO ---
         else {
             for (Chunk& chunk : terrain_chunks) {
                 for (TreeInstance& tree : chunk.tree_instances) {
 
-                    // Transición 1: ALIVE/CHOPPED_ONCE -> BURNING
-                    // Comprueba si es hora de que este árbol comience a arder
+                    // Transici�n 1: ALIVE/CHOPPED_ONCE -> BURNING
+                    // Comprueba si es hora de que este �rbol comience a arder
                     if (tree.fireTriggerTime >= 0.0f && fire_elapsed >= tree.fireTriggerTime) {
                         if (tree.state == TreeState::ALIVE || tree.state == TreeState::CHOPPED_ONCE) {
                             if (tree.state == TreeState::ALIVE) {
@@ -534,9 +534,9 @@ void updateGameLogic() {
                         }
                     }
 
-                    // --- ¡¡LÓGICA CLAVE FALTANTE!! ---
-                    // Transición 2: BURNING -> CHOPPED_TWICE
-                    // Comprueba si este árbol ya terminó de quemarse (su tiempo individual)
+                    // --- ��L�GICA CLAVE FALTANTE!! ---
+                    // Transici�n 2: BURNING -> CHOPPED_TWICE
+                    // Comprueba si este �rbol ya termin� de quemarse (su tiempo individual)
                     if (tree.burnOutTime >= 0.0f && fire_elapsed >= tree.burnOutTime) {
                         if (tree.state == TreeState::BURNING) {
                             tree.state = TreeState::CHOPPED_TWICE;
@@ -548,7 +548,7 @@ void updateGameLogic() {
         }
     }
 
-    // --- Lógica de Hojas ---
+    // --- L�gica de Hojas ---
     leaf_matrices.clear();
     for (size_t i = 0; i < falling_leaves.size(); ++i) {
         Leaf& leaf = falling_leaves[i];
@@ -579,12 +579,12 @@ void updateGameLogic() {
         leaf_matrices.push_back(model);
     }
 
-    // --- Lógica de Animales ---
+    // --- L�gica de Animales ---
     updateForestHealthAndAnimals(deltaTime);
 }
 
 
-int getRandomWalkIndex(int modelListLength) { //ELIGE INDICES PARES QUE CORRESPONDEN A ANIMACIÓN WALW
+int getRandomWalkIndex(int modelListLength) { //ELIGE INDICES PARES QUE CORRESPONDEN A ANIMACI�N WALW
 
     if (modelListLength < 2) return 0;
 
@@ -719,7 +719,7 @@ void generateForest() {
                         animal.walk = animalPairs[selectedPair].first;   // walk
                         animal.idle = animalPairs[selectedPair].second;  // idle DEL MISMO TIPO
 
-                        // Pose inicial con la animación idle
+                        // Pose inicial con la animaci�n idle
                         if (animal.idle) {
                             animal.idle->SetPose(0.0f, animal.gBones);
                         }
@@ -732,7 +732,7 @@ void generateForest() {
         }
     }
 
-    // Generación Nubes
+    // Generaci�n Nubes
     for (unsigned int i = 0; i < NUM_DISTANT_CLOUDS; i++) {
         glm::mat4 model = glm::mat4(1.0f);
         glm::vec3 pos;
@@ -787,9 +787,9 @@ void generateForest() {
         }
     }
 
-    // --- Comprobación ---
+    // --- Comprobaci�n ---
     std::cout << "Se generaron " << g_animals.size() << " animales en el mundo." << std::endl;
-    // --- FIN Comprobación ---
+    // --- FIN Comprobaci�n ---
 }
 
 void generateCity() {

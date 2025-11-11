@@ -37,7 +37,7 @@ public:
 	unsigned int   currentAnimation = 0; // first animation
 
 	// Pose inicial del modelo
-	// glm::mat4 gBones[MAX_RIGGING_BONES]; 
+	//glm::mat4 gBones[MAX_RIGGING_BONES]; 
 
 	/* Functions   */
 	// constructor, expects a filepath to a 3D model.
