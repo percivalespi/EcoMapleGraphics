@@ -358,54 +358,25 @@ void renderGlaciarScene(const glm::mat4& projection, const glm::mat4& view) {
         float speed = meltSpeedBase * temperatura;     // más calor → más rápido
         glacierScaleY = glm::max(0.0f, glacierScaleY - speed * deltaTime);
     }
+    setupStaticShader(mLightsShader, projection, view);
+    setupShaderLights(mLightsShader, gLights);
 
-    // Dibujamos un objeto cualquiera
+    // Coche (Metálico -> Phong)
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(0.0f, 0.0f, desp));
+    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+
+    drawObject(mLightsShader, ga.Glaciares, ga.GlaciaresMaterial, model);
+    drawObject(mLightsShader, ga.PlacaHielo, ga.nieveMaterial, model);
+    if (glacierScaleY > 0.0f)
     {
-        // Activamos el shader de Phong
-        phongShader2->use();
+        glm::mat4 mG = model;
+        mG = glm::scale(mG, glm::vec3(1.0f, 1.0f, glacierScaleY));
+        drawObject(mLightsShader, ga.Iceberg, ga.nieveMaterial, mG);
 
-        // Activamos para objetos transparentes
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        // Aplicamos transformaciones de proyección y cámara (si las hubiera)
-        phongShader->setMat4("projection", projection);
-        phongShader->setMat4("view", view);
-
-        // Base para la escena 1
-        glm::mat4 baseM = glm::mat4(1.0f);
-        baseM = glm::translate(baseM, glm::vec3(0.0f, 0.0f, desp));
-        baseM = glm::rotate(baseM, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        baseM = glm::scale(baseM, glm::vec3(1.0f, 1.0f, 1.0f));
-
-        // Luz y material
-        phongShader2->setVec4("LightColor", ga.theLight.Color);
-        phongShader2->setVec4("LightPower", ga.theLight.Power);
-        phongShader2->setInt("alphaIndex", ga.theLight.alphaIndex);
-        phongShader2->setFloat("distance", ga.theLight.distance);
-        phongShader2->setVec3("lightPosition", ga.theLight.Position);
-        phongShader2->setVec3("lightDirection", ga.theLight.Direction);
-        phongShader2->setVec3("eye", camera.Position);
-
-        phongShader2->setVec4("MaterialAmbientColor", ga.defaultMaterial.ambient);
-        phongShader2->setVec4("MaterialDiffuseColor", ga.defaultMaterial.diffuse);
-        phongShader2->setVec4("MaterialSpecularColor", ga.defaultMaterial.specular);
-        phongShader2->setFloat("transparency", ga.defaultMaterial.transparency);
-
-        // Iceberg, placa y trozos: sin cambios
-        phongShader2->setMat4("model", baseM);
-        ga.Glaciares->Draw(*phongShader2);
-        ga.PlacaHielo->Draw(*phongShader2);
-
-        // Glaciares/Iceberg según escala
-        if (glacierScaleY > 0.0f)
-        {
-            glm::mat4 mG = baseM;
-            mG = glm::scale(mG, glm::vec3(1.0f, 1.0f, glacierScaleY));
-            phongShader2->setMat4("model", mG);
-            ga.Iceberg->Draw(*phongShader2);
-        }
     }
+
     {
         wavesShader2->use();
 
@@ -436,42 +407,20 @@ void renderGlaciarScene(const glm::mat4& projection, const glm::mat4& view) {
     glUseProgram(0);
     // Descenso de osos 1 y 2 en función del derretimiento
     float osoDown = 8 * glacierScaleY - 8; // 0→sin bajar, 1→máximo
+
     if (glacierScaleY > 0.0f) {
-        // Activamos el shader de Phong
-        phongShader2->use();
 
-        // Activamos para objetos transparentes
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        setupStaticShader(mLightsShader, projection, view);
+        setupShaderLights(mLightsShader, gLights);
 
-        // Aplicamos transformaciones de proyección y cámara (si las hubiera)
-        phongShader2->setMat4("projection", projection);
-        phongShader2->setMat4("view", view);
+        // Coche (Metálico -> Phong)
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, desp+osoDown));
+        model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
 
-        // Base para la escena 1
-        glm::mat4 baseM = glm::mat4(1.0f);
-        baseM = glm::translate(baseM, glm::vec3(0.0f, 0.0f, desp+ osoDown));
-        baseM = glm::rotate(baseM, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        baseM = glm::scale(baseM, glm::vec3(1.0f, 1.0f, glacierScaleY));
-
-        // Luz y material
-        phongShader2->setVec4("LightColor", ga.theLight.Color);
-        phongShader2->setVec4("LightPower", ga.theLight.Power);
-        phongShader2->setInt("alphaIndex", ga.theLight.alphaIndex);
-        phongShader2->setFloat("distance", ga.theLight.distance);
-        phongShader2->setVec3("lightPosition", ga.theLight.Position);
-        phongShader2->setVec3("lightDirection", ga.theLight.Direction);
-        phongShader2->setVec3("eye", camera.Position);
-
-        phongShader2->setVec4("MaterialAmbientColor", ga.defaultMaterial.ambient);
-        phongShader2->setVec4("MaterialDiffuseColor", ga.defaultMaterial.diffuse);
-        phongShader2->setVec4("MaterialSpecularColor", ga.defaultMaterial.specular);
-        phongShader2->setFloat("transparency", ga.defaultMaterial.transparency);
-
-        phongShader2->setMat4("model", baseM);
-
-        ga.TrozoH1->Draw(*phongShader2);
-        ga.TrozoH2->Draw(*phongShader2);
+        drawObject(mLightsShader, ga.TrozoH1, ga.nieveMaterial, model);
+        drawObject(mLightsShader, ga.TrozoH2, ga.nieveMaterial, model);
     }
     glUseProgram(0);
 
@@ -1235,7 +1184,6 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
 }
 
     
-
 
 
 void renderUI() {

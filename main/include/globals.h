@@ -279,6 +279,8 @@ struct GlaciarAssets {
     Light theLight;
     // Material
     Material defaultMaterial;
+	Material nieveMaterial;
+	Material GlaciaresMaterial;
 };
 
 

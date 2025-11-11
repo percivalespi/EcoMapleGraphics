@@ -339,6 +339,18 @@ void initilizeMaterialsGlaciar(GlaciarAssets& ga) {
     ga.defaultMaterial.diffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
     ga.defaultMaterial.specular = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
     ga.defaultMaterial.transparency = 1.0f;
+
+    ga.nieveMaterial.ambient = glm::vec4(0.2f, 0.2f, 0.25f, 1.0f);
+    ga.nieveMaterial.diffuse = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
+    ga.nieveMaterial.specular = glm::vec4(0.3f, 0.3f, 0.3f, 1.0f);
+
+
+    ga.nieveMaterial.transparency = 0.9f;
+
+    ga.GlaciaresMaterial.ambient = glm::vec4(0.18f, 0.15f, 0.18f, 0.8f);
+    ga.GlaciaresMaterial.diffuse = glm::vec4(0.3f, 0.28f, 0.3f, 1.0f);
+    ga.GlaciaresMaterial.specular = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    ga.GlaciaresMaterial.transparency = 1.0f;
 }
 
 void initilizeLightsGlaciar(GlaciarAssets& ga) {

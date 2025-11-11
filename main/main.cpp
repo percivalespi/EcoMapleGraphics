@@ -199,7 +199,7 @@ float DT4 = 0.0f;
 float DT5 = 0.0f;
 float DT6 = 0.0f;
 float DHoja = 0.0f;
-const float velocidadCarga = 0.05f;
+const float velocidadCarga = 0.01f;
 
 float temperatura = -25.0f;
 float barraTF = 0.0f;
