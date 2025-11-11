@@ -319,11 +319,11 @@ void initializeModelsGlaciar(GlaciarAssets& ga) {
     ga.TerAzulBase = new Model("models/iceland/TerAzulBase.fbx");
     ga.TerRojoBase = new Model("models/iceland/TerRojoBase.fbx");
 
-    ga.Oso1 = new AnimatedModel("models/iceland/Oso1.fbx");
-    ga.Oso2 = new AnimatedModel("models/iceland/Oso2.fbx");
-    ga.Oso3 = new AnimatedModel("models/iceland/Oso3.fbx");
-    ga.Oso4 = new AnimatedModel("models/iceland/Oso4.fbx");
-    ga.Oso5 = new AnimatedModel("models/iceland/Oso5.fbx");
+    ga.Oso1 = new Animated("models/iceland/Oso1.fbx");
+    ga.Oso2 = new Animated("models/iceland/Oso2.fbx");
+    ga.Oso3 = new Animated("models/iceland/Oso3.fbx");
+    ga.Oso4 = new Animated("models/iceland/Oso4.fbx");
+    ga.Oso5 = new Animated("models/iceland/Oso5.fbx");
 
     // CORREGIDO: Usar -> en punteros
     if (!fa.cubeenv || fa.cubeenv->meshes.empty() || fa.cubeenv->meshes[0].textures.empty()) {

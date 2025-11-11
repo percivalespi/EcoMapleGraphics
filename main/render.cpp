@@ -474,6 +474,130 @@ void renderGlaciarScene(const glm::mat4& projection, const glm::mat4& view) {
         ga.TrozoH2->Draw(*phongShader2);
     }
     glUseProgram(0);
+
+    {
+        ga.Oso1->UpdateAnimation(deltaTime);
+
+        dynamicShader->use();
+        dynamicShader->setMat4("projection", projection);
+        dynamicShader->setMat4("view", view);
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, osoDown, desp));
+        model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
+
+        dynamicShader->setMat4("model", model);
+        dynamicShader->setMat4("gBones", MAX_RIGGING_BONES, ga.Oso1->gBones);
+        ga.Oso1->Draw(*dynamicShader);
+    }
+    glUseProgram(0);
+    {
+        ga.Oso2->UpdateAnimation(deltaTime);
+
+        dynamicShader->use();
+        dynamicShader->setMat4("projection", projection);
+        dynamicShader->setMat4("view", view);
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, osoDown, desp));
+        model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
+
+        dynamicShader->setMat4("model", model);
+        dynamicShader->setMat4("gBones", MAX_RIGGING_BONES, ga.Oso2->gBones);
+        ga.Oso2->Draw(*dynamicShader);
+    }
+    glUseProgram(0);
+    
+    
+    // ===== Oso3, Oso4, Oso5: caminar en tramos de 10 y girar ±90° aleatorio =====
+        auto avanzarOso = [&](int idx) {
+            // Dirección de avance a partir de yaw (solo Yaw sobre eje Y)
+            float yawRad = glm::radians(osoYawDeg[idx]);
+            glm::vec3 forward = glm::vec3(std::cos(yawRad), 0.0f, std::sin(yawRad)); // +X al inicio
+
+            // Avance por frame
+            osoPos[idx] += forward * (OSO_SPEED * deltaTime);
+
+            // Si ya recorrió 10 unidades desde el último giro, elige izquierda o derecha al azar
+            float distTramo = glm::length(osoPos[idx] - osoUltimoGiro[idx]);
+            if (distTramo >= OSO_SEGMENTO) {
+                int signo = (std::rand() & 1) ? 1 : -1;   // 1 o -1
+                osoYawDeg[idx] += 90.0f * signo;
+                // Normaliza yaw a [-180,180] opcional
+                if (osoYawDeg[idx] > 180.0f) osoYawDeg[idx] -= 360.0f;
+                if (osoYawDeg[idx] < -180.0f) osoYawDeg[idx] += 360.0f;
+                // Nuevo origen del siguiente tramo
+                osoUltimoGiro[idx] = osoPos[idx];
+            }
+            };
+
+        // Oso3
+        {
+            ga.Oso3->UpdateAnimation(deltaTime);
+            avanzarOso(0);
+
+            dynamicShader->use();
+            dynamicShader->setMat4("projection", projection);
+            dynamicShader->setMat4("view", view);
+
+            glm::mat4 model = glm::mat4(1.0f);
+            //model = glm::translate(model, osoPos[0]);
+            model = glm::translate(model, glm::vec3(0.0f, 0.0f, desp));
+            model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 1.0f, 0.0f)); // yaw
+            model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
+
+            dynamicShader->setMat4("model", model);
+            dynamicShader->setMat4("gBones", MAX_RIGGING_BONES, ga.Oso3->gBones);
+            ga.Oso3->Draw(*dynamicShader);
+        }
+        glUseProgram(0);
+
+        // Oso4
+        {
+            ga.Oso4->UpdateAnimation(deltaTime);
+
+            avanzarOso(1);
+
+            dynamicShader->use();
+            dynamicShader->setMat4("projection", projection);
+            dynamicShader->setMat4("view", view);
+
+            glm::mat4 model = glm::mat4(1.0f);
+            //model = glm::translate(model, osoPos[1]);
+            model = glm::translate(model, glm::vec3(0.0f, 0.0f, desp));
+            model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f)); // yaw
+            model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
+
+            dynamicShader->setMat4("model", model);
+            dynamicShader->setMat4("gBones", MAX_RIGGING_BONES, ga.Oso4->gBones);
+            ga.Oso4->Draw(*dynamicShader);
+        }
+        glUseProgram(0);
+
+        // Oso5
+        {
+            ga.Oso5->UpdateAnimation(deltaTime);
+            avanzarOso(2);
+
+            dynamicShader->use();
+            dynamicShader->setMat4("projection", projection);
+            dynamicShader->setMat4("view", view);
+
+            glm::mat4 model = glm::mat4(1.0f);
+            //model = glm::translate(model, osoPos[2]);
+            model = glm::translate(model, glm::vec3(0.0f, 0.0f, desp));
+            model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // yaw
+            model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
+
+            dynamicShader->setMat4("model", model);
+            dynamicShader->setMat4("gBones", MAX_RIGGING_BONES, ga.Oso5->gBones);
+            ga.Oso5->Draw(*dynamicShader);
+        }
+        glUseProgram(0);
+    
+
     if (!menu) {
         {
             // === Termómetro pegado a la cámara (lateral izquierdo) ===

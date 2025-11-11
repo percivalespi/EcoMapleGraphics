@@ -27,6 +27,7 @@
 
 #include <material.h>
 #include <animatedmodel.h>
+#include <animated.h>
 #include <irrKlang.h>
 
 
@@ -268,11 +269,11 @@ struct GlaciarAssets {
     Model* Iceberg;
     Model* PlacaHielo;
     Model* Glaciares;
-    AnimatedModel* Oso1;
-    AnimatedModel* Oso2;
-    AnimatedModel* Oso3;
-    AnimatedModel* Oso4;
-    AnimatedModel* Oso5;
+    Animated* Oso1;
+    Animated* Oso2;
+    Animated* Oso3;
+    Animated* Oso4;
+    Animated* Oso5;
 
     // --- Luz
     Light theLight;
@@ -280,6 +281,9 @@ struct GlaciarAssets {
     Material defaultMaterial;
 };
 
+
+extern glm::vec3 osoUltimoGiro[3];
+extern float osoYawDeg[3];
 
 // -- Assets del Bosque
 extern ForestAssets fa;

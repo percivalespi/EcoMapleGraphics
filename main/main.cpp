@@ -229,6 +229,8 @@ glm::vec3 posicionInicioG(0.0f, 2.0f, 10.0f);
 glm::vec3 posicionOrigen(0.0f, 0.0f, 0.0f);
 glm::vec3 posicionEscenario1(0.0f, 40.0f, 340.0f);
 
+glm::vec3 osoUltimoGiro[3] = { {0,0,0}, {0,0,0}, {0,0,0} };
+float      osoYawDeg[3] = { 0.0f, 0.0f, 0.0f };  // 0° mirando +X
 
 int main() {
     if (!Start()) {
@@ -305,7 +307,7 @@ bool Start() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "EcoMapleGrahics  v0.0.0-alpha", NULL, NULL);
+    window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "EcoMapleGrahics  v1.0.0-alpha", NULL, NULL);
     if (window == NULL) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -346,6 +348,8 @@ bool Start() {
 
     // --- NUEVO: Cargar Shader de Skinning ---
     dynamicShader = new Shader("shaders/10_vertex_skinning-IT.vs", "shaders/10_fragment_skinning-IT.fs");
+    //dynamicShader2 = new Shader("shaders/10_vertex_skinning-IT2.vs", "shaders/10_fragment_skinning-IT2.fs");
+
 
     if (!phongShader || phongShader->ID == 0 ||
         !instancePhongShader || instancePhongShader->ID == 0 ||
