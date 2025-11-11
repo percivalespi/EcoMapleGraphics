@@ -153,8 +153,8 @@ void loadForest(ForestAssets& fa) {
 
 /* -------------------------------------------- - Manejo de Recursos Glaciar------------------------------------------*/
 void initializeModelsEspacio(EspacioAssets& ea) {
-    ea.Tierra = new Model("models/Tierra.fbx");
-    ea.Canada = new Model("models/Canada.fbx");
+    ea.Tierra = new Model("models/iceland/Tierra.fbx");
+    ea.Canada = new Model("models/iceland/Canada.fbx");
     ea.Luna = new Model("models/IllumModels/moon.fbx");
     ea.cubeenv = new Model("models/mycube.fbx");
     ea.cubeenv_noche = new Model("models/noche/mycube.fbx");
@@ -190,14 +190,14 @@ void loadEspacio(EspacioAssets& ea) {
 }
 
 void initializeModelsMenu(MenuAssets& ma) {
-    ma.Texto1 = new Model("models/Texto1.fbx");
-    ma.Texto2 = new Model("models/Texto2.fbx");
-    ma.Texto3 = new Model("models/Texto3.fbx");
-    ma.Texto4 = new Model("models/Texto4.fbx");
-    ma.Texto5 = new Model("models/Texto5.fbx");
-    ma.Texto6 = new Model("models/Texto6.fbx");
-    ma.Fondo_Menu = new Model("models/Fondo_Menu.fbx");
-    ma.HojaArce_Menu = new Model("models/HojaArce_Menu.fbx");
+    ma.Texto1 = new Model("models/iceland/Texto1.fbx");
+    ma.Texto2 = new Model("models/iceland/Texto2.fbx");
+    ma.Texto3 = new Model("models/iceland/Texto3.fbx");
+    ma.Texto4 = new Model("models/iceland/Texto4.fbx");
+    ma.Texto5 = new Model("models/iceland/Texto5.fbx");
+    ma.Texto6 = new Model("models/iceland/Texto6.fbx");
+    ma.Fondo_Menu = new Model("models/iceland/Fondo_Menu.fbx");
+    ma.HojaArce_Menu = new Model("models/iceland/HojaArce_Menu.fbx");
 }
 
 void loadMenu(MenuAssets& ma) {
@@ -205,22 +205,22 @@ void loadMenu(MenuAssets& ma) {
 }
 
 void initializeModelsGlaciar(GlaciarAssets& ga) {
-    ga.Agua = new Model("models/Agua.fbx");
-    ga.Iceberg = new Model("models/Iceberg.fbx");
-    ga.TrozoH1 = new Model("models/TrozoH1.fbx");
-    ga.TrozoH2 = new Model("models/TrozoH2.fbx");
-    ga.Glaciares = new Model("models/Glaciares.fbx");
-    ga.PlacaHielo = new Model("models/PlacaHielo.fbx");
-    ga.BarraAzul = new Model("models/BarraAzul.fbx");
-    ga.BarraRoja = new Model("models/BarraRoja.fbx");
-    ga.TerAzulBase = new Model("models/TerAzulBase.fbx");
-    ga.TerRojoBase = new Model("models/TerRojoBase.fbx");
+    ga.Agua = new Model("models/iceland/Agua.fbx");
+    ga.Iceberg = new Model("models/iceland/Iceberg.fbx");
+    ga.TrozoH1 = new Model("models/iceland/TrozoH1.fbx");
+    ga.TrozoH2 = new Model("models/iceland/TrozoH2.fbx");
+    ga.Glaciares = new Model("models/iceland/Glaciares.fbx");
+    ga.PlacaHielo = new Model("models/iceland/PlacaHielo.fbx");
+    ga.BarraAzul = new Model("models/iceland/BarraAzul.fbx");
+    ga.BarraRoja = new Model("models/iceland/BarraRoja.fbx");
+    ga.TerAzulBase = new Model("models/iceland/TerAzulBase.fbx");
+    ga.TerRojoBase = new Model("models/iceland/TerRojoBase.fbx");
 
-    ga.Oso1 = new AnimatedModel("models/Oso1.fbx");
-    ga.Oso2 = new AnimatedModel("models/Oso2.fbx");
-    ga.Oso3 = new AnimatedModel("models/Oso3.fbx");
-    ga.Oso4 = new AnimatedModel("models/Oso4.fbx");
-    ga.Oso5 = new AnimatedModel("models/Oso5.fbx");
+    ga.Oso1 = new AnimatedModel("models/iceland/Oso1.fbx");
+    ga.Oso2 = new AnimatedModel("models/iceland/Oso2.fbx");
+    ga.Oso3 = new AnimatedModel("models/iceland/Oso3.fbx");
+    ga.Oso4 = new AnimatedModel("models/iceland/Oso4.fbx");
+    ga.Oso5 = new AnimatedModel("models/iceland/Oso5.fbx");
 
     // CORREGIDO: Usar -> en punteros
     if (!fa.cubeenv || fa.cubeenv->meshes.empty() || fa.cubeenv->meshes[0].textures.empty()) {

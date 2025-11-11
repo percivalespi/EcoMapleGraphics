@@ -351,7 +351,7 @@ void renderGlaciarScene(const glm::mat4& projection, const glm::mat4& view) {
 
         // Base para la escena 1
         glm::mat4 baseM = glm::mat4(1.0f);
-        baseM = glm::translate(baseM, glm::vec3(0.0f, 0.0f, -250.0f));
+        baseM = glm::translate(baseM, glm::vec3(0.0f, 0.0f, 250.0f));
         baseM = glm::rotate(baseM, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         baseM = glm::scale(baseM, glm::vec3(1.0f, 1.0f, 1.0f));
 
@@ -387,7 +387,7 @@ void renderGlaciarScene(const glm::mat4& projection, const glm::mat4& view) {
         wavesShader2->use();
 
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, -250.0f));
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 250.0f));
         model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
 
@@ -427,7 +427,7 @@ void renderGlaciarScene(const glm::mat4& projection, const glm::mat4& view) {
 
         // Base para la escena 1
         glm::mat4 baseM = glm::mat4(1.0f);
-        baseM = glm::translate(baseM, glm::vec3(0.0f, 0.0f, -250.0f+ osoDown));
+        baseM = glm::translate(baseM, glm::vec3(0.0f, 0.0f, 250.0f+ osoDown));
         baseM = glm::rotate(baseM, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         baseM = glm::scale(baseM, glm::vec3(1.0f, 1.0f, glacierScaleY));
 
