@@ -2,7 +2,11 @@
 #include "mechanic.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+    // --- NUEVO: Actualizar dimensiones globales y viewport ---
     glViewport(0, 0, width, height);
+    SCR_WIDTH = width;
+    SCR_HEIGHT = height;
+    // --- FIN NUEVO ---
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
@@ -23,10 +27,61 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
     camera.ProcessMouseScroll((float)yoffset);
 }
 
+#include "input.h"
+
+// --- NUEVO: Implementación de la función para pantalla completa ---
+void toggleFullscreen(GLFWwindow* window) {
+    if (!is_fullscreen) {
+        // Guardar la posición y tamaño de la ventana
+        glfwGetWindowPos(window, &last_window_x, &last_window_y);
+        glfwGetWindowSize(window, &last_window_width, &last_window_height);
+
+        // Cambiar a modo de pantalla completa
+        GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+        glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+        is_fullscreen = true;
+    }
+    else {
+        // Restaurar la ventana al modo de ventana
+        glfwSetWindowMonitor(window, NULL, last_window_x, last_window_y, last_window_width, last_window_height, 0);
+        is_fullscreen = false;
+    }
+}
+
+// --- NUEVO: Implementación del callback de foco ---
+void window_focus_callback(GLFWwindow* window, int focused)
+{
+    g_isWindowFocused = (focused == GLFW_TRUE);
+    if (g_isWindowFocused)
+    {
+        // La ventana ha ganado el foco, capturar el cursor de nuevo
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        firstMouse = true; // Evita un salto brusco de la cámara
+    }
+    else
+    {
+        // La ventana ha perdido el foco, liberar el cursor
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
+}
+// --- FIN NUEVO ---
+
+
+// cuando el tamaño de la ventana cambia (por SO o por el usuario) esta función de devolución de llamada se ejecuta
+// ---------------------------------------------------------------------------------------------
 
 void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
+    }
+    static bool f11_pressed = false;
+    if (glfwGetKey(window, GLFW_KEY_F11) == GLFW_PRESS && !f11_pressed) {
+        toggleFullscreen(window);
+        f11_pressed = true;
+    }
+    if (glfwGetKey(window, GLFW_KEY_F11) == GLFW_RELEASE) {
+        f11_pressed = false;
     }
     if (!animacion1 && !menu) {
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {

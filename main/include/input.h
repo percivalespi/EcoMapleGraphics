@@ -3,7 +3,14 @@
 
 
 #include "globals.h" // Incluye el cerebro
-
+// --- NUEVO: Declaración de la función para pantalla completa ---
+// --- NUEVO: Declaración de la función para pantalla completa ---
+void toggleFullscreen(GLFWwindow* window);
+void window_focus_callback(GLFWwindow* window, int focused); // --- NUEVO: Para el foco de la ventana ---
+// --- FIN NUEVO ---
+// Declaraciones de funciones de input
+// Estas son las 5 funciones que vamos a mover
+// --- FIN NUEVO ---
 // Declaraciones de funciones de input
 // Estas son las 5 funciones que vamos a mover
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);

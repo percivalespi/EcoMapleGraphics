@@ -306,14 +306,25 @@ extern GlaciarAssets ga;
 // 'extern' le dice al compilador: "esta variable existe,
 // pero su memoria está definida en OTRO archivo .cpp"
 
+// pero su memoria está definida en OTRO archivo .cpp"
+
 extern GLFWwindow* window;
-extern const unsigned int SCR_WIDTH;
-extern const unsigned int SCR_HEIGHT;
+extern unsigned int SCR_WIDTH;
+extern unsigned int SCR_HEIGHT;
+
+// --- NUEVO: Variables para el modo de pantalla completa ---
+extern bool is_fullscreen;
+extern int last_window_width;
+extern int last_window_height;
+extern int last_window_x;
+extern int last_window_y;
+// --- FIN NUEVO ---
 
 extern Camera camera;
 extern float lastX;
 extern float lastY;
 extern bool firstMouse;
+extern bool g_isWindowFocused;
 
 extern float deltaTime;
 extern float lastFrame;

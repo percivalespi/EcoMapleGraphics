@@ -31,13 +31,20 @@ void processInput2(GLFWwindow* window);
 
 // --> Variables Globales Para la <Ventana> 
 GLFWwindow* window;
-const unsigned int SCR_WIDTH = 1024;
-const unsigned int SCR_HEIGHT = 768;
+unsigned int SCR_WIDTH = 1024;
+unsigned int SCR_HEIGHT = 768;
+
+bool is_fullscreen = false;
+int last_window_width = SCR_WIDTH;
+int last_window_height = SCR_HEIGHT;
+int last_window_x = 0;
+int last_window_y = 0;
 
 Camera camera(glm::vec3(0.0f, 5.0f, 25.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
+bool g_isWindowFocused = true;
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -307,6 +314,7 @@ bool Start() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
     window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "EcoMapleGrahics  v1.0.0-alpha", NULL, NULL);
     if (window == NULL) {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -318,6 +326,7 @@ bool Start() {
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
+    glfwSetWindowFocusCallback(window, window_focus_callback); // --- NUEVO: Registrar el callback de foco ---
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cout << "Failed to initialize GLAD" << std::endl;
