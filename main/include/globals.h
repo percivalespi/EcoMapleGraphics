@@ -110,6 +110,25 @@ struct UIAssets {//Buffers
     unsigned int legendTreeTextureID = 0;
 };
 
+// --- VARIABLES GLOBALES: PERSONAJE DEMI Y CÁMARA ---
+extern bool g_isThirdPerson;
+extern bool g_pressM;
+extern Animated* g_demiModel;
+extern glm::vec3 g_demiPos;
+extern float g_demiRotY;
+extern bool g_demiMoving;
+
+// --- NUEVO: VARIABLES MIKU Y SELECTOR ---
+
+// Constantes (Declaración)
+extern const float DEMI_SPEED;
+extern const float DEMI_SCALE;
+extern const float DEMI_CAM_DIST; // <--- AQUÍ ESTÁ LA VARIABLE FALTANTE
+extern const float DEMI_OFFSET_Y;
+// ... variables de demi ...
+extern Animated* g_mikuModel;     // <--- FALTA ESTO
+extern int g_activeCharacter;     // <--- FALTA ESTO
+extern const float MIKU_SCALE;    // <--- FALTA ESTO
 
 // --- NUEVO: Constantes de Simulación ---
 const float FOREST_HEALTH_TRIGGER = 0.25f;    // 25% de vida para que los animales mueran
@@ -141,7 +160,7 @@ struct AnimalInstance {
     AnimatedModel* walk; //  <-- NUEVO. Puntero para el modelo de animal que estemos usando
     AnimatedModel* idle;
 
-    // Estado de animaci�n (movido de AnimatedModel)
+    // Estado de animaci n (movido de AnimatedModel)
     // Estado de animación (movido de AnimatedModel)
     float elapsedTime;
     int animationCount;

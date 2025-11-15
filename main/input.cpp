@@ -75,6 +75,119 @@ void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
+
+    // --- CAMBIO DE PERSONAJE (1 y 2) ---
+    if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) {
+        g_activeCharacter = 1; // Seleccionar Demi
+    }
+    if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) {
+        g_activeCharacter = 2; // Seleccionar Miku
+    }
+
+    // --- TOGGLE MODO CÁMARA (TECLA M) ---
+    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS) {
+        if (!g_pressM) {
+            g_isThirdPerson = !g_isThirdPerson;
+            g_pressM = true;
+            if (g_isThirdPerson) {
+                // Al entrar, ajustamos un poco la cámara para ver al personaje
+                camera.Pitch = -15.0f;
+                camera.ProcessMouseMovement(0, 0); // Actualizar vectores
+            }
+        }
+    }
+    else {
+        g_pressM = false;
+    }
+
+    if (!animacion1 && !menu) {
+
+        if (g_isThirdPerson) {
+            // =================================================
+            // === MODO 3RA PERSONA (CON SUAVIZADO) ===
+            // =================================================
+            g_demiMoving = false;
+
+            // 1. Vectores de cámara (planos)
+            glm::vec3 camFront = camera.Front;
+            camFront.y = 0.0f;
+            glm::vec3 camRight = camera.Right;
+            camRight.y = 0.0f;
+
+            if (glm::length(camFront) > 0.01f) camFront = glm::normalize(camFront);
+            if (glm::length(camRight) > 0.01f) camRight = glm::normalize(camRight);
+
+            glm::vec3 moveDir(0.0f);
+
+            // 2. Input WASD
+            if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) moveDir += camFront;
+            if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) moveDir -= camFront;
+            if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) moveDir -= camRight;
+            if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) moveDir += camRight;
+
+            // 3. Movimiento y Rotación SUAVE
+            if (glm::length(moveDir) > 0.01f) {
+                moveDir = glm::normalize(moveDir);
+
+                // --- A. Movimiento ---
+                g_demiPos += moveDir * DEMI_SPEED * deltaTime;
+                g_demiMoving = true;
+
+                // --- B. Rotación Suave (Interpolación) ---
+                // Calculamos el ángulo objetivo hacia donde queremos ir
+                float targetRotation = atan2(moveDir.x, moveDir.z);
+
+                // Lógica matemática para rotar suavemente sin dar vueltas locas (360->0)
+                // Velocidad de giro (ajusta el 10.0f si quieres que gire más rápido o lento)
+                float rotationSpeed = 10.0f * deltaTime;
+
+                // Calcular diferencia de ángulos
+                float angleDiff = targetRotation - g_demiRotY;
+
+                // Ajustar para que tome el camino más corto
+                const float PI = 3.14159265359f;
+                if (angleDiff > PI) angleDiff -= 2.0f * PI;
+                if (angleDiff < -PI) angleDiff += 2.0f * PI;
+
+                // Aplicar la rotación progresiva
+                g_demiRotY += angleDiff * rotationSpeed;
+            }
+
+            // 4. Restricciones de altura
+            if (g_demiPos.y < DEMI_OFFSET_Y) g_demiPos.y = DEMI_OFFSET_Y;
+
+            // 5. Cámara Orbital SUAVE (LERP)
+            // Calculamos dónde DEBERÍA estar la cámara (Target)
+            glm::vec3 targetCamPos = g_demiPos - (camera.Front * DEMI_CAM_DIST) + glm::vec3(0.0f, 5.0f, 0.0f);
+
+            // En lugar de asignarlo directo, nos movemos un % hacia allá (0.1f es la "dureza" del resorte)
+            // Cuanto más bajo el valor (ej 0.05f), más suave pero tardada. Cuanto más alto (0.5f), más rígida.
+            float cameraSmoothness = 15.0f * deltaTime;
+            // Asegurar que no exceda 1.0 para evitar oscilación
+            if (cameraSmoothness > 1.0f) cameraSmoothness = 1.0f;
+
+            camera.Position = glm::mix(camera.Position, targetCamPos, cameraSmoothness);
+
+        }
+        else {
+            // ... (Aquí sigue tu else de cámara libre original) ...
+            // =================================================
+            // === MODO CÁMARA LIBRE (Tu código original) ===
+            // =================================================
+            if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+                camera.ProcessKeyboard(FORWARD, deltaTime);
+            if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+                camera.ProcessKeyboard(BACKWARD, deltaTime);
+            if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+                camera.ProcessKeyboard(LEFT, deltaTime);
+            if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+                camera.ProcessKeyboard(RIGHT, deltaTime);
+            if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+                camera.ProcessKeyboard(UPWARD, deltaTime);
+            if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+                camera.ProcessKeyboard(DOWNWARD, deltaTime);
+        }
+    }
     static bool f11_pressed = false;
     if (glfwGetKey(window, GLFW_KEY_F11) == GLFW_PRESS && !f11_pressed) {
         toggleFullscreen(window);

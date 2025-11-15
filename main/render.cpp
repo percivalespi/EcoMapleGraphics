@@ -1162,6 +1162,61 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
         fa.moon_model->Draw(*sunShader);
     }
 
+    // --- DIBUJAR PERSONAJE DEMI ---
+
+ // --- DIBUJAR PERSONAJE (3RA PERSONA) ---
+
+    if (g_isThirdPerson) {
+
+        // 1. Determinar qué modelo dibujar
+        Animated* modelToRender = nullptr;
+        float scaleToUse = 1.0f;
+
+        if (g_activeCharacter == 1) {
+            modelToRender = g_demiModel;
+            scaleToUse = DEMI_SCALE;
+        }
+        else if (g_activeCharacter == 2) {
+            modelToRender = g_mikuModel;
+            scaleToUse = MIKU_SCALE;
+        }
+
+        // 2. Dibujar si el modelo es válido
+        if (modelToRender != nullptr) {
+            dynamicShader->use();
+  
+            dynamicShader->setMat4("projection", projection);
+            dynamicShader->setMat4("view", view);
+            dynamicShader->setVec3("lightPosition", fa.theLight.Position);
+            dynamicShader->setVec4("LightColor", fa.theLight.Color);
+            dynamicShader->setVec4("LightPower", dimmedLightPower);
+            dynamicShader->setInt("alphaIndex", fa.theLight.alphaIndex);
+            dynamicShader->setVec4("MaterialAmbientColor", fa.defaultMaterial.ambient);
+            dynamicShader->setVec4("MaterialSpecularColor", fa.defaultMaterial.specular);
+            dynamicShader->setFloat("transparency", 1.0f);
+
+            glm::mat4 model = glm::mat4(1.0f);
+
+  
+            model = glm::translate(model, g_demiPos + glm::vec3(0.0f, DEMI_OFFSET_Y, 0.0f));
+
+        
+            model = glm::rotate(model, g_demiRotY, glm::vec3(0.0f, 1.0f, 0.0f));
+
+     
+            //model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+
+            model = glm::scale(model, glm::vec3(scaleToUse));
+
+            dynamicShader->setMat4("model", model);
+
+            dynamicShader->setMat4("gBones", MAX_RIGGING_BONES, modelToRender->gBones);
+
+            modelToRender->Draw(*dynamicShader);
+        }
+    }
+
     // --- 4. DIBUJAR SKYBOX (AL FINAL PARA NO TAPAR SOL/LUNA) ---
     if (skyboxShader != nullptr && skyboxShader->ID != 0) {
         glDepthFunc(GL_LEQUAL);

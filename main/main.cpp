@@ -1,17 +1,9 @@
 /*
 *
-* ProyectoFinal 0.0.1-alpha
-
-Funcionalidades: (Con Chunks, In<stancias, Montaña, Luz de Phong, Sol/Luna Esféricos, Ciclo Día/Noche, Nubes, Hojas y Talar/Plantar Árboles + Incendio Secuencial)
-
-Ultimas Implementaciones: (Incendio Secuencial + Scope Global + Estilo Súper Estricto)
+* ProyectoFinal 0.0.1-alpha - Main.cpp
+* Integración: Cámara 3ra Persona + Cambio de Personaje (Demi/Miku)
 */
 
-/*Si lo aprendiste bien dale like y sucribete*/
-
-/* ---------------------------------------- Encabezados del Proyecto -------------------------------------------------*/
-
-// Archivo de Encabezado con las Estrucuras y Bibliotecas del Proyecto
 #include "globals.h"
 #include "input.h"
 #include "mechanic.h"
@@ -19,17 +11,16 @@ Ultimas Implementaciones: (Incendio Secuencial + Scope Global + Estilo Súper Es
 #include "src_manager.h"
 
 // Bandera Para activar entorno de prueba
-bool g_runTestEnvironment = false; // <-- CAMBIADO A FALSE PARA VER EL BOSQUE
+bool g_runTestEnvironment = false;
 
-// Firmas de Funciones - Estructura Básica OpenGL
+// Firmas de Funciones
 bool Start();
 bool Update();
-
 void processInput2(GLFWwindow* window);
 
 /* ------------------------------------------ Variables Globales ------------------------------------------------------ */
 
-// --> Variables Globales Para la <Ventana> 
+// --> Ventana
 GLFWwindow* window;
 unsigned int SCR_WIDTH = 1024;
 unsigned int SCR_HEIGHT = 768;
@@ -51,21 +42,17 @@ float lastFrame = 0.0f;
 float sunAngle = 0.0f;
 float sunElevationAngle = 45.0f;
 
-// --> Variables Globales Para Definir las [Reglas del Mundo]
+// --> Reglas del Mundo
 const float CHUNK_SIZE = 20.0f;
-const float fireDuration = 80.0f; // 1 Minuto
-const float minBurnDuration = 15.0f; // [Mínimo que un árbol arde]
-const float maxBurnDuration = 40.0f; // Máximo que un árbol arde]
+const float fireDuration = 80.0f;
+const float minBurnDuration = 15.0f;
+const float maxBurnDuration = 40.0f;
 const float minCloudDistanceSq = 60.0f * 60.0f;
 const int maxPlacementTries = 20;
 
-// --> Variables Globales Para la Generacion Aleatoria del Bosque
-
-// Generando Semilla Aleatora
+// --> Generación Aleatoria
 std::random_device rd;
 std::mt19937 gen(rd());
-
-// Generación de elemntos aleatorios dentro del chunk [BOSQUE]
 std::uniform_real_distribution<float> dis_pos(-CHUNK_SIZE / 2.0f, CHUNK_SIZE / 2.0f);
 std::uniform_real_distribution<float> dis_scale_grass(0.8f, 1.2f);
 std::uniform_real_distribution<float> dis_scale_rock(0.2f, 0.7f);
@@ -81,39 +68,31 @@ std::uniform_real_distribution<float> dis_explode_angle(0.0f, 360.0f);
 std::uniform_real_distribution<float> dis_explode_radius(0.0f, 1.5f);
 std::uniform_real_distribution<float> dis_explode_fall(1.5f, 3.0f);
 std::uniform_real_distribution<float> dis_explode_spin(40.0f, 90.0f);
-std::uniform_real_distribution<float> dis_fire_time(0.0f, fireDuration - maxBurnDuration); // Tiempo de inicio de fuego
-std::uniform_real_distribution<float> dis_burn_duration(minBurnDuration, maxBurnDuration); // Duración de quema
-
-// Generación de elemntos aleatorios dentro del chunk [NUBES]
+std::uniform_real_distribution<float> dis_fire_time(0.0f, fireDuration - maxBurnDuration);
+std::uniform_real_distribution<float> dis_burn_duration(minBurnDuration, maxBurnDuration);
 std::uniform_real_distribution<float> dis_cloud_distant_x(-800.0f, 800.0f);
 std::uniform_real_distribution<float> dis_cloud_distant_z(-800.0f, 800.0f);
 std::uniform_real_distribution<float> dis_cloud_y(70.0f, 100.0f);
 std::uniform_real_distribution<float> dis_cloud_scale(1.0f, 2.5f);
 
-// --> Variables Globales Para el uso de [SHADERS]
-
-// Shaders de Phong
+// --> Shaders
 Shader* phongShader = nullptr;
 Shader* instancePhongShader = nullptr;
 Shader* instanceAlphaTestPhongShader = nullptr;
-// Shaders personalizados
 Shader* skyboxShader = nullptr;
 Shader* sunShader = nullptr;
 Shader* crosshairShader = nullptr;
 Shader* mLightsShader = nullptr;
-// Shader Interfaz Grafica (UI)
 Shader* uiShader = nullptr;
-// Shader de Skinning
 Shader* dynamicShader = nullptr;
-
 Shader* phongShader2 = nullptr;
 Shader* moonShader;
 Shader* basicShader;
 Shader* wavesShader;
 Shader* wavesShader2;
+Shader* lambertShader;
 
-
-// --> Variables Globales Para el estado del mundo [Iluminacion y Materiales]
+// --> Estado del Mundo
 std::vector<Chunk> terrain_chunks;
 std::vector<Leaf> falling_leaves;
 std::vector<glm::mat4> cloud_matrices;
@@ -122,30 +101,29 @@ std::vector<glm::mat4> leaf_matrices;
 int next_tree_id = 0;
 bool isDay = true;
 
-// --- NUEVO: Definición de globales de IA y Mundo ---
+// --> IA y Mundo
 float WORLD_MIN_X, WORLD_MAX_X, WORLD_MIN_Z, WORLD_MAX_Z;
 std::vector<AnimalInstance> g_animals;
-std::uniform_real_distribution<float> dis_ai_time(3.0f, 10.0f); // 3-10 segundos por estado
-std::uniform_real_distribution<float> dis_ai_target_dist(5.0f, 15.0f); // Caminar 5-15 metros
-std::uniform_real_distribution<float> dis_spawn_chance(0.0f, 1.0f); // Rango de 0.0 a 1.0
+std::uniform_real_distribution<float> dis_ai_time(3.0f, 10.0f);
+std::uniform_real_distribution<float> dis_ai_target_dist(5.0f, 15.0f);
+std::uniform_real_distribution<float> dis_spawn_chance(0.0f, 1.0f);
 
-// --- NUEVO: Definición de Globales de Simulación ---
-float g_forestHealth = 1.0f;        // Empezar al 100%
-float g_previousForestHealth = 1.0f; // <-- AÑADE ESTA LÍNEA (inicializar igual)
+// --> Simulación Salud
+float g_forestHealth = 1.0f;
+float g_previousForestHealth = 1.0f;
 int g_totalInitialTrees = 0;
 int g_currentLivingTrees = 0;
 int g_maxAnimalsInWorld = 0;
 float g_animalDeathTimer = ANIMAL_DEATH_RATE;
 float g_animalRespawnTimer = ANIMAL_RESPAWN_RATE;
-// --- FIN NUEVO ---
 
-// --> Variable Globale Para el Tamano del Mundo
+// --> Tamaño Mundo
 const int WORLD_SIZE = 10;
 
-// --> Variable Globale Para lo que la camara puede ver
+// --> Frustum
 Frustum cameraFrustum;
 
-// -> Variables Globales Mecanica (Talado de Árboles)
+// --> Constantes Mecánicas
 const unsigned int GRASS_PER_CHUNK = 80;
 const unsigned int ROCKS_PER_CHUNK = 15;
 const unsigned int TREES_PER_CHUNK = 5;
@@ -155,11 +133,9 @@ const unsigned int NUM_LOCAL_CLOUDS = 10;
 const unsigned int TOTAL_CLOUDS = NUM_DISTANT_CLOUDS + NUM_LOCAL_CLOUDS;
 const unsigned int EXPLOSION_LEAVES_PER_HIT = 20;
 
-// Hitboxes Arboles
 const glm::vec3 tree_trunk_aabb_min(-0.5f, 0.0f, -0.5f);
 const glm::vec3 tree_trunk_aabb_max(0.5f, 2.0f, 5.5f);
 
-// Banderas de Estado Mecácnica Fuego/Plantar 
 const float max_plant_distance = 15.0f;
 bool p_key_pressed = false;
 bool f_key_pressed = false;
@@ -171,7 +147,7 @@ float fireStartTime = 0.0f;
 // Vector de Luces
 std::vector<Light> gLights;
 
-// Assets del Bosque
+// Assets
 ForestAssets fa;
 UIAssets ui;
 TestAssets ta;
@@ -179,26 +155,15 @@ EspacioAssets ea;
 MenuAssets ma;
 GlaciarAssets ga;
 
-// Shaders para materiales
-Shader* lambertShader;
-
-
-
-
-
-
-
-// -> Variable Global Para el Manejo del [Audio]
+// --> Audio
 ISoundEngine* SoundEngine = createIrrKlangDevice();
 
-//Variables tierra, glaciares
+// --> Variables Tierra/Glaciar
 float Time = 0.0f;
 float TimeA1 = 0.0f;
-
 float transparenciaC = 0.0f;
 float wavesTime = 0.0f;
 float avanceA1 = 0.0005f;
-
 float DT1 = 0.0f;
 float DT2 = 0.0f;
 float DT3 = 0.0f;
@@ -207,27 +172,23 @@ float DT5 = 0.0f;
 float DT6 = 0.0f;
 float DHoja = 0.0f;
 const float velocidadCarga = 0.01f;
-
 float temperatura = -25.0f;
 float barraTF = 0.0f;
 float barraTC = 0.0f;
-
-int escena = 0;
-
+int escena = 1;
 bool menu = false;
 bool animacion1 = false;
 bool calor = false;
 
-// === Variables globales para derretimiento en escena 1 ===
-float glacierScaleY = 1.0f;          // escala vertical de Glaciares (1 → 0)
-float meltSpeedBase = 0.01f;         // factor base de derretimiento por °C
-float osoDropFactor = 2.0f;          // descenso de osos por unidad derretida
-
-// === Movimiento aleatorio segmentado para Oso3, Oso4 y Oso5 ===
-// Recorren tramos de 10 unidades y giran ±90° al azar al finalizar cada tramo.
+// --> Glaciar variables
+float glacierScaleY = 1.0f;
+float meltSpeedBase = 0.01f;
+float osoDropFactor = 2.0f;
 const float OSO_SEGMENTO = 10.0f;
-const float OSO_SPEED = 1.0f;            // unidades/segundo
+const float OSO_SPEED = 1.0f;
 glm::vec3 osoPos[3] = { {0,0,0}, {0,0,0}, {0,0,0} };
+glm::vec3 osoUltimoGiro[3] = { {0,0,0}, {0,0,0}, {0,0,0} };
+float      osoYawDeg[3] = { 0.0f, 0.0f, 0.0f };
 
 glm::vec3 posicionActual(0.0f, 2.0f, 10.0f);
 glm::vec3 posicionA1(-0.6f, 6.0f, 5.0f);
@@ -236,8 +197,32 @@ glm::vec3 posicionInicioG(0.0f, 2.0f, 10.0f);
 glm::vec3 posicionOrigen(0.0f, 0.0f, 0.0f);
 glm::vec3 posicionEscenario1(0.0f, 40.0f, 340.0f);
 
-glm::vec3 osoUltimoGiro[3] = { {0,0,0}, {0,0,0}, {0,0,0} };
-float      osoYawDeg[3] = { 0.0f, 0.0f, 0.0f };  // 0° mirando +X
+// =============================================================================================
+// === VARIABLES GLOBALES PARA PERSONAJE Y CÁMARA 3RA PERSONA ===
+// =============================================================================================
+
+// Estado
+bool g_isThirdPerson = false;
+bool g_pressM = false;
+
+// Variables de los Modelos
+Animated* g_demiModel = nullptr;
+Animated* g_mikuModel = nullptr; 
+
+// Estado del Jugador
+int g_activeCharacter = 1; // 1=Demi, 2=Miku 
+glm::vec3 g_demiPos(0.0f, 0.0f, 0.0f); // Posición compartida
+float g_demiRotY = 0.0f;
+bool g_demiMoving = false;
+
+// Constantes (Definición)
+const float DEMI_SPEED = 10.0f;
+const float DEMI_SCALE = 0.04f;
+const float MIKU_SCALE = 0.04f; 
+const float DEMI_CAM_DIST = 15.0f;
+const float DEMI_OFFSET_Y = 0.0f;
+
+// =============================================================================================
 
 int main() {
     if (!Start()) {
@@ -256,6 +241,7 @@ int main() {
     if (ui.crosshairVBO != 0) { glDeleteBuffers(1, &ui.crosshairVBO); ui.crosshairVBO = 0; }
     if (ui.uiVAO != 0) { glDeleteVertexArrays(1, &ui.uiVAO); ui.uiVAO = 0; }
     if (ui.uiVBO != 0) { glDeleteBuffers(1, &ui.uiVBO); ui.uiVBO = 0; }
+
     if (fa.grassInstanceVBO != 0) { glDeleteBuffers(1, &fa.grassInstanceVBO); }
     if (fa.rockInstanceVBO != 0) { glDeleteBuffers(1, &fa.rockInstanceVBO); }
     if (fa.treeInstanceVBO != 0) { glDeleteBuffers(1, &fa.treeInstanceVBO); }
@@ -268,11 +254,8 @@ int main() {
     if (ui.fireTextureID != 0) { glDeleteTextures(1, &ui.fireTextureID); }
     if (ui.treeTextureID != 0) { glDeleteTextures(1, &ui.treeTextureID); }
     if (ui.highlightTextureID != 0) { glDeleteTextures(1, &ui.highlightTextureID); }
-
-    // --- NUEVO: Limpieza de leyendas ---
     if (ui.legendFireTextureID != 0) { glDeleteTextures(1, &ui.legendFireTextureID); }
     if (ui.legendTreeTextureID != 0) { glDeleteTextures(1, &ui.legendTreeTextureID); }
-    // -----------------------------------
 
     delete phongShader;
     delete instancePhongShader;
@@ -281,11 +264,11 @@ int main() {
     delete sunShader;
     delete crosshairShader;
     delete uiShader;
-    delete dynamicShader; // <-- NUEVO
+    delete dynamicShader;
 
-    delete fa.character01; // <-- NUEVO
-    delete fa.character02; // <__ NUEVO MODELO DE CASTOR
-    delete fa.skull_model; // <-- NUEVO
+    delete fa.character01;
+    delete fa.character02;
+    delete fa.skull_model;
 
     delete fa.terrain_model;
     delete fa.grass_model;
@@ -302,20 +285,21 @@ int main() {
     delete fa.cloud_model;
     delete fa.leaf_model;
 
+    // Limpiar Personajes
+    if (g_demiModel) delete g_demiModel;
+    if (g_mikuModel) delete g_mikuModel;
+
     glfwTerminate();
     return 0;
 }
 
-
-
 bool Start() {
     glfwInit();
-
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "EcoMapleGrahics  v1.0.0-alpha", NULL, NULL);
+    window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "EcoMapleGrahics v1.0.0-alpha", NULL, NULL);
     if (window == NULL) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -326,7 +310,7 @@ bool Start() {
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
-    glfwSetWindowFocusCallback(window, window_focus_callback); // --- NUEVO: Registrar el callback de foco ---
+    glfwSetWindowFocusCallback(window, window_focus_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cout << "Failed to initialize GLAD" << std::endl;
@@ -334,9 +318,7 @@ bool Start() {
     }
     glEnable(GL_DEPTH_TEST);
 
-    // ----------------------------- DEFINICIÓN DE SHADERS ----------------------------------------------------
-
-    //NOTA: EL BOSQUE AL TENER UNA SOLA FUENTE DE ILUMINACIÓN (SOL) SE USA LE BASICO
+    // Shaders
     phongShader = new Shader("shaders/11_BasicPhongShader.vs", "shaders/11_BasicPhongShader.fs");
     instancePhongShader = new Shader("shaders/instancing_phong.vs", "shaders/11_BasicPhongShader.fs");
     instanceAlphaTestPhongShader = new Shader("shaders/instancing_phong.vs", "shaders/instancing_phong_alpha_test.fs");
@@ -344,21 +326,13 @@ bool Start() {
     sunShader = new Shader("shaders/sun.vs", "shaders/sun.fs");
     crosshairShader = new Shader("shaders/crosshair.vs", "shaders/crosshair.fs");
     uiShader = new Shader("shaders/ui_shader.vs", "shaders/ui_shader.fs");
-
-    //Shaders de Tierra y Glaciares
     moonShader = new Shader("shaders/16_moonAnimation.vs", "shaders/16_moonAnimation.fs");
     basicShader = new Shader("shaders/10_vertex_simple.vs", "shaders/10_fragment_simple.fs");
     wavesShader = new Shader("shaders/13_wavesAnimation.vs", "shaders/13_wavesAnimation.fs");
     wavesShader2 = new Shader("shaders/13_wavesAnimation2.vs", "shaders/13_wavesAnimation2.fs");
-
-    //Shader de Luces Multiples de Phong
     phongShader2 = new Shader("shaders/11_BasicPhongShader2.vs", "shaders/11_BasicPhongShader2.fs");
     mLightsShader = new Shader("shaders/11_PhongShaderMultLights.vs", "shaders/11_PhongShaderMultLights.fs");
-
-    // --- NUEVO: Cargar Shader de Skinning ---
     dynamicShader = new Shader("shaders/10_vertex_skinning-IT.vs", "shaders/10_fragment_skinning-IT.fs");
-    //dynamicShader2 = new Shader("shaders/10_vertex_skinning-IT2.vs", "shaders/10_fragment_skinning-IT2.fs");
-
 
     if (!phongShader || phongShader->ID == 0 ||
         !instancePhongShader || instancePhongShader->ID == 0 ||
@@ -368,55 +342,29 @@ bool Start() {
         !crosshairShader || crosshairShader->ID == 0 ||
         !uiShader || uiShader->ID == 0 ||
         !mLightsShader || mLightsShader->ID == 0 ||
-        !dynamicShader || dynamicShader->ID == 0 // <-- NUEVA COMPROBACIÓN
-        )
+        !dynamicShader || dynamicShader->ID == 0)
     {
         std::cerr << "ERROR: Shaders failed to load." << std::endl;
-        delete phongShader;
-        delete instancePhongShader;
-        delete instanceAlphaTestPhongShader;
-        delete skyboxShader;
-        delete sunShader;
-        delete crosshairShader;
-        delete uiShader;
-        delete mLightsShader;
-        delete dynamicShader; // <-- NUEVO DELETE
         return false;
     }
 
-    //ta.light02.Position = glm::vec3(camera.Position);
-    //ta.light02.Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-    //ta.light02.Power = glm::vec4(10.0f, 10.0f, 10.0f, 1.0f); // Potencia en Watts
-    //ta.light02.alphaIndex = 16;
-    //gLights.push_back(ta.light02);
-
-    // Carga de Modelos y Recursos
     loadUI(ui);
     loadTest(ta);
     loadForest(fa);
-
     loadMenu(ma);
     loadEspacio(ea);
     loadGlaciar(ga);
-    // Inicialiacion de los Buffer de Renderizado
+
     initializeRenderBuffers(ui);
 
-    // Depuración (Se debe de Borrar)
-    std::cout << "Using Manual Tree Trunk AABB Min: (" << tree_trunk_aabb_min.x << ", " << tree_trunk_aabb_min.y << ", " << tree_trunk_aabb_min.z << ")" << std::endl;
-    std::cout << "Using Manual Tree Trunk AABB Max: (" << tree_trunk_aabb_max.x << ", " << tree_trunk_aabb_max.y << ", " << tree_trunk_aabb_max.z << ")" << std::endl;
-
-    // --- NUEVO: Calcular límites del mundo ---
-    // !!! MOVIDO AQUÍ ARRIBA !!!
     float world_half_width = (WORLD_SIZE / 2.0f) * CHUNK_SIZE;
     WORLD_MIN_X = -world_half_width;
     WORLD_MAX_X = world_half_width;
     WORLD_MIN_Z = -world_half_width;
     WORLD_MAX_Z = world_half_width;
-    // --- FIN NUEVO ---
 
     generateForest();
 
-    // --- NUEVO: Contar árboles iniciales y animales ---
     g_totalInitialTrees = 0;
     for (const auto& chunk : terrain_chunks) {
         for (const auto& tree : chunk.tree_instances) {
@@ -427,104 +375,89 @@ bool Start() {
     }
     g_currentLivingTrees = g_totalInitialTrees;
     g_maxAnimalsInWorld = (int)g_animals.size();
-    std::cout << "Mundo generado con " << g_totalInitialTrees << " arboles vivos." << std::endl;
-    std::cout << "Maximo de animales en el mundo: " << g_maxAnimalsInWorld << std::endl;
-    // --- FIN NUEVO ---
 
     initializeInstanceBuffers(fa);
+
+    // =============================================================================================
+    // === CARGA DE MODELOS JUGABLES ===
+    // =============================================================================================
+
+    // Cargar Demi
+    g_demiModel = new Animated("models/demi.fbx");
+    if (g_demiModel) {
+        g_demiModel->currentAnimation = 0;
+        g_demiModel->fps = 30.0f;
+        g_demiPos = glm::vec3(0.0f, 0.0f, 0.0f); // Posición inicial
+    }
+    else {
+        std::cout << "ERROR CRITICO: No se cargo models/demi.fbx" << std::endl;
+    }
+
+    // Cargar Miku
+    g_mikuModel = new Animated("models/miku.fbx");
+    if (g_mikuModel) {
+        g_mikuModel->currentAnimation = 0;
+        g_mikuModel->fps = 30.0f;
+    }
+    else {
+        std::cout << "ERROR: No se cargo models/miku.fbx" << std::endl;
+    }
 
     return true;
 }
 
 bool Update() {
-    //Delta Time
     float currentFrame = (float)glfwGetTime();
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
 
-    if (!animacion1 && escena == 0)CalculoCamara(window);
-    else if (!menu && animacion1)Animacion1(window);
-    else if (menu)Trancision();
+    // Evitar conflicto de cámaras
+    if (!animacion1 && escena == 0 && !g_isThirdPerson) {
+        CalculoCamara(window);
+    }
+    else if (!menu && animacion1) Animacion1(window);
+    else if (menu) Trancision();
 
-    //Cálculo del desplazamiento de la barra del termómetro
     barraTF = (temperatura + 25.0) * 0.04088f;
     barraTC = temperatura * 0.0236f;
 
-    // Procesa la entrada del teclado o mouse
     processInput(window);
 
-    //Actualizar la Logica de Mundo
-    updateGameLogic();
+    // ==========================================================
+    // === ACTUALIZACIÓN DE ANIMACIÓN DE PERSONAJE ACTIVO ===
+    // ==========================================================
 
-    // Dibujar Escena 3D
+    // 1. Seleccionar modelo activo
+    Animated* currentModel = nullptr;
+    if (g_activeCharacter == 1) currentModel = g_demiModel;
+    else if (g_activeCharacter == 2) currentModel = g_mikuModel;
+
+    // 2. Actualizar si existe
+    if (currentModel) {
+        currentModel->currentAnimation = 0; // Solo hay anim 0
+
+        if (g_demiMoving) {
+            // Moverse
+            currentModel->UpdateAnimation(deltaTime);
+        }
+        else {
+            // Pausar/Resetear a frame 0
+            currentModel->animationCount = 0;
+            currentModel->elapsedTime = 0.0f;
+            currentModel->UpdateAnimation(0.0f);
+        }
+    }
+
+    updateGameLogic();
     renderScene();
 
-    // Dibujar UI 2D 
-    if(escena==1 && !menu)renderUI();
+    if (escena == 1 && !menu) renderUI();
+
     glfwSwapBuffers(window);
     glfwPollEvents();
-         
-    //processInput2(window);
 
-    
     return true;
 }
 
-// Procesamos entradas del teclado
-void processInput2(GLFWwindow* window)
-{
-    if (!animacion1 && !menu) {
-
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-            camera.ProcessKeyboard(FORWARD, deltaTime);
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-            camera.ProcessKeyboard(BACKWARD, deltaTime);
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-            camera.ProcessKeyboard(LEFT, deltaTime);
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-            camera.ProcessKeyboard(RIGHT, deltaTime);
-        if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS)
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
-            glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
-
-        // Character movement
-        if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-            Time += 0.05f;
-        }
-        if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-            Time -= 0.05f;
-        }
-        if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS) {
-
-        }
-        if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS) {
-
-        }
-        if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS) {
-        }
-        if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
-
-        }
-        if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-            if (temperatura > -40.00 && !calor)temperatura -= 0.05f;
-        }
-        if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-            if (temperatura < 40.00)temperatura += 0.05f;
-            if (temperatura > 0)calor = true;
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS)
-        {
-
-        }
-        if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS)
-        {
-
-        }
-    }
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
-}
+// (processInput2 eliminado, no se usa)
+void processInput2(GLFWwindow* window) {}
