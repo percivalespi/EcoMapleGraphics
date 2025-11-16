@@ -256,26 +256,26 @@ void renderMenuScene(const glm::mat4& projection, const glm::mat4& view) {
 }
 
 void renderEspacioScene(const glm::mat4& projection, const glm::mat4& view) {
+    glm::mat4 view_skybox = glm::mat4(glm::mat3(view));
 
-    // Carga del Skybox usando codigo de tenshi
     if (skyboxShader != nullptr && skyboxShader->ID != 0) {
         glDepthFunc(GL_LEQUAL);
         skyboxShader->use();
         skyboxShader->setMat4("projection", projection);
-        glm::mat4 view_skybox = glm::mat4(glm::mat3(view));
         skyboxShader->setMat4("view", view_skybox);
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(1000.0f));
-        Model* currentSkybox = ea.cubeenv;
+        skyboxShader->setMat4("model", model);
+        Model* currentSkybox = ea.cubeenv_noche;
         if (currentSkybox != nullptr) {
             currentSkybox->Draw(*skyboxShader);
         }
         glDepthFunc(GL_LESS);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, 0);
     }
 
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     // Dibujamos un objeto cualquiera
     {
@@ -321,6 +321,20 @@ void renderEspacioScene(const glm::mat4& projection, const glm::mat4& view) {
 
 
 
+    }
+
+    {
+		basicShader->use();
+		basicShader->setMat4("projection", projection); 
+		basicShader->setMat4("view", view); 
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-20.0f, 0.0f, 3.0f));
+        model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+        basicShader->setMat4("model", model);
+
+		ea.sol->Draw(*basicShader);
     }
 
     glUseProgram(0);
@@ -417,7 +431,7 @@ void renderGlaciarScene(const glm::mat4& projection, const glm::mat4& view) {
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, desp+osoDown));
         model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, glacierScaleY));
 
         drawObject(mLightsShader, ga.TrozoH1, ga.nieveMaterial, model);
         drawObject(mLightsShader, ga.TrozoH2, ga.nieveMaterial, model);

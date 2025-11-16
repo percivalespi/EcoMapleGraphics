@@ -259,8 +259,8 @@ void initializeModelsEspacio(EspacioAssets& ea) {
     ea.Tierra = new Model("models/iceland/Tierra.fbx");
     ea.Canada = new Model("models/iceland/Canada.fbx");
     ea.Luna = new Model("models/IllumModels/moon.fbx");
-    ea.cubeenv = new Model("models/mycube.fbx");
     ea.cubeenv_noche = new Model("models/noche/mycube.fbx");
+    ea.sol = new Model("models/iceland/Sol.fbx");
 
     // CORREGIDO: Usar -> en punteros
     if (!fa.cubeenv || fa.cubeenv->meshes.empty() || fa.cubeenv->meshes[0].textures.empty()) {

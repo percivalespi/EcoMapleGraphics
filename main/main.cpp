@@ -210,6 +210,8 @@ int escena = 0;
 bool menu = false;
 bool animacion1 = false;
 bool calor = false;
+CamAni g_anim1;
+MenuAnim g_menu;
 
 // === Variables globales para derretimiento en escena 1 ===
 float glacierScaleY = 1.0f;          // escala vertical de Glaciares (1 → 0)
@@ -434,8 +436,9 @@ bool Update() {
     lastFrame = currentFrame;
 
     if (!animacion1 && escena == 0)CalculoCamara(window);
-    else if (!menu && animacion1)Animacion1(window);
-    else if (menu)Trancision();
+    //else if (!menu && animacion1)Animacion1(window);
+    else if (!menu && animacion1)UpdateAnim1(window);
+    else if (menu)Transicion(window);
 
     //Cálculo del desplazamiento de la barra del termómetro
     barraTF = (temperatura + 25.0) * 0.04088f;
@@ -454,68 +457,8 @@ bool Update() {
     if(escena==1 && !menu)renderUI();
     glfwSwapBuffers(window);
     glfwPollEvents();
-         
-    //processInput2(window);
+      
 
     
     return true;
-}
-
-// Procesamos entradas del teclado
-void processInput2(GLFWwindow* window)
-{
-    if (!animacion1 && !menu) {
-
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-            camera.ProcessKeyboard(FORWARD, deltaTime);
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-            camera.ProcessKeyboard(BACKWARD, deltaTime);
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-            camera.ProcessKeyboard(LEFT, deltaTime);
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-            camera.ProcessKeyboard(RIGHT, deltaTime);
-        if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS)
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
-            glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
-
-        // Character movement
-        if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-            Time += 0.05f;
-        }
-        if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-            Time -= 0.05f;
-        }
-        if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS) {
-
-        }
-        if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS) {
-
-        }
-        if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS) {
-        }
-        if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
-
-        }
-        if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-            if (temperatura > -40.00 && !calor)temperatura -= 0.05f;
-        }
-        if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-            if (temperatura < 40.00)temperatura += 0.05f;
-            if (temperatura > 0)calor = true;
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS)
-        {
-
-        }
-        if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS)
-        {
-
-        }
-    }
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
 }
