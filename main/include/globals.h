@@ -27,6 +27,7 @@
 
 #include <material.h>
 #include <animatedmodel.h>
+#include <animated.h>
 #include <irrKlang.h>
 
 
@@ -136,10 +137,16 @@ struct AnimalInstance {
     float stateTimer; // Tiempo restante en el estado actual
     glm::vec3 targetPosition;
 
+
+    AnimatedModel* walk; //  <-- NUEVO. Puntero para el modelo de animal que estemos usando
+    AnimatedModel* idle;
+
+    // Estado de animaci�n (movido de AnimatedModel)
     // Estado de animación (movido de AnimatedModel)
     float elapsedTime;
     int animationCount;
     glm::mat4 gBones[MAX_RIGGING_BONES]; // MAX_RIGGING_BONES se define en animatedmodel.h
+
 };
 // --- FIN NUEVO ---
 
@@ -161,7 +168,15 @@ struct ForestAssets {
     Model* moon_model;
     Model* cloud_model;
     Model* leaf_model;
-    AnimatedModel* character01;
+    AnimatedModel* character01; // <-- MODELO DE LOBO CORRIENDO
+    AnimatedModel* character02; // <-- MODELO DE LOBO ESTATICO (PENDIENTE)
+    AnimatedModel* character03; // <-- MODELO DE CASTOR CORRIENDO
+    AnimatedModel* character04; // <-- MODELO DE CASTOR ESTATICO
+    AnimatedModel* character05; // <-- MODELO DE OSO NEGRO CORRIENDO
+    AnimatedModel* character06; // <-- MODELO DE OSO ESTATICO (PENDIENTE)
+    AnimatedModel* character07; // <-- MODELO DE ALCE CORRIENDO
+    AnimatedModel* character08; // <-- NUEVO DE ALCE ESTATICO
+
     Model* skull_model; // <-- NUEVO MODELO
     // --- Luz
     Light theLight;
@@ -186,12 +201,34 @@ struct ForestAssets {
 struct TestAssets { //Elementos Para el entorno de Prueba
     Light light01;
     Light light02;
-    Material steel;
-    Material asphalt;
     Model* car;
     Model* luminaire;
     Model* stop;
     Model* floor;
+    AnimatedModel *character01;
+    Light cameraLight;
+
+    //Modelos
+    Model* suelo, *suelo_verde, *metales, *objMadera, *objCristales;
+    Model* objPlasticos, *objConcreto, *objLlantas, *objLadrillo;
+    Model* bandera, *grafitis, *luzSemaforo, *co2;
+
+
+    //Modelos IA
+    Model* hopstial, * fabrica, * policia, * tienda, * rascacielos, *edificio2, *banco;
+
+
+    
+
+
+    //Materiales
+    Material asphalt, cesped, concreto, goma, ladrillo, tela, gases, focos;
+    
+
+    Material steel;
+    Material plastic;
+    Material traslucido;
+    Material madera;
 };
 
 struct EspacioAssets {
@@ -232,18 +269,23 @@ struct GlaciarAssets {
     Model* Iceberg;
     Model* PlacaHielo;
     Model* Glaciares;
-    AnimatedModel* Oso1;
-    AnimatedModel* Oso2;
-    AnimatedModel* Oso3;
-    AnimatedModel* Oso4;
-    AnimatedModel* Oso5;
+    Animated* Oso1;
+    Animated* Oso2;
+    Animated* Oso3;
+    Animated* Oso4;
+    Animated* Oso5;
 
     // --- Luz
     Light theLight;
     // Material
     Material defaultMaterial;
+	Material nieveMaterial;
+	Material GlaciaresMaterial;
 };
 
+
+extern glm::vec3 osoUltimoGiro[3];
+extern float osoYawDeg[3];
 
 // -- Assets del Bosque
 extern ForestAssets fa;
@@ -383,6 +425,7 @@ extern const glm::vec3 tree_trunk_aabb_max;
 extern bool p_key_pressed;
 extern bool f_key_pressed;
 extern bool g_key_pressed;
+extern bool z_key_pressed;
 extern const float max_plant_distance;
 extern bool isFireActive;
 extern float fireStartTime;
@@ -437,5 +480,9 @@ extern glm::vec3 posicionCarga;
 extern glm::vec3 posicionInicioG;
 extern glm::vec3 posicionOrigen;
 extern glm::vec3 posicionEscenario1;
+
+// Shaders para materiales
+extern Shader* lambertShader;
+
 
 #endif

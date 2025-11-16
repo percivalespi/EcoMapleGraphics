@@ -112,7 +112,7 @@ void processInput(GLFWwindow* window) {
                 if (temperatura > 0)calor = true;
             }
             if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS) {
-                if (temperatura > -40.00 && !calor)temperatura -= 0.35f;
+                if ((temperatura > -40.00 && !calor) || (temperatura > 0.00 && calor))temperatura -= 0.35f;
             }
         }
        

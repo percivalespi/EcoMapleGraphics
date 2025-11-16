@@ -3,7 +3,7 @@
 
 >[!NOTE]
 >  Aun no se incluye la carpeta models debido a que como va aumnetar de tamaño estos se deben de decargar por separado, lo más probable es que hasta que este final se comprima y seba añadir manualmente al proyecto.
->Para ello descargar la carpeta models del siguiente link y meterlo en la carpeta BIN del [***Descarga Carpeta models***](https://drive.google.com/drive/folders/1eo8KdIWDBilb1HSjECFdnIou3gmr_QRI?usp=sharing)
+>Para ello descargar la carpeta models del siguiente link y meterlo en la carpeta BIN del [***Descarga Carpeta models***](https://drive.google.com/file/d/1O8QMp9DRxNnE742jWmlFmh3YPAa_G8PA/view?usp=sharing)
 
 >[!WARNING]
 > Configurar como Archivos de Origen Existentes **TODOS** los `.cpp` y en archivos de encabezado agregar como existentes todos los que estan dentro del `include`

@@ -157,6 +157,7 @@ const float max_plant_distance = 15.0f;
 bool p_key_pressed = false;
 bool f_key_pressed = false;
 bool g_key_pressed = false;
+bool z_key_pressed = false;
 bool isFireActive = false;
 float fireStartTime = 0.0f;
 
@@ -170,6 +171,15 @@ TestAssets ta;
 EspacioAssets ea;
 MenuAssets ma;
 GlaciarAssets ga;
+
+// Shaders para materiales
+Shader* lambertShader;
+
+
+
+
+
+
 
 // -> Variable Global Para el Manejo del [Audio]
 ISoundEngine* SoundEngine = createIrrKlangDevice();
@@ -189,7 +199,7 @@ float DT4 = 0.0f;
 float DT5 = 0.0f;
 float DT6 = 0.0f;
 float DHoja = 0.0f;
-const float velocidadCarga = 0.05f;
+const float velocidadCarga = 0.01f;
 
 float temperatura = -25.0f;
 float barraTF = 0.0f;
@@ -217,8 +227,10 @@ glm::vec3 posicionA1(-0.6f, 6.0f, 5.0f);
 glm::vec3 posicionCarga(0.0f, 47.0f, 4.0f);
 glm::vec3 posicionInicioG(0.0f, 2.0f, 10.0f);
 glm::vec3 posicionOrigen(0.0f, 0.0f, 0.0f);
-glm::vec3 posicionEscenario1(0.0f, 20.0f, -340.0f);
+glm::vec3 posicionEscenario1(0.0f, 40.0f, 340.0f);
 
+glm::vec3 osoUltimoGiro[3] = { {0,0,0}, {0,0,0}, {0,0,0} };
+float      osoYawDeg[3] = { 0.0f, 0.0f, 0.0f };  // 0° mirando +X
 
 int main() {
     if (!Start()) {
@@ -265,6 +277,7 @@ int main() {
     delete dynamicShader; // <-- NUEVO
 
     delete fa.character01; // <-- NUEVO
+    delete fa.character02; // <__ NUEVO MODELO DE CASTOR
     delete fa.skull_model; // <-- NUEVO
 
     delete fa.terrain_model;
@@ -294,7 +307,7 @@ bool Start() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "EcoMapleGrahics  v0.0.0-alpha", NULL, NULL);
+    window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "EcoMapleGrahics  v1.0.0-alpha", NULL, NULL);
     if (window == NULL) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -335,6 +348,8 @@ bool Start() {
 
     // --- NUEVO: Cargar Shader de Skinning ---
     dynamicShader = new Shader("shaders/10_vertex_skinning-IT.vs", "shaders/10_fragment_skinning-IT.fs");
+    //dynamicShader2 = new Shader("shaders/10_vertex_skinning-IT2.vs", "shaders/10_fragment_skinning-IT2.fs");
+
 
     if (!phongShader || phongShader->ID == 0 ||
         !instancePhongShader || instancePhongShader->ID == 0 ||
@@ -359,6 +374,12 @@ bool Start() {
         delete dynamicShader; // <-- NUEVO DELETE
         return false;
     }
+
+    //ta.light02.Position = glm::vec3(camera.Position);
+    //ta.light02.Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    //ta.light02.Power = glm::vec4(10.0f, 10.0f, 10.0f, 1.0f); // Potencia en Watts
+    //ta.light02.alphaIndex = 16;
+    //gLights.push_back(ta.light02);
 
     // Carga de Modelos y Recursos
     loadUI(ui);
