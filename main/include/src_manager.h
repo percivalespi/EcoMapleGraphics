@@ -38,7 +38,8 @@ void initilizeMaterialsGlaciar(GlaciarAssets& ga);
 void initilizeLightsGlaciar(GlaciarAssets& ga);
 void loadGlaciar(GlaciarAssets& ga);
 
-
+static unsigned int LoadCubemap(const std::vector<std::string>& faces);
+void loadFresnelGlassResources();
 
 
 

@@ -1,4 +1,4 @@
-#include "input.h"
+ï»¿#include "input.h"
 #include "mechanic.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -29,10 +29,10 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
 
 #include "input.h"
 
-// --- NUEVO: Implementación de la función para pantalla completa ---
+// --- NUEVO: Implementaciï¿½n de la funciï¿½n para pantalla completa ---
 void toggleFullscreen(GLFWwindow* window) {
     if (!is_fullscreen) {
-        // Guardar la posición y tamaño de la ventana
+        // Guardar la posiciï¿½n y tamaï¿½o de la ventana
         glfwGetWindowPos(window, &last_window_x, &last_window_y);
         glfwGetWindowSize(window, &last_window_width, &last_window_height);
 
@@ -49,7 +49,7 @@ void toggleFullscreen(GLFWwindow* window) {
     }
 }
 
-// --- NUEVO: Implementación del callback de foco ---
+// --- NUEVO: Implementaciï¿½n del callback de foco ---
 void window_focus_callback(GLFWwindow* window, int focused)
 {
     g_isWindowFocused = (focused == GLFW_TRUE);
@@ -57,7 +57,7 @@ void window_focus_callback(GLFWwindow* window, int focused)
     {
         // La ventana ha ganado el foco, capturar el cursor de nuevo
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        firstMouse = true; // Evita un salto brusco de la cámara
+        firstMouse = true; // Evita un salto brusco de la cï¿½mara
     }
     else
     {
@@ -68,7 +68,7 @@ void window_focus_callback(GLFWwindow* window, int focused)
 // --- FIN NUEVO ---
 
 
-// cuando el tamaño de la ventana cambia (por SO o por el usuario) esta función de devolución de llamada se ejecuta
+// cuando el tamaï¿½o de la ventana cambia (por SO o por el usuario) esta funciï¿½n de devoluciï¿½n de llamada se ejecuta
 // ---------------------------------------------------------------------------------------------
 
 void processInput(GLFWwindow* window) {
@@ -84,13 +84,13 @@ void processInput(GLFWwindow* window) {
         g_activeCharacter = 2; // Seleccionar Miku
     }
 
-    // --- TOGGLE MODO CÁMARA (TECLA M) ---
+    // --- TOGGLE MODO Cï¿½MARA (TECLA M) ---
     if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS) {
         if (!g_pressM) {
             g_isThirdPerson = !g_isThirdPerson;
             g_pressM = true;
             if (g_isThirdPerson) {
-                // Al entrar, ajustamos un poco la cámara para ver al personaje
+                // Al entrar, ajustamos un poco la cï¿½mara para ver al personaje
                 camera.Pitch = -15.0f;
                 camera.ProcessMouseMovement(0, 0); // Actualizar vectores
             }
@@ -108,7 +108,7 @@ void processInput(GLFWwindow* window) {
             // =================================================
             g_demiMoving = false;
 
-            // 1. Vectores de cámara (planos)
+            // 1. Vectores de cï¿½mara (planos)
             glm::vec3 camFront = camera.Front;
             camFront.y = 0.0f;
             glm::vec3 camRight = camera.Right;
@@ -125,7 +125,7 @@ void processInput(GLFWwindow* window) {
             if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) moveDir -= camRight;
             if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) moveDir += camRight;
 
-            // 3. Movimiento y Rotación SUAVE
+            // 3. Movimiento y Rotaciï¿½n SUAVE
             if (glm::length(moveDir) > 0.01f) {
                 moveDir = glm::normalize(moveDir);
 
@@ -133,46 +133,46 @@ void processInput(GLFWwindow* window) {
                 g_demiPos += moveDir * DEMI_SPEED * deltaTime;
                 g_demiMoving = true;
 
-                // --- B. Rotación Suave (Interpolación) ---
-                // Calculamos el ángulo objetivo hacia donde queremos ir
+                // --- B. Rotaciï¿½n Suave (Interpolaciï¿½n) ---
+                // Calculamos el ï¿½ngulo objetivo hacia donde queremos ir
                 float targetRotation = atan2(moveDir.x, moveDir.z);
 
-                // Lógica matemática para rotar suavemente sin dar vueltas locas (360->0)
-                // Velocidad de giro (ajusta el 10.0f si quieres que gire más rápido o lento)
+                // Lï¿½gica matemï¿½tica para rotar suavemente sin dar vueltas locas (360->0)
+                // Velocidad de giro (ajusta el 10.0f si quieres que gire mï¿½s rï¿½pido o lento)
                 float rotationSpeed = 10.0f * deltaTime;
 
-                // Calcular diferencia de ángulos
+                // Calcular diferencia de ï¿½ngulos
                 float angleDiff = targetRotation - g_demiRotY;
 
-                // Ajustar para que tome el camino más corto
+                // Ajustar para que tome el camino mï¿½s corto
                 const float PI = 3.14159265359f;
                 if (angleDiff > PI) angleDiff -= 2.0f * PI;
                 if (angleDiff < -PI) angleDiff += 2.0f * PI;
 
-                // Aplicar la rotación progresiva
+                // Aplicar la rotaciï¿½n progresiva
                 g_demiRotY += angleDiff * rotationSpeed;
             }
 
             // 4. Restricciones de altura
             if (g_demiPos.y < DEMI_OFFSET_Y) g_demiPos.y = DEMI_OFFSET_Y;
 
-            // 5. Cámara Orbital SUAVE (LERP)
-            // Calculamos dónde DEBERÍA estar la cámara (Target)
+            // 5. Cï¿½mara Orbital SUAVE (LERP)
+            // Calculamos dï¿½nde DEBERï¿½A estar la cï¿½mara (Target)
             glm::vec3 targetCamPos = g_demiPos - (camera.Front * DEMI_CAM_DIST) + glm::vec3(0.0f, 5.0f, 0.0f);
 
-            // En lugar de asignarlo directo, nos movemos un % hacia allá (0.1f es la "dureza" del resorte)
-            // Cuanto más bajo el valor (ej 0.05f), más suave pero tardada. Cuanto más alto (0.5f), más rígida.
+            // En lugar de asignarlo directo, nos movemos un % hacia allï¿½ (0.1f es la "dureza" del resorte)
+            // Cuanto mï¿½s bajo el valor (ej 0.05f), mï¿½s suave pero tardada. Cuanto mï¿½s alto (0.5f), mï¿½s rï¿½gida.
             float cameraSmoothness = 15.0f * deltaTime;
-            // Asegurar que no exceda 1.0 para evitar oscilación
+            // Asegurar que no exceda 1.0 para evitar oscilaciï¿½n
             if (cameraSmoothness > 1.0f) cameraSmoothness = 1.0f;
 
             camera.Position = glm::mix(camera.Position, targetCamPos, cameraSmoothness);
 
         }
         else {
-            // ... (Aquí sigue tu else de cámara libre original) ...
+            // ... (Aquï¿½ sigue tu else de cï¿½mara libre original) ...
             // =================================================
-            // === MODO CÁMARA LIBRE (Tu código original) ===
+            // === MODO Cï¿½MARA LIBRE (Tu cï¿½digo original) ===
             // =================================================
             if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
                 camera.ProcessKeyboard(FORWARD, deltaTime);
@@ -405,7 +405,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
                 }
             }
             else {
-                std::cerr << "ERROR: Indices de árbol golpeado inválidos!" << std::endl;
+                std::cerr << "ERROR: Indices de Ã¡rbol golpeado invÃ¡lidos!" << std::endl;
             }
         }
     }
@@ -417,41 +417,126 @@ void CalculoCamara(GLFWwindow* window) {
     if (distancia <= 6) {
         animacion1 = true;
         camera.Position = posicionA1;
+        StartAnim1(/*posDestino*/ glm::vec3(-0.7, 3.5, 2.5),
+            /*lookAtDestino*/ glm::vec3(0, 1.5, 0),   // o punto objetivo
+            /*duraciÃ³n*/ 20.0f);
         Time = 222.0f;
     }
 }
 
-void Animacion1(GLFWwindow* window) {
-    transparenciaC += 0.00015f;
-    posicionActual = camera.Position + glm::vec3(0.0f, -avanceA1, -avanceA1);
-    camera.Position = posicionActual;
-    float distancia = glm::length(posicionActual - posicionOrigen);
-    if (distancia <= 3) {
-        menu = true;
-        camera.Position = posicionCarga;
-        escena = 1;
-        animacion1 = false;
-    }
+void StartAnim1(const glm::vec3& camTargetPos, const glm::vec3& camTargetLookAt, double durationSec)
+{
+    g_anim1.active = true;
+    g_anim1.t0 = glfwGetTime();          // o std::chrono::steady_clock
+    g_anim1.dur = durationSec;
 
+    g_anim1.p0 = camera.Position;
+    g_anim1.p1 = camTargetPos;
+
+    camera.Front = glm::normalize(glm::vec3(-10.0f, 0.0f, 3.0f) - camera.Position);
+   
+    g_anim1.lookAt0 = camera.Position + camera.Front;  // punto de mira actual
+    g_anim1.lookAt1 = camTargetLookAt;                 // punto de mira destino
 }
 
-void Trancision() {
-    if (DT1 < 1.0)DT1 += velocidadCarga;
+static inline float Smooth01(float x) {
+    x = glm::clamp(x, 0.0f, 1.0f);
+    return x * x * (3.0f - 2.0f * x);
+}
+
+void UpdateAnim1(GLFWwindow* window)
+{
+    if (!g_anim1.active) return;
+
+    double now = glfwGetTime();                        // reloj estable
+    double u = (now - g_anim1.t0) / g_anim1.dur;     // progreso [0,âˆž)
+    float  su = Smooth01((float)u);   // progreso suavizado [0,1]
+    transparenciaC = su;
+
+    // Interpola posiciÃ³n
+    glm::vec3 pos = glm::mix(g_anim1.p0, g_anim1.p1, su);
+    camera.Position = pos;
+
+    // Interpola direcciÃ³n de mirada hacia un punto objetivo (opcional)
+    glm::vec3 lookAt = glm::mix(g_anim1.lookAt0, g_anim1.lookAt1, su);
+    glm::vec3 dir = glm::normalize(lookAt - camera.Position);
+
+    // Reconstruye la base de cÃ¡mara (sin roll)
+    glm::vec3 worldUp(0, 1, 0);
+    camera.Front = dir;
+    camera.Right = glm::normalize(glm::cross(camera.Front, worldUp));
+    camera.Up = glm::normalize(glm::cross(camera.Right, camera.Front));
+
+    // Fin de la animaciÃ³n
+    if (u >= 1.0) {
+        g_anim1.active = false;
+        escena = 1;
+        animacion1 = false;
+        camera.Position = posicionCarga;
+        StartMenu(/*lookAtDestino*/ glm::vec3(0.0f, -0.20f, -1.0f),   // o punto objetivo
+            /*duraciÃ³n por lÃ­nea*/ 1.0f);
+        menu = true;
+    }
+}
+
+void StartMenu(const glm::vec3& camTargetLookAt, double durationSec)
+{
+    g_menu.t0 = glfwGetTime();          // o std::chrono::steady_clock
+    g_menu.dur = durationSec;
+
+    g_menu.p0 = camera.Position;
+
+
+    g_menu.lookAt = camTargetLookAt;  // punto de mira fijo
+}
+
+void Transicion(GLFWwindow* window) {
+    
+    if (DT1 < 1.0) {  
+        double now = glfwGetTime(); // reloj estable
+        double u = (now - g_menu.t0) / g_menu.dur;
+        DT1 = Smooth01((float)u);
+    }
     else {
-        if (DT2 < 1.0)DT2 += velocidadCarga;
+        if (DT2 < 1.0){
+            double now = glfwGetTime(); // reloj estable
+            double u = (now - g_menu.t0 - g_menu.dur) / g_menu.dur; 
+            DT2 = Smooth01((float)u);  
+        }   
         else {
-            if (DT3 < 1.0)DT3 += velocidadCarga;
+            if (DT3 < 1.0) {
+                double now = glfwGetTime(); // reloj estable
+                double u = (now - g_menu.t0 - 2.0f*g_menu.dur) / g_menu.dur;
+                DT3 = Smooth01((float)u);
+            }
             else {
-                if (DT4 < 1.0)DT4 += velocidadCarga;
+                if (DT4 < 1.0){
+                    double now = glfwGetTime(); // reloj estable
+                    double u = (now - g_menu.t0 - 3.0f*g_menu.dur) / g_menu.dur;
+                    DT4 = Smooth01((float)u); 
+                }
                 else {
-                    if (DT5 < 1.0)DT5 += velocidadCarga;
+                    if (DT5 < 1.0) {
+                        double now = glfwGetTime(); // reloj estable
+                        double u = (now - g_menu.t0 - 4.0f*g_menu.dur) / g_menu.dur;
+                        DT5 = Smooth01((float)u);
+                    }
                     else {
-                        if (DT6 < 1.0)DT6 += velocidadCarga;
+                        if (DT6 < 1.0) {
+                            double now = glfwGetTime(); // reloj estable
+                            double u = (now - g_menu.t0 - 5.0f*g_menu.dur) / g_menu.dur;
+                            DT6 = Smooth01((float)u);
+                        }
                         else {
-                            if (DHoja < 1.3)DHoja += velocidadCarga;
+                            if (DHoja < 1.3) {
+                                double now = glfwGetTime(); // reloj estable
+                                double u = (now - g_menu.t0 - 6.0f*g_menu.dur) / g_menu.dur;
+                                DHoja = Smooth01((float)u)*1.4f;
+                            }
                             else {
                                 menu = false;
                                 camera.Position = posicionEscenario1;
+                                return;
                             }
                         }
                     }
@@ -459,4 +544,9 @@ void Trancision() {
             }
         }
     }
+    // Reconstruye la base de cÃ¡mara (sin roll)
+    glm::vec3 worldUp(0, 1, 0);
+    camera.Front = g_menu.lookAt;
+    camera.Right = glm::normalize(glm::cross(camera.Front, worldUp));
+    camera.Up = glm::normalize(glm::cross(camera.Right, camera.Front));
 }

@@ -86,11 +86,16 @@ Shader* mLightsShader = nullptr;
 Shader* uiShader = nullptr;
 Shader* dynamicShader = nullptr;
 Shader* phongShader2 = nullptr;
+Shader* fresnelShader = nullptr;
 Shader* moonShader;
 Shader* basicShader;
 Shader* wavesShader;
 Shader* wavesShader2;
 Shader* lambertShader;
+
+//Variables para Fresnel
+unsigned int g_envCubemapTexID = 0;
+Model* g_glassModel = nullptr;
 
 // --> Estado del Mundo
 std::vector<Chunk> terrain_chunks;
@@ -175,10 +180,12 @@ const float velocidadCarga = 0.01f;
 float temperatura = -25.0f;
 float barraTF = 0.0f;
 float barraTC = 0.0f;
-int escena = 1;
+int escena = 0;
 bool menu = false;
 bool animacion1 = false;
 bool calor = false;
+CamAni g_anim1;
+MenuAnim g_menu;
 
 // --> Glaciar variables
 float glacierScaleY = 1.0f;
@@ -328,6 +335,7 @@ bool Start() {
     uiShader = new Shader("shaders/ui_shader.vs", "shaders/ui_shader.fs");
     moonShader = new Shader("shaders/16_moonAnimation.vs", "shaders/16_moonAnimation.fs");
     basicShader = new Shader("shaders/10_vertex_simple.vs", "shaders/10_fragment_simple.fs");
+    fresnelShader = new Shader("shaders/17_Fresnel.vs", "shaders/17_Fresnel.fs");
     wavesShader = new Shader("shaders/13_wavesAnimation.vs", "shaders/13_wavesAnimation.fs");
     wavesShader2 = new Shader("shaders/13_wavesAnimation2.vs", "shaders/13_wavesAnimation2.fs");
     phongShader2 = new Shader("shaders/11_BasicPhongShader2.vs", "shaders/11_BasicPhongShader2.fs");
@@ -354,6 +362,7 @@ bool Start() {
     loadMenu(ma);
     loadEspacio(ea);
     loadGlaciar(ga);
+    loadFresnelGlassResources();
 
     initializeRenderBuffers(ui);
 
@@ -415,8 +424,8 @@ bool Update() {
     if (!animacion1 && escena == 0 && !g_isThirdPerson) {
         CalculoCamara(window);
     }
-    else if (!menu && animacion1) Animacion1(window);
-    else if (menu) Trancision();
+    else if (!menu && animacion1) UpdateAnim1(window);
+    else if (menu) Transicion(window);
 
     barraTF = (temperatura + 25.0) * 0.04088f;
     barraTC = temperatura * 0.0236f;

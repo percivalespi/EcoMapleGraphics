@@ -8,7 +8,7 @@ void initializeModelsTest(TestAssets& ta) {
     ta.suelo_verde = new Model("models/city/Prod/sueloVerde.fbx");
     ta.metales = new Model("models/city/Prod/metales.fbx");
     ta.objMadera = new Model("models/city/Prod/elementosMadera.fbx");
-    ta.objCristales = new Model("models/city/Prod/objCristales3.fbx");
+    //ta.objCristales = new Model("models/city/Prod/objCristales3.fbx");
     ta.objPlasticos = new Model("models/city/Prod/objPlasticos3.fbx");
     ta.objConcreto = new Model("models/city/Prod/objConcreto.fbx");
     ta.objLlantas = new Model("models/city/Prod/objLlantafbx.fbx");
@@ -259,8 +259,8 @@ void initializeModelsEspacio(EspacioAssets& ea) {
     ea.Tierra = new Model("models/iceland/Tierra.fbx");
     ea.Canada = new Model("models/iceland/Canada.fbx");
     ea.Luna = new Model("models/IllumModels/moon.fbx");
-    ea.cubeenv = new Model("models/mycube.fbx");
-    ea.cubeenv_noche = new Model("models/noche/mycube.fbx");
+    ea.cubeenv_noche = new Model("models/noche_tierra.fbx");
+    ea.sol = new Model("models/iceland/Sol.fbx");
 
     // CORREGIDO: Usar -> en punteros
     if (!fa.cubeenv || fa.cubeenv->meshes.empty() || fa.cubeenv->meshes[0].textures.empty()) {
@@ -319,11 +319,8 @@ void initializeModelsGlaciar(GlaciarAssets& ga) {
     ga.TerAzulBase = new Model("models/iceland/TerAzulBase.fbx");
     ga.TerRojoBase = new Model("models/iceland/TerRojoBase.fbx");
 
-    ga.Oso1 = new Animated("models/iceland/Oso1.fbx");
-    ga.Oso2 = new Animated("models/iceland/Oso2.fbx");
-    ga.Oso3 = new Animated("models/iceland/Oso3.fbx");
-    ga.Oso4 = new Animated("models/iceland/Oso4.fbx");
-    ga.Oso5 = new Animated("models/iceland/Oso5.fbx");
+    ga.Oso1 = new Animated("models/iceland/OsoPS.fbx");
+    ga.Oso2 = new Animated("models/iceland/OsoPW.fbx");
 
     // CORREGIDO: Usar -> en punteros
     if (!fa.cubeenv || fa.cubeenv->meshes.empty() || fa.cubeenv->meshes[0].textures.empty()) {
@@ -365,4 +362,61 @@ void loadGlaciar(GlaciarAssets& ga) {
     initilizeLightsGlaciar(ga);
     initilizeMaterialsGlaciar(ga);
     initializeModelsGlaciar(ga);
+}
+
+// Crea un cubemap desde 6 rutas (orden GL: POSITIVE_X, NEGATIVE_X, POSITIVE_Y, NEGATIVE_Y, POSITIVE_Z, NEGATIVE_Z)
+static unsigned int LoadCubemap(const std::vector<std::string>& faces)
+{
+    unsigned int texID;
+    glGenTextures(1, &texID);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, texID);
+
+    int w, h, ch;
+    stbi_set_flip_vertically_on_load(false);
+    for (unsigned int i = 0; i < 6; i++) {
+        unsigned char* data = stbi_load(faces[i].c_str(), &w, &h, &ch, 0);
+        if (data) {
+            GLenum fmt = (ch == 4) ? GL_RGBA : GL_RGB;
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, fmt, w, h, 0, fmt, GL_UNSIGNED_BYTE, data);
+            stbi_image_free(data);
+        }
+        else {
+            std::cerr << "ERROR: Failed to load cubemap face: " << faces[i] << std::endl;
+            stbi_image_free(data);
+        }
+    }
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+    return texID;
+}
+
+// Carga recursos del cristal: cubemap + modelo
+void loadFresnelGlassResources()
+{
+    if (g_envCubemapTexID == 0) {
+        std::vector<std::string> faces = {
+            "models/mycube.fbm/posx.jpg",
+            "models/mycube.fbm/negx.jpg",
+            "models/mycube.fbm/posy.jpg",
+            "models/mycube.fbm/negy.jpg",
+            "models/mycube.fbm/posz.jpg",
+            "models/mycube.fbm/negz.jpg"
+        };
+        g_envCubemapTexID = LoadCubemap(faces);
+        if (g_envCubemapTexID == 0) {
+            std::cerr << "ERROR: Could not create environment cubemap." << std::endl;
+        }
+    }
+
+    if (g_glassModel == nullptr) {
+        // Coloca tu FBX/OBJ en models/GlassBuilding.fbx
+        g_glassModel = new Model("models/city/Prod/objCristales3.fbx");
+        if (!g_glassModel) {
+            std::cerr << "ERROR: Could not load models/GlassBuilding.fbx" << std::endl;
+        }
+    }
 }

@@ -255,8 +255,8 @@ struct EspacioAssets {
     Model* Tierra;
     Model* Canada;
     Model* Luna;
-    Model* cubeenv;
     Model* cubeenv_noche;
+    Model* sol;
     // --- Luz
     Light theLight;
     // Material
@@ -290,9 +290,6 @@ struct GlaciarAssets {
     Model* Glaciares;
     Animated* Oso1;
     Animated* Oso2;
-    Animated* Oso3;
-    Animated* Oso4;
-    Animated* Oso5;
 
     // --- Luz
     Light theLight;
@@ -409,13 +406,19 @@ extern Shader* skyboxShader;
 extern Shader* sunShader;
 extern Shader* crosshairShader;
 extern Shader* dynamicShader;
-
+extern Shader* fresnelShader;
 extern Shader* moonShader;
 extern Shader* basicShader;
 extern Shader* wavesShader;
 extern Shader* wavesShader2;
 
 extern bool isDay;
+
+// Cubemap ambiental para Fresnel
+extern unsigned int g_envCubemapTexID; // <- NUEVO
+
+// Modelo de cristal (edificio/panel)
+extern Model* g_glassModel;
 
 // --- Contenedores del Mundo ---
 extern std::vector<Chunk> terrain_chunks;
@@ -513,6 +516,27 @@ extern glm::vec3 posicionEscenario1;
 
 // Shaders para materiales
 extern Shader* lambertShader;
+
+//Movimiento de camara animacion1
+struct CamAni {
+    bool   active = false;
+    double t0;         // tiempo inicio (segundos)
+    double dur;         // duración deseada (segundos)
+    glm::vec3 p0;                 // posición inicial cámara
+    glm::vec3 p1;                 // posición objetivo
+    glm::vec3 lookAt0;            // punto inicial de mira
+    glm::vec3 lookAt1;            // punto objetivo de mira
+};
+extern CamAni g_anim1;
+
+
+struct MenuAnim {
+    double t0;         // tiempo inicio (segundos)
+    double dur;         // duración deseada (segundos)
+    glm::vec3 p0;                 // posición cámara
+    glm::vec3 lookAt;            // opcional: punto inicial de mira
+};
+extern MenuAnim g_menu;
 
 
 #endif

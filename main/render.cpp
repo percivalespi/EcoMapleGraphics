@@ -76,7 +76,7 @@ void renderTestEnvironment(const glm::mat4& projection, const glm::mat4& view) {
     drawObject(mLightsShader, ta.suelo_verde, ta.cesped, model);
     drawObject(mLightsShader, ta.metales, ta.steel, model);
     drawObject(mLightsShader, ta.objMadera, ta.madera, model);
-    drawObject(mLightsShader, ta.objCristales, ta.traslucido, model);
+    //drawObject(mLightsShader, ta.objCristales, ta.traslucido, model);
     drawObject(mLightsShader, ta.objPlasticos, ta.plastic, model);
     drawObject(mLightsShader, ta.objConcreto, ta.concreto, model);
     drawObject(mLightsShader, ta.objLlantas, ta.goma, model);
@@ -97,7 +97,67 @@ void renderTestEnvironment(const glm::mat4& projection, const glm::mat4& view) {
 
 }
 
+void renderFresnelCristal(const glm::mat4& projection, const glm::mat4& view)
+{
+    if (!fresnelShader || !g_glassModel || g_envCubemapTexID == 0) return;
 
+    fresnelShader->use();
+
+    fresnelShader->setMat4("projection", projection);
+    fresnelShader->setMat4("view", view);
+
+    // Cámara
+    fresnelShader->setVec3("cameraPosition", camera.Position);
+
+    // Parámetros Fresnel típicos para vidrio
+    fresnelShader->setFloat("mRefractionRatio", 1.0f / 1.52f); // ~0.658
+    fresnelShader->setFloat("_Bias", 0.02f);
+    fresnelShader->setFloat("_Scale", 0.98f);
+    fresnelShader->setFloat("_Power", 5.0f);
+
+    // Bind del cubemap en la unidad 0
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, g_envCubemapTexID);
+    fresnelShader->setInt("cubetex", 0);
+
+    // Si el mesh tiene difusa, la ponemos en unidad 1 (opcional)
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    fresnelShader->setInt("texture_diffuse1", 1);
+
+    // Matriz de modelo: coloca/escala el “cristal de edificio”
+    glm::mat4 model = glm::mat4(1.0f);
+    // Ajusta a tu escena (altura, rotación, escala)
+    model = glm::translate(model, glm::vec3(0.0f, 0.0f, (-WORLD_SIZE * 35) - 2.5));
+    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+    fresnelShader->setMat4("model", model);
+
+    // Dibujar el modelo
+    for (unsigned int i = 0; i < g_glassModel->meshes.size(); ++i)
+    {
+        // Si el mesh trae difusa, la usamos en la unidad 1
+        if (!g_glassModel->meshes[i].textures.empty()) {
+            unsigned int tex2D = 0;
+            for (const auto& t : g_glassModel->meshes[i].textures) {
+                if (t.type == "texture_diffuse") { tex2D = t.id; break; }
+            }
+            if (tex2D != 0) {
+                glActiveTexture(GL_TEXTURE1);
+                glBindTexture(GL_TEXTURE_2D, tex2D);
+            }
+        }
+        // VAO y draw
+        glBindVertexArray(g_glassModel->meshes[i].VAO);
+        glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(g_glassModel->meshes[i].indices.size()), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+    }
+
+    // Limpieza mínima
+    glActiveTexture(GL_TEXTURE1); glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+    glUseProgram(0);
+}
 
 void renderScene() {
     glClearColor(0.1f, 0.15f, 0.2f, 1.0f);
@@ -115,6 +175,7 @@ void renderScene() {
         renderForestScene(projection, view);
         renderGlaciarScene(projection, view);
         renderTestEnvironment(projection, view);
+        renderFresnelCristal(projection, view);
 
     }
     if (menu)renderMenuScene(projection, view);
@@ -256,26 +317,26 @@ void renderMenuScene(const glm::mat4& projection, const glm::mat4& view) {
 }
 
 void renderEspacioScene(const glm::mat4& projection, const glm::mat4& view) {
+    glm::mat4 view_skybox = glm::mat4(glm::mat3(view));
 
-    // Carga del Skybox usando codigo de tenshi
     if (skyboxShader != nullptr && skyboxShader->ID != 0) {
         glDepthFunc(GL_LEQUAL);
         skyboxShader->use();
         skyboxShader->setMat4("projection", projection);
-        glm::mat4 view_skybox = glm::mat4(glm::mat3(view));
         skyboxShader->setMat4("view", view_skybox);
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(1000.0f));
-        Model* currentSkybox = ea.cubeenv;
+        skyboxShader->setMat4("model", model);
+        Model* currentSkybox = ea.cubeenv_noche;
         if (currentSkybox != nullptr) {
             currentSkybox->Draw(*skyboxShader);
         }
         glDepthFunc(GL_LESS);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, 0);
     }
 
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     // Dibujamos un objeto cualquiera
     {
@@ -321,6 +382,20 @@ void renderEspacioScene(const glm::mat4& projection, const glm::mat4& view) {
 
 
 
+    }
+
+    {
+		basicShader->use();
+		basicShader->setMat4("projection", projection); 
+		basicShader->setMat4("view", view); 
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-20.0f, 0.0f, 3.0f));
+        model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+        basicShader->setMat4("model", model);
+
+		ea.sol->Draw(*basicShader);
     }
 
     glUseProgram(0);
@@ -417,7 +492,7 @@ void renderGlaciarScene(const glm::mat4& projection, const glm::mat4& view) {
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, desp+osoDown));
         model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, glacierScaleY));
 
         drawObject(mLightsShader, ga.TrozoH1, ga.nieveMaterial, model);
         drawObject(mLightsShader, ga.TrozoH2, ga.nieveMaterial, model);
@@ -432,7 +507,7 @@ void renderGlaciarScene(const glm::mat4& projection, const glm::mat4& view) {
         dynamicShader->setMat4("view", view);
 
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, osoDown, desp));
+        model = glm::translate(model, glm::vec3(0.0f, 7.6f+osoDown, desp));
         model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
 
@@ -449,7 +524,7 @@ void renderGlaciarScene(const glm::mat4& projection, const glm::mat4& view) {
         dynamicShader->setMat4("view", view);
 
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, osoDown, desp));
+        model = glm::translate(model, glm::vec3(-1.0f, 6.4+osoDown, -42.4+desp));
         model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
 
@@ -464,7 +539,7 @@ void renderGlaciarScene(const glm::mat4& projection, const glm::mat4& view) {
         auto avanzarOso = [&](int idx) {
             // Dirección de avance a partir de yaw (solo Yaw sobre eje Y)
             float yawRad = glm::radians(osoYawDeg[idx]);
-            glm::vec3 forward = glm::vec3(std::cos(yawRad), 0.0f, std::sin(yawRad)); // +X al inicio
+            glm::vec3 forward = glm::vec3(-std::cos(yawRad), 0.0f, std::sin(yawRad)); // +X al inicio
 
             // Avance por frame
             osoPos[idx] += forward * (OSO_SPEED * deltaTime);
@@ -484,7 +559,7 @@ void renderGlaciarScene(const glm::mat4& projection, const glm::mat4& view) {
 
         // Oso3
         {
-            ga.Oso3->UpdateAnimation(deltaTime);
+            ga.Oso2->UpdateAnimation(deltaTime);
             avanzarOso(0);
 
             dynamicShader->use();
@@ -492,20 +567,20 @@ void renderGlaciarScene(const glm::mat4& projection, const glm::mat4& view) {
             dynamicShader->setMat4("view", view);
 
             glm::mat4 model = glm::mat4(1.0f);
-            //model = glm::translate(model, osoPos[0]);
-            model = glm::translate(model, glm::vec3(0.0f, 0.0f, desp));
-            model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 1.0f, 0.0f)); // yaw
+            model = glm::translate(model, osoPos[0]);
+            model = glm::translate(model, glm::vec3(80.0f, 9.5f, -11.4f+desp));
+            model = glm::rotate(model, glm::radians(osoYawDeg[0]), glm::vec3(0.0f, 1.0f, 0.0f)); // yaw
             model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
 
             dynamicShader->setMat4("model", model);
-            dynamicShader->setMat4("gBones", MAX_RIGGING_BONES, ga.Oso3->gBones);
-            ga.Oso3->Draw(*dynamicShader);
+            dynamicShader->setMat4("gBones", MAX_RIGGING_BONES, ga.Oso2->gBones);
+            ga.Oso2->Draw(*dynamicShader);
         }
         glUseProgram(0);
 
         // Oso4
         {
-            ga.Oso4->UpdateAnimation(deltaTime);
+            ga.Oso2->UpdateAnimation(deltaTime);
 
             avanzarOso(1);
 
@@ -514,20 +589,20 @@ void renderGlaciarScene(const glm::mat4& projection, const glm::mat4& view) {
             dynamicShader->setMat4("view", view);
 
             glm::mat4 model = glm::mat4(1.0f);
-            //model = glm::translate(model, osoPos[1]);
-            model = glm::translate(model, glm::vec3(0.0f, 0.0f, desp));
-            model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f)); // yaw
-            model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
+            model = glm::translate(model, osoPos[1]);
+            model = glm::translate(model, glm::vec3(80.0f, 9.2f, -5.759+desp));
+            model = glm::rotate(model, glm::radians(osoYawDeg[1]), glm::vec3(0.0f, 1.0f, 0.0f)); // yaw
+            model = glm::scale(model, glm::vec3(0.008f, 0.008f, 0.008f));
 
             dynamicShader->setMat4("model", model);
-            dynamicShader->setMat4("gBones", MAX_RIGGING_BONES, ga.Oso4->gBones);
-            ga.Oso4->Draw(*dynamicShader);
+            dynamicShader->setMat4("gBones", MAX_RIGGING_BONES, ga.Oso2->gBones);
+            ga.Oso2->Draw(*dynamicShader);
         }
         glUseProgram(0);
 
         // Oso5
         {
-            ga.Oso5->UpdateAnimation(deltaTime);
+            ga.Oso2->UpdateAnimation(deltaTime);
             avanzarOso(2);
 
             dynamicShader->use();
@@ -535,14 +610,14 @@ void renderGlaciarScene(const glm::mat4& projection, const glm::mat4& view) {
             dynamicShader->setMat4("view", view);
 
             glm::mat4 model = glm::mat4(1.0f);
-            //model = glm::translate(model, osoPos[2]);
-            model = glm::translate(model, glm::vec3(0.0f, 0.0f, desp));
-            model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // yaw
-            model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
+            model = glm::translate(model, osoPos[2]);
+            model = glm::translate(model, glm::vec3(80.0f, 9.2f, -16.23f+desp));
+            model = glm::rotate(model, glm::radians(osoYawDeg[2]), glm::vec3(0.0f, 1.0f, 0.0f)); // yaw
+            model = glm::scale(model, glm::vec3(0.008f, 0.008f, 0.008f));
 
             dynamicShader->setMat4("model", model);
-            dynamicShader->setMat4("gBones", MAX_RIGGING_BONES, ga.Oso5->gBones);
-            ga.Oso5->Draw(*dynamicShader);
+            dynamicShader->setMat4("gBones", MAX_RIGGING_BONES, ga.Oso2->gBones);
+            ga.Oso2->Draw(*dynamicShader);
         }
         glUseProgram(0);
     
