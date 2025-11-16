@@ -662,9 +662,6 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
     float escala;
     glm::mat4 view_skybox = glm::mat4(glm::mat3(view));
 
-    float forestLightMultiplier = 1.0f;  // ya está equilibrado
-    float cityLightMultiplier = 1.0f;  // ajustable
-    gLights[0].Power = dimmedLightPower * cityLightMultiplier;
 
     //La iluminación del bosque sigue a la del sol
     if (!gLights.empty())

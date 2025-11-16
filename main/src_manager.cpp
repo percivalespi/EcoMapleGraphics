@@ -44,7 +44,7 @@ void initilizeMaterialsTest(TestAssets& ta) {
 
     // --- ASFALTO - Carretera - Mate
 
-    ta.asphalt.ambient = glm::vec4(0.3f, 0.30f, 0.30f, 1.0f);
+    ta.asphalt.ambient = glm::vec4(0.4f, 0.40f, 0.40f, 1.0f);
     ta.asphalt.diffuse = glm::vec4(0.15f, 0.15f, 0.15f, 1.0f);
     ta.asphalt.specular = glm::vec4(0.02f, 0.02f, 0.02f, 1.0f); // Casi sin brillo
     ta.asphalt.transparency = 1.0f;
@@ -117,7 +117,7 @@ void initilizeLightsTest(TestAssets& ta) {
     ta.light01.Color = glm::vec4(0.2f, 0.2f, 0.2f, 0.5f);
     ta.light01.Power = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f); // Potencia en Watts
     ta.light01.alphaIndex = 50;
-    ta.light01.distance = 1.1f;
+    ta.light01.distance = 1.3f;
 
     gLights.push_back(ta.light01);
 }
@@ -327,21 +327,19 @@ void initializeModelsGlaciar(GlaciarAssets& ga) {
 }
 
 void initilizeMaterialsGlaciar(GlaciarAssets& ga) {
-    ga.defaultMaterial.ambient = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
-    ga.defaultMaterial.diffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-    ga.defaultMaterial.specular = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    ga.defaultMaterial.ambient = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
+    ga.defaultMaterial.diffuse = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
+    ga.defaultMaterial.specular = glm::vec4(0.010f, 0.010f, 0.010f, 1.0f);
     ga.defaultMaterial.transparency = 1.0f;
 
-    ga.nieveMaterial.ambient = glm::vec4(0.2f, 0.2f, 0.25f, 1.0f);
-    ga.nieveMaterial.diffuse = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
-    ga.nieveMaterial.specular = glm::vec4(0.3f, 0.3f, 0.3f, 1.0f);
+    ga.nieveMaterial.ambient = glm::vec4(0.19f, 0.2f, 0.21f, 1.0f);
+    ga.nieveMaterial.diffuse = glm::vec4(0.48f, 0.5f, 0.51f, 1.0f);
+    ga.nieveMaterial.specular = glm::vec4(0.10f, 0.10f, 0.10f, 1.0f);
+    ga.nieveMaterial.transparency = 1.0f;
 
-
-    ga.nieveMaterial.transparency = 0.9f;
-
-    ga.GlaciaresMaterial.ambient = glm::vec4(0.18f, 0.15f, 0.18f, 0.8f);
-    ga.GlaciaresMaterial.diffuse = glm::vec4(0.3f, 0.28f, 0.3f, 1.0f);
-    ga.GlaciaresMaterial.specular = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    ga.GlaciaresMaterial.ambient = glm::vec4(0.18f, 0.15f, 0.18f, 1.0f);
+    ga.GlaciaresMaterial.diffuse = glm::vec4(0.5f, 0.48f, 0.5f, 1.0f);
+    ga.GlaciaresMaterial.specular = glm::vec4(0.010f, 0.010f, 0.010f, 1.0f);
     ga.GlaciaresMaterial.transparency = 1.0f;
 }
 
