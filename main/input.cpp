@@ -75,27 +75,26 @@ void processInput(GLFWwindow* window) {
         glfwSetWindowShouldClose(window, true);
     }
 
-
-    if (glfwGetKey(window, GLFW_KEY_KP_ADD) == GLFW_PRESS) {
-        if (!plus_key_pressed) { // Si no la habíamos presionado
+    //Sube --> el volumen al presionar (U)
+    if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
+        if (!plus_key_pressed) { 
             changeGlobalVolume(0.1f); // Sube 10%
-            plus_key_pressed = true;  // Marca como "ya presionada"
+            plus_key_pressed = true;  
         }
     }
     else {
-        plus_key_pressed = false; // Resetea la bandera cuando se suelta
+        plus_key_pressed = false; 
     }
 
-    // Bajar Volumen (Usando '-' del teclado numérico)
-    if (glfwGetKey(window, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS) {
-        if (!minus_key_pressed) { // Si no la habíamos presionado
+    //Baja --> al presionar (J)
+    if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
+        if (!minus_key_pressed) { 
             changeGlobalVolume(-0.1f); // Baja 10%
-            minus_key_pressed = true;   // Marca como "ya presionada"
+            minus_key_pressed = true;   
         }
     }
     else {
-        minus_key_pressed = false; // Resetea la bandera cuando se suelta
-    }
+        minus_key_pressed = false;     }
 
 
     // --- CAMBIO DE PERSONAJE (1 y 2) ---
