@@ -1218,20 +1218,39 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
     }
 
     // --- 4. DIBUJAR SKYBOX (AL FINAL PARA NO TAPAR SOL/LUNA) ---
-    if (skyboxShader != nullptr && skyboxShader->ID != 0) {
-        glDepthFunc(GL_LEQUAL);
+// --- 6. SKYDOME (ESFERAS FBX) ---
+    // Usamos el shader simple que ya tenías para el cubo, funciona igual para la esfera
+    if (skyboxShader != nullptr) {
+        glDepthFunc(GL_LEQUAL); // Truco: Dibujar solo donde la profundidad sea <= (al fondo)
         skyboxShader->use();
+
+        // 1. Proyección normal
         skyboxShader->setMat4("projection", projection);
-        skyboxShader->setMat4("view", view_skybox);
+
+        // 2. Vista SIN TRASLACIÓN (Para que el cielo te siga y no te acerques nunca)
+        glm::mat4 viewNoTrans = glm::mat4(glm::mat3(view));
+        skyboxShader->setMat4("view", viewNoTrans);
+
+        // 3. Transformación del Modelo
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+        // Rotación opcional si la textura quedó chueca en Blender
+        model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); 
+
+        // Escalamos la esfera para que sea gigante y cubra todo
         model = glm::scale(model, glm::vec3(1000.0f));
+
         skyboxShader->setMat4("model", model);
-        Model* currentSkybox = isDay ? fa.cubeenv : fa.cubeenv_noche;
-        if (currentSkybox != nullptr) {
-            currentSkybox->Draw(*skyboxShader);
+
+        // 4. Elegir cuál dibujar
+        if (isDay) {
+            if (fa.sphereDay) fa.sphereDay->Draw(*skyboxShader);
         }
-        glDepthFunc(GL_LESS);
+        else {
+            if (fa.sphereNight) fa.sphereNight->Draw(*skyboxShader);
+        }
+
+        glDepthFunc(GL_LESS); // Regresar profundidad a la normalidad
     }
 
     glActiveTexture(GL_TEXTURE0);

@@ -187,6 +187,11 @@ struct ForestAssets {
     Model* moon_model;
     Model* cloud_model;
     Model* leaf_model;
+
+    Model* sphereDay;   // esfera_cielo.fbx
+    Model* sphereNight; // esfera_noche.fbx
+
+
     AnimatedModel* character01; // <-- MODELO DE LOBO CORRIENDO
     AnimatedModel* character02; // <-- MODELO DE LOBO ESTATICO (PENDIENTE)
     AnimatedModel* character03; // <-- MODELO DE CASTOR CORRIENDO

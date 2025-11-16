@@ -188,6 +188,14 @@ void initializeModelsForest(ForestAssets& fa) {
     fa.cubeenv = new Model("models/mycube.fbx");
     fa.cubeenv_noche = new Model("models/noche/mycube.fbx");
 
+    fa.sphereDay = new Model("models/esfera_cielo.fbx");
+    fa.sphereNight = new Model("models/esfera_noche.fbx");
+
+    // Validación simple
+    if (!fa.sphereDay) std::cout << "ERROR: No se cargo esfera_cielo.fbx" << std::endl;
+    if (!fa.sphereNight) std::cout << "ERROR: No se cargo esfera_noche.fbx" << std::endl;
+
+
     fa.character01 = new AnimatedModel("models/LoboAnimation.fbx"); // <-- MODELO DEL LOBO CORRIENDO
     fa.character02 = new AnimatedModel("models/LoboAnimation.fbx"); // <-- MODELO DEL LOBO IDLE
     fa.character03 = new AnimatedModel("models/castorW.fbx"); // <-- MODELO DEL CASTOR CORRIENDO

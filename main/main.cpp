@@ -285,6 +285,9 @@ int main() {
     delete fa.cloud_model;
     delete fa.leaf_model;
 
+    delete fa.sphereDay;
+	delete fa.sphereNight;
+
     // Limpiar Personajes
     if (g_demiModel) delete g_demiModel;
     if (g_mikuModel) delete g_mikuModel;
