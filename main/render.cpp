@@ -93,6 +93,7 @@ void renderTestEnvironment(const glm::mat4& projection, const glm::mat4& view) {
     drawObject(mLightsShader, ta.policia, ta.concreto, model);
     drawObject(mLightsShader, ta.luzSemaforo, ta.traslucido, model);
     drawObject(mLightsShader, ta.co2, ta.gases, model);
+    drawObject(mLightsShader, ta.camion, ta.plastic, model);
     glUseProgram(0);
 
 

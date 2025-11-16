@@ -208,9 +208,10 @@ bool g_pressM = false;
 // Variables de los Modelos
 Animated* g_demiModel = nullptr;
 Animated* g_mikuModel = nullptr; 
+//Model* camionBasura = nullptr;
 
 // Estado del Jugador
-int g_activeCharacter = 1; // 1=Demi, 2=Miku 
+int g_activeCharacter = 1; // 1=Demi, 2=Miku
 glm::vec3 g_demiPos(0.0f, 0.0f, 0.0f); // Posición compartida
 float g_demiRotY = 0.0f;
 bool g_demiMoving = false;

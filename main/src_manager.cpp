@@ -29,6 +29,8 @@ void initializeModelsTest(TestAssets& ta) {
     ta.hopstial = new Model("models/city/Prod/hospital.fbx");
     ta.banco = new Model("models/city/Prod/banco.fbx");
     ta.policia = new Model("models/city/Prod/policia.fbx");
+    ta.camion = new Model("models/city/Prod/Camion.fbx");
+
 
     //ta.character01 = new AnimatedModel("models/IllumModels/KAYA.fbx");
 
