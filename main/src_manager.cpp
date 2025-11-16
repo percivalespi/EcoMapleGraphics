@@ -29,21 +29,10 @@ void initializeModelsTest(TestAssets& ta) {
     ta.hopstial = new Model("models/city/Prod/hospital.fbx");
     ta.banco = new Model("models/city/Prod/banco.fbx");
     ta.policia = new Model("models/city/Prod/policia.fbx");
-
-
-
-
-
-
-
-
-
-
-
-    //ta.character01 = new AnimatedModel("models/IllumModels/KAYA.fbx");
-
+    ta.camion = new Model("models/city/Prod/Camionv2.fbx");
 }
 
+/*                                         PROPIEDADES DE LOS MATERIALES CIUDAD                                    */
 void initilizeMaterialsTest(TestAssets& ta) {
     // --- ACERO (Metálico y brillante) ---
     ta.steel.ambient = glm::vec4(0.25f, 0.25f, 0.25f, 1.0f);
@@ -53,7 +42,7 @@ void initilizeMaterialsTest(TestAssets& ta) {
 
     // --- ASFALTO - Carretera - Mate
 
-    ta.asphalt.ambient = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
+    ta.asphalt.ambient = glm::vec4(0.4f, 0.40f, 0.40f, 1.0f);
     ta.asphalt.diffuse = glm::vec4(0.15f, 0.15f, 0.15f, 1.0f);
     ta.asphalt.specular = glm::vec4(0.02f, 0.02f, 0.02f, 1.0f); // Casi sin brillo
     ta.asphalt.transparency = 1.0f;
@@ -120,23 +109,24 @@ void initilizeMaterialsTest(TestAssets& ta) {
     ta.tela.transparency = 1.0f;
 }
 
+/*                                         PROPIEDADES DE LUZ GLOBAL PARA LA CIUDAD                                   */
 void initilizeLightsTest(TestAssets& ta) {
-    ta.light01.Position = glm::vec3(1.4895f, 1.8836f, -1.1042f);
+    ta.light01.Position = glm::vec3(100.4895f, 1.8836f, -1.1042f);
     ta.light01.Color = glm::vec4(0.2f, 0.2f, 0.2f, 0.5f);
-    ta.light01.Power = glm::vec4(60.0f, 60.0f, 60.0f, 1.0f); // Potencia en Watts
+    ta.light01.Power = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f); // Potencia en Watts
     ta.light01.alphaIndex = 50;
-    ta.light01.distance = 2.0f;
+    ta.light01.distance = 1.3f;
 
     gLights.push_back(ta.light01);
 }
 
+/*                                       CARGA DE LUCES, MODELOS Y MATERIALES PARA CIUDAD                           */
 void loadTest(TestAssets& ta) {
     initilizeLightsTest(ta);
+    initilizeLightsForest(fa);
     initilizeMaterialsTest(ta);
     initializeModelsTest(ta);
 }
-
-
 
 /* -------------------------------------------- - Manejo de Recursos UI------------------------------------------*/
 void loadUI(UIAssets& ui) {
@@ -171,7 +161,7 @@ void loadUI(UIAssets& ui) {
 }
 
 
-/* -------------------------------------------- - Manejo de Recursos Bosque------------------------------------------*/
+/* -------------------------------------------- - Manejo de Recursos Bosque CARGA DE MODELOS------------------------------------------*/
 void initializeModelsForest(ForestAssets& fa) {
     fa.terrain_model = new Model("models/tierra_superficie.fbx");
     fa.grass_model = new Model("models/pastoooyya.fbx");
@@ -187,6 +177,14 @@ void initializeModelsForest(ForestAssets& fa) {
     fa.leaf_model = new Model("models/hojaarce.fbx");
     fa.cubeenv = new Model("models/mycube.fbx");
     fa.cubeenv_noche = new Model("models/noche/mycube.fbx");
+
+    fa.sphereDay = new Model("models/esfera_cielo.fbx");
+    fa.sphereNight = new Model("models/esfera_noche.fbx");
+
+    // Validación simple
+    if (!fa.sphereDay) std::cout << "ERROR: No se cargo esfera_cielo.fbx" << std::endl;
+    if (!fa.sphereNight) std::cout << "ERROR: No se cargo esfera_noche.fbx" << std::endl;
+
 
     fa.character01 = new AnimatedModel("models/LoboAnimation.fbx"); // <-- MODELO DEL LOBO CORRIENDO
     fa.character02 = new AnimatedModel("models/LoboAnimation.fbx"); // <-- MODELO DEL LOBO IDLE
@@ -332,21 +330,19 @@ void initializeModelsGlaciar(GlaciarAssets& ga) {
 }
 
 void initilizeMaterialsGlaciar(GlaciarAssets& ga) {
-    ga.defaultMaterial.ambient = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
-    ga.defaultMaterial.diffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-    ga.defaultMaterial.specular = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    ga.defaultMaterial.ambient = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
+    ga.defaultMaterial.diffuse = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
+    ga.defaultMaterial.specular = glm::vec4(0.010f, 0.010f, 0.010f, 1.0f);
     ga.defaultMaterial.transparency = 1.0f;
 
-    ga.nieveMaterial.ambient = glm::vec4(0.2f, 0.2f, 0.25f, 1.0f);
-    ga.nieveMaterial.diffuse = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
-    ga.nieveMaterial.specular = glm::vec4(0.3f, 0.3f, 0.3f, 1.0f);
+    ga.nieveMaterial.ambient = glm::vec4(0.19f, 0.2f, 0.21f, 1.0f);
+    ga.nieveMaterial.diffuse = glm::vec4(0.48f, 0.5f, 0.51f, 1.0f);
+    ga.nieveMaterial.specular = glm::vec4(0.10f, 0.10f, 0.10f, 1.0f);
+    ga.nieveMaterial.transparency = 1.0f;
 
-
-    ga.nieveMaterial.transparency = 0.9f;
-
-    ga.GlaciaresMaterial.ambient = glm::vec4(0.18f, 0.15f, 0.18f, 0.8f);
-    ga.GlaciaresMaterial.diffuse = glm::vec4(0.3f, 0.28f, 0.3f, 1.0f);
-    ga.GlaciaresMaterial.specular = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    ga.GlaciaresMaterial.ambient = glm::vec4(0.18f, 0.15f, 0.18f, 1.0f);
+    ga.GlaciaresMaterial.diffuse = glm::vec4(0.5f, 0.48f, 0.5f, 1.0f);
+    ga.GlaciaresMaterial.specular = glm::vec4(0.010f, 0.010f, 0.010f, 1.0f);
     ga.GlaciaresMaterial.transparency = 1.0f;
 }
 

@@ -145,4 +145,5 @@ inline unsigned int TextureFromFile(const char* path, const string& directory, b
 
     return textureID;
 }
+
 #endif

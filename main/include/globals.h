@@ -187,6 +187,11 @@ struct ForestAssets {
     Model* moon_model;
     Model* cloud_model;
     Model* leaf_model;
+
+    Model* sphereDay;   // esfera_cielo.fbx
+    Model* sphereNight; // esfera_noche.fbx
+
+
     AnimatedModel* character01; // <-- MODELO DE LOBO CORRIENDO
     AnimatedModel* character02; // <-- MODELO DE LOBO ESTATICO (PENDIENTE)
     AnimatedModel* character03; // <-- MODELO DE CASTOR CORRIENDO
@@ -234,7 +239,7 @@ struct TestAssets { //Elementos Para el entorno de Prueba
 
 
     //Modelos IA
-    Model* hopstial, * fabrica, * policia, * tienda, * rascacielos, *edificio2, *banco;
+    Model* hopstial, * fabrica, * policia, * tienda, * rascacielos, *edificio2, *banco, *camion;
 
 
     

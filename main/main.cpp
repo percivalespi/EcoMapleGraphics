@@ -215,9 +215,10 @@ bool g_pressM = false;
 // Variables de los Modelos
 Animated* g_demiModel = nullptr;
 Animated* g_mikuModel = nullptr; 
+//Model* camionBasura = nullptr;
 
 // Estado del Jugador
-int g_activeCharacter = 1; // 1=Demi, 2=Miku 
+int g_activeCharacter = 1; // 1=Demi, 2=Miku
 glm::vec3 g_demiPos(0.0f, 0.0f, 0.0f); // Posición compartida
 float g_demiRotY = 0.0f;
 bool g_demiMoving = false;
@@ -291,6 +292,9 @@ int main() {
     delete fa.moon_model;
     delete fa.cloud_model;
     delete fa.leaf_model;
+
+    delete fa.sphereDay;
+	delete fa.sphereNight;
 
     // Limpiar Personajes
     if (g_demiModel) delete g_demiModel;
