@@ -239,7 +239,7 @@ struct TestAssets { //Elementos Para el entorno de Prueba
 
 
     //Modelos IA
-    Model* hopstial, * fabrica, * policia, * tienda, * rascacielos, *edificio2, *banco;
+    Model* hopstial, * fabrica, * policia, * tienda, * rascacielos, *edificio2, *banco, *camion;
 
 
     
