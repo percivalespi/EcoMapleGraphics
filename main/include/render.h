@@ -21,4 +21,5 @@ void SetLightUniformFloat(Shader * shader, const char* propertyName, size_t ligh
 void SetLightUniformVec4(Shader* shader, const char* propertyName, size_t lightIndex, glm::vec4 value);
 void SetLightUniformVec3(Shader* shader, const char* propertyName, size_t lightIndex, glm::vec3 value);
 
+
 #endif

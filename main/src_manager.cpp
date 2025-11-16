@@ -30,20 +30,11 @@ void initializeModelsTest(TestAssets& ta) {
     ta.banco = new Model("models/city/Prod/banco.fbx");
     ta.policia = new Model("models/city/Prod/policia.fbx");
 
-
-
-
-
-
-
-
-
-
-
     //ta.character01 = new AnimatedModel("models/IllumModels/KAYA.fbx");
 
 }
 
+/*                                         PROPIEDADES DE LOS MATERIALES CIUDAD                                    */
 void initilizeMaterialsTest(TestAssets& ta) {
     // --- ACERO (Metálico y brillante) ---
     ta.steel.ambient = glm::vec4(0.25f, 0.25f, 0.25f, 1.0f);
@@ -53,7 +44,7 @@ void initilizeMaterialsTest(TestAssets& ta) {
 
     // --- ASFALTO - Carretera - Mate
 
-    ta.asphalt.ambient = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
+    ta.asphalt.ambient = glm::vec4(0.3f, 0.30f, 0.30f, 1.0f);
     ta.asphalt.diffuse = glm::vec4(0.15f, 0.15f, 0.15f, 1.0f);
     ta.asphalt.specular = glm::vec4(0.02f, 0.02f, 0.02f, 1.0f); // Casi sin brillo
     ta.asphalt.transparency = 1.0f;
@@ -120,23 +111,24 @@ void initilizeMaterialsTest(TestAssets& ta) {
     ta.tela.transparency = 1.0f;
 }
 
+/*                                         PROPIEDADES DE LUZ GLOBAL PARA LA CIUDAD                                   */
 void initilizeLightsTest(TestAssets& ta) {
-    ta.light01.Position = glm::vec3(1.4895f, 1.8836f, -1.1042f);
+    ta.light01.Position = glm::vec3(100.4895f, 1.8836f, -1.1042f);
     ta.light01.Color = glm::vec4(0.2f, 0.2f, 0.2f, 0.5f);
-    ta.light01.Power = glm::vec4(60.0f, 60.0f, 60.0f, 1.0f); // Potencia en Watts
+    ta.light01.Power = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f); // Potencia en Watts
     ta.light01.alphaIndex = 50;
-    ta.light01.distance = 2.0f;
+    ta.light01.distance = 1.1f;
 
     gLights.push_back(ta.light01);
 }
 
+/*                                       CARGA DE LUCES, MODELOS Y MATERIALES PARA CIUDAD                           */
 void loadTest(TestAssets& ta) {
     initilizeLightsTest(ta);
+    initilizeLightsForest(fa);
     initilizeMaterialsTest(ta);
     initializeModelsTest(ta);
 }
-
-
 
 /* -------------------------------------------- - Manejo de Recursos UI------------------------------------------*/
 void loadUI(UIAssets& ui) {
@@ -171,7 +163,7 @@ void loadUI(UIAssets& ui) {
 }
 
 
-/* -------------------------------------------- - Manejo de Recursos Bosque------------------------------------------*/
+/* -------------------------------------------- - Manejo de Recursos Bosque CARGA DE MODELOS------------------------------------------*/
 void initializeModelsForest(ForestAssets& fa) {
     fa.terrain_model = new Model("models/tierra_superficie.fbx");
     fa.grass_model = new Model("models/pastoooyya.fbx");

@@ -62,6 +62,7 @@ void renderTestEnvironment(const glm::mat4& projection, const glm::mat4& view) {
         glDepthFunc(GL_LESS);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, 0);
+
     }
     setupStaticShader(mLightsShader, projection, view);
     setupShaderLights(mLightsShader, gLights);
@@ -661,6 +662,21 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
     float escala;
     glm::mat4 view_skybox = glm::mat4(glm::mat3(view));
 
+    float forestLightMultiplier = 1.0f;  // ya está equilibrado
+    float cityLightMultiplier = 1.0f;  // ajustable
+    gLights[0].Power = dimmedLightPower * cityLightMultiplier;
+
+    //La iluminación del bosque sigue a la del sol
+    if (!gLights.empty())
+    {
+        gLights[0].Position = fa.theLight.Position;
+        gLights[0].Color = fa.theLight.Color;
+
+        float cityMultiplier = 2.5f;  // Ajustable
+        gLights[0].Power = dimmedLightPower * cityMultiplier;
+
+        gLights[0].alphaIndex = fa.theLight.alphaIndex;
+    }
 
     // --- 1. DIBUJAR OBJETOS OPACOS ESTÁTICOS ---
     if (phongShader != nullptr && phongShader->ID != 0) {
@@ -1013,9 +1029,6 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
-
-    // --- 3.8 DIBUJAR MODELOS ANIMADOS (LOBO) ---
-    // --- CÓDIGO MODIFICADO PARA DIBUJAR LOBOS O CRÁNEOS ---
     // --- 3.8 DIBUJAR MODELOS ANIMADOS (LOBO, CASTOR, OSO, ALCE) ---
     // --- BLOQUE CORREGIDO (Lógica de cráneo + Rotaciones correctas) ---
     if ((dynamicShader != nullptr || phongShader != nullptr) && !g_animals.empty())
