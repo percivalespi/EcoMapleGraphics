@@ -468,6 +468,10 @@ extern const float max_plant_distance;
 extern bool isFireActive;
 extern float fireStartTime;
 
+//Variables para el control del volumen
+extern bool plus_key_pressed;  
+extern bool minus_key_pressed;
+
 // --- Audio ---
 extern ISoundEngine* SoundEngine;
 

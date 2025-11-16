@@ -1,6 +1,7 @@
 ﻿#include "mechanic.h"
 #include "globals.h"
-//Hola
+#include "audio.h"
+
 void plantTree() {
     // 1. Calcular Rayo en Coordenadas del Mundo
     glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 2000.0f);
@@ -792,6 +793,56 @@ void generateForest() {
     // --- FIN Comprobaci n ---
 }
 
-void generateCity() {
-    //proximamente a implementar
+// --------------------------- Control del Audio Por Biomasi 
+
+// Ejemplo: Una "caja" (AABB) para una cueva en la escena 1
+const glm::vec3 g_CaveMin(-10.0f, 0.0f, 20.0f); // Esquina min (X, Y, Z)
+const glm::vec3 g_CaveMax(10.0f, 15.0f, 40.0f); // Esquina max (X, Y, Z)
+bool g_PlayerIsInCave = false; // Estado para evitar reiniciar la música
+
+// --- Implementación de la Función ---
+void updateAudioLogic(const glm::vec3& playerPos) {
+
+    // --- PETICIÓN 2: Música por Escena Fija ---
+
+    if (menu) {
+        // (Asumiendo que tienes una variable global 'menu' como en tu render)
+        playMusic("music/AriaMath.mp3");
+    }
+    else if (escena == 0) {
+        // (Asumiendo que tienes una variable global 'escena')
+        playMusic("music/SecretGarden.mp3"); // Música para la Escena 0
+    }
+    else if (escena == 1) {
+        // Estamos en la escena 1 (Bosque/Glaciar/Test),
+        // ahora revisamos la lógica de coordenadas.
+
+        // --- PETICIÓN 1: Música por Coordenadas ---
+
+        // 1. Revisar si el jugador está DENTRO de la "caja" de la cueva
+        /*
+        
+        bool isInside = (playerPos.x >= g_CaveMin.x && playerPos.x <= g_CaveMax.x) &&
+            (playerPos.y >= g_CaveMin.y && playerPos.y <= g_CaveMax.y) &&
+            (playerPos.z >= g_CaveMin.z && playerPos.z <= g_CaveMax.z);
+
+        // 2. Lógica de Transición (solo se activa al cruzar el límite)
+        if (isInside && !g_PlayerIsInCave) {
+            // El jugador ACABA DE ENTRAR
+            g_PlayerIsInCave = true;
+            std::cout << "Entrando a la cueva..." << std::endl;
+            playMusic("sound/cave_ambience.mp3"); // Poner música de cueva
+        }
+        else if (!isInside && g_PlayerIsInCave) {
+            // El jugador ACABA DE SALIR
+            g_PlayerIsInCave = false;
+            std::cout << "Saliendo de la cueva..." << std::endl;
+            playMusic("sound/forest_ambience.mp3"); // Volver a la música normal del bosque
+        }
+        else if (!isInside && g_CurrentMusicFile == "") {
+            // Si está afuera Y no hay música sonando, pone la de por defecto
+            playMusic("sound/forest_ambience.mp3");
+        }
+        */
+    }
 }

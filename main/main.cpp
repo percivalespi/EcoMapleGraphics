@@ -9,6 +9,8 @@
 #include "mechanic.h"
 #include "render.h"
 #include "src_manager.h"
+#include "audio.h"
+
 
 // Bandera Para activar entorno de prueba
 bool g_runTestEnvironment = false;
@@ -146,6 +148,8 @@ bool p_key_pressed = false;
 bool f_key_pressed = false;
 bool g_key_pressed = false;
 bool z_key_pressed = false;
+bool plus_key_pressed = false; 
+bool minus_key_pressed = false;
 bool isFireActive = false;
 float fireStartTime = 0.0f;
 
@@ -359,7 +363,7 @@ bool Start() {
         std::cerr << "ERROR: Shaders failed to load." << std::endl;
         return false;
     }
-
+    audio_init();
     loadUI(ui);
     loadTest(ta);
     loadForest(fa);
@@ -462,6 +466,7 @@ bool Update() {
     }
 
     updateGameLogic();
+    updateAudioLogic(camera.Position);
     renderScene();
 
     if (escena == 1 && !menu) renderUI();

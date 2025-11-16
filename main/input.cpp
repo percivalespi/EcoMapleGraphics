@@ -1,5 +1,6 @@
 ﻿#include "input.h"
 #include "mechanic.h"
+#include "audio.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     // --- NUEVO: Actualizar dimensiones globales y viewport ---
@@ -26,8 +27,6 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
     camera.ProcessMouseScroll((float)yoffset);
 }
-
-#include "input.h"
 
 // --- NUEVO: Implementaci�n de la funci�n para pantalla completa ---
 void toggleFullscreen(GLFWwindow* window) {
@@ -75,6 +74,29 @@ void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
+
+
+    if (glfwGetKey(window, GLFW_KEY_KP_ADD) == GLFW_PRESS) {
+        if (!plus_key_pressed) { // Si no la habíamos presionado
+            changeGlobalVolume(0.1f); // Sube 10%
+            plus_key_pressed = true;  // Marca como "ya presionada"
+        }
+    }
+    else {
+        plus_key_pressed = false; // Resetea la bandera cuando se suelta
+    }
+
+    // Bajar Volumen (Usando '-' del teclado numérico)
+    if (glfwGetKey(window, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS) {
+        if (!minus_key_pressed) { // Si no la habíamos presionado
+            changeGlobalVolume(-0.1f); // Baja 10%
+            minus_key_pressed = true;   // Marca como "ya presionada"
+        }
+    }
+    else {
+        minus_key_pressed = false; // Resetea la bandera cuando se suelta
+    }
+
 
     // --- CAMBIO DE PERSONAJE (1 y 2) ---
     if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) {
@@ -290,6 +312,8 @@ void processInput(GLFWwindow* window) {
         if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
             Time -= 0.05f;
         }
+
+
     }
     
 }
@@ -550,3 +574,4 @@ void Transicion(GLFWwindow* window) {
     camera.Right = glm::normalize(glm::cross(camera.Front, worldUp));
     camera.Up = glm::normalize(glm::cross(camera.Right, camera.Front));
 }
+
