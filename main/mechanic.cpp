@@ -116,6 +116,7 @@ void plantTree() {
                     target_chunk.tree_instances[old_base_index].id == hit_tree_id)
                 {
                     target_chunk.tree_instances.erase(target_chunk.tree_instances.begin() + old_base_index);
+                    temperatura -= 10;
                 }
                 else {
                     bool found = false;
@@ -133,6 +134,7 @@ void plantTree() {
             }
             else {
                 std::cout << "Plantando nuevo  rbol en el suelo." << std::endl;
+                temperatura -= 10;
             }
 
             // Crear nueva instancia de  rbol
@@ -509,6 +511,7 @@ void updateGameLogic() {
                 for (TreeInstance& tree : chunk.tree_instances) {
                     if (tree.state == TreeState::BURNING) {
                         tree.state = TreeState::CHOPPED_TWICE;
+                        temperatura += 1;
                     }
                 }
             }
@@ -529,6 +532,7 @@ void updateGameLogic() {
                                     }
                                 }
                                 g_currentLivingTrees--; // <-- PIERDE VIDA POR FUEGO
+                                temperatura += 0.1;
                             }
                             tree.state = TreeState::BURNING;
                             tree.fireTriggerTime = -1.0f; // Previene que se active de nuevo
@@ -541,6 +545,7 @@ void updateGameLogic() {
                     if (tree.burnOutTime >= 0.0f && fire_elapsed >= tree.burnOutTime) {
                         if (tree.state == TreeState::BURNING) {
                             tree.state = TreeState::CHOPPED_TWICE;
+                            temperatura += 5;
                             tree.burnOutTime = -1.0f; // Previene que se active de nuevo
                         }
                     }

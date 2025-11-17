@@ -1,5 +1,4 @@
 /*
-*
 * ProyectoFinal 0.0.1-alpha - Main.cpp
 * Integración: Cámara 3ra Persona + Cambio de Personaje (Demi/Miku)
 */
@@ -11,7 +10,6 @@
 #include "src_manager.h"
 #include "audio.h"
 
-
 // Bandera Para activar entorno de prueba
 bool g_runTestEnvironment = false;
 
@@ -21,6 +19,8 @@ bool Update();
 void processInput2(GLFWwindow* window);
 
 /* ------------------------------------------ Variables Globales ------------------------------------------------------ */
+int rrr=0;
+int bandera = 0;
 
 // --> Ventana
 GLFWwindow* window;
@@ -94,6 +94,7 @@ Shader* basicShader;
 Shader* wavesShader;
 Shader* wavesShader2;
 Shader* lambertShader;
+Shader* lineShader = nullptr;
 
 //Variables para Fresnel
 unsigned int g_envCubemapTexID = 0;
@@ -148,9 +149,10 @@ bool p_key_pressed = false;
 bool f_key_pressed = false;
 bool g_key_pressed = false;
 bool z_key_pressed = false;
-bool plus_key_pressed = false; 
+bool plus_key_pressed = false;
 bool minus_key_pressed = false;
 bool isFireActive = false;
+bool r_key_pressed = false;
 float fireStartTime = 0.0f;
 
 // Vector de Luces
@@ -218,7 +220,7 @@ bool g_pressM = false;
 
 // Variables de los Modelos
 Animated* g_demiModel = nullptr;
-Animated* g_mikuModel = nullptr; 
+Animated* g_mikuModel = nullptr;
 //Model* camionBasura = nullptr;
 
 // Estado del Jugador
@@ -230,9 +232,108 @@ bool g_demiMoving = false;
 // Constantes (Definición)
 const float DEMI_SPEED = 10.0f;
 const float DEMI_SCALE = 0.04f;
-const float MIKU_SCALE = 0.04f; 
+const float MIKU_SCALE = 0.04f;
 const float DEMI_CAM_DIST = 15.0f;
 const float DEMI_OFFSET_Y = 0.0f;
+
+// ============================================================================
+// CLASE AABB PARA PRUEBAS - TODO EN MAIN
+// ============================================================================
+
+class AABB {
+public:
+    glm::vec3 min;
+    glm::vec3 max;
+    GLuint vao = 0, vbo = 0;
+
+    AABB(glm::vec3 center, glm::vec3 halfSize) {
+        // -- Debug --
+        //std::cout << "[AABB] Constructor\n";
+        //std::cout << " center = " << center.x << ", " << center.y << ", " << center.z << "\n";
+        //std::cout << " halfSize = " << halfSize.x << ", " << halfSize.y << ", " << halfSize.z << "\n";
+
+        // Guarda límites
+        min = center - halfSize;
+        max = center + halfSize;
+
+        //std::cout << " min = " << min.x << ", " << min.y << ", " << min.z << "\n";
+        //std::cout << " max = " << max.x << ", " << max.y << ", " << max.z << "\n";
+
+        generateLineVAO();
+    }
+
+    ~AABB() {
+        //std::cout << "[AABB] Destructor\n";
+        if (vao) glDeleteVertexArrays(1, &vao);
+        if (vbo) glDeleteBuffers(1, &vbo);
+    }
+
+    void generateLineVAO() {
+        //std::cout << "[AABB] Generando VAO...\n";
+
+        glm::vec3 v[] = {
+            // frente
+            {min.x, min.y, max.z}, {max.x, min.y, max.z},
+            {max.x, min.y, max.z}, {max.x, max.y, max.z},
+            {max.x, max.y, max.z}, {min.x, max.y, max.z},
+            {min.x, max.y, max.z}, {min.x, min.y, max.z},
+
+            // atrás
+            {min.x, min.y, min.z}, {max.x, min.y, min.z},
+            {max.x, min.y, min.z}, {max.x, max.y, min.z},
+            {max.x, max.y, min.z}, {min.x, max.y, min.z},
+            {min.x, max.y, min.z}, {min.x, min.y, min.z},
+
+            // conexiones
+            {min.x, min.y, min.z}, {min.x, min.y, max.z},
+            {max.x, min.y, min.z}, {max.x, min.y, max.z},
+            {max.x, max.y, min.z}, {max.x, max.y, max.z},
+            {min.x, max.y, min.z}, {min.x, max.y, max.z}
+        };
+
+       // std::cout << "[AABB] Total líneas: " << (sizeof(v) / sizeof(glm::vec3)) << "\n";
+
+        glGenVertexArrays(1, &vao);
+        glGenBuffers(1, &vbo);
+
+        if (!vao || !vbo)
+            //std::cout << "[AABB] ERROR creando VAO o VBO\n";
+
+        glBindVertexArray(vao);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+        glBufferData(GL_ARRAY_BUFFER, sizeof(v), v, GL_STATIC_DRAW);
+        //std::cout << "[AABB] Buffer cargado.\n";
+
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
+
+        glBindVertexArray(0);
+
+        //std::cout << "[AABB] VAO listo. vao=" << vao << "\n\n";
+    }
+
+    void Draw(Shader& shader) {
+        if (!vao) {
+            //std::cout << "[AABB] WARNING: VAO = 0, no se puede dibujar\n";
+            return;
+        }
+
+
+        glUseProgram(shader.ID);
+        glBindVertexArray(vao);
+        glDrawArrays(GL_LINES, 0, 24);
+        glBindVertexArray(0);
+    }
+};
+
+
+
+// ============================================================================
+// VARIABLES AABB PARA PRUEBAS
+// ============================================================================
+AABB* testAABB = nullptr;
+bool collisionDetected = false;
 
 // =============================================================================================
 
@@ -248,7 +349,15 @@ int main() {
         }
     }
 
-    // Limpieza
+    // ============================================================================
+    // LIMPIEZA AABB
+    // ============================================================================
+    if (testAABB != nullptr) {
+        delete testAABB;
+        testAABB = nullptr;
+    }
+
+    // Limpieza existente
     if (ui.crosshairVAO != 0) { glDeleteVertexArrays(1, &ui.crosshairVAO); ui.crosshairVAO = 0; }
     if (ui.crosshairVBO != 0) { glDeleteBuffers(1, &ui.crosshairVBO); ui.crosshairVBO = 0; }
     if (ui.uiVAO != 0) { glDeleteVertexArrays(1, &ui.uiVAO); ui.uiVAO = 0; }
@@ -298,7 +407,7 @@ int main() {
     delete fa.leaf_model;
 
     delete fa.sphereDay;
-	delete fa.sphereNight;
+    delete fa.sphereNight;
 
     // Limpiar Personajes
     if (g_demiModel) delete g_demiModel;
@@ -349,6 +458,8 @@ bool Start() {
     phongShader2 = new Shader("shaders/11_BasicPhongShader2.vs", "shaders/11_BasicPhongShader2.fs");
     mLightsShader = new Shader("shaders/11_PhongShaderMultLights.vs", "shaders/11_PhongShaderMultLights.fs");
     dynamicShader = new Shader("shaders/10_vertex_skinning-IT.vs", "shaders/10_fragment_skinning-IT.fs");
+    lineShader = new Shader("shaders/line.vs", "shaders/line.fs");
+
 
     if (!phongShader || phongShader->ID == 0 ||
         !instancePhongShader || instancePhongShader->ID == 0 ||
@@ -420,6 +531,13 @@ bool Start() {
         std::cout << "ERROR: No se cargo models/miku.fbx" << std::endl;
     }
 
+    // ============================================================================
+    // CREAR AABB DE PRUEBA
+    // ============================================================================
+    testAABB = new AABB(glm::vec3(0, 2, 0), glm::vec3(5, 5, 5));
+    //std::cout << "AABB creado en (0,2,0) con halfsize 5.\n";
+
+
     return true;
 }
 
@@ -428,7 +546,6 @@ bool Update() {
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
 
-    // Evitar conflicto de cámaras
     if (!animacion1 && escena == 0 && !g_isThirdPerson) {
         CalculoCamara(window);
     }
@@ -440,25 +557,17 @@ bool Update() {
 
     processInput(window);
 
-    // ==========================================================
-    // === ACTUALIZACIÓN DE ANIMACIÓN DE PERSONAJE ACTIVO ===
-    // ==========================================================
-
-    // 1. Seleccionar modelo activo
     Animated* currentModel = nullptr;
     if (g_activeCharacter == 1) currentModel = g_demiModel;
     else if (g_activeCharacter == 2) currentModel = g_mikuModel;
 
-    // 2. Actualizar si existe
     if (currentModel) {
-        currentModel->currentAnimation = 0; // Solo hay anim 0
+        currentModel->currentAnimation = 0;
 
         if (g_demiMoving) {
-            // Moverse
             currentModel->UpdateAnimation(deltaTime);
         }
         else {
-            // Pausar/Resetear a frame 0
             currentModel->animationCount = 0;
             currentModel->elapsedTime = 0.0f;
             currentModel->UpdateAnimation(0.0f);
@@ -467,12 +576,58 @@ bool Update() {
 
     updateGameLogic();
     updateAudioLogic(camera.Position);
+
+    // DIBUJAR AABB
+    if (testAABB != nullptr) {
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom),
+            (float)SCR_WIDTH / (float)SCR_HEIGHT,
+            0.1f, 2000.0f);
+
+        glm::mat4 view = camera.GetViewMatrix();
+
+        if (testAABB) {
+
+            glm::mat4 projection = glm::perspective(
+                glm::radians(camera.Zoom),
+                (float)SCR_WIDTH / (float)SCR_HEIGHT,
+                0.1f, 5000.0f
+            );
+
+            glm::mat4 view = camera.GetViewMatrix();
+            glm::mat4 model = glm::mat4(1.0f);
+
+            lineShader->use();
+            lineShader->setMat4("projection", projection);
+            lineShader->setMat4("view", view);
+            lineShader->setMat4("model", model);
+
+            // COLOR FUERTE FLUORESCENTE
+            lineShader->setVec3("color", glm::vec3(1.0f, 1.0f, 0.0f));
+
+            // GROSOR DE LÍNEA
+            glLineWidth(5.0f);
+
+            // SIN ZBUFFER — SIEMPRE VISIBLE
+            glDisable(GL_DEPTH_TEST);
+
+            // DIBUJAR
+            testAABB->Draw(*lineShader);
+
+            glEnable(GL_DEPTH_TEST);
+            glLineWidth(1.0f);
+        }
+
+
+    }
+
     renderScene();
 
     if (escena == 1 && !menu) renderUI();
 
+
     glfwSwapBuffers(window);
     glfwPollEvents();
+
 
     return true;
 }

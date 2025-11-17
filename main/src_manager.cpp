@@ -19,6 +19,46 @@ void initializeModelsTest(TestAssets& ta) {
     ta.luzSemaforo = new Model("models/city/Prod/luzSemaforo.fbx");
     ta.co2 = new Model("models/city/Prod/CO2.fbx");
 
+    //BASURAS
+    ta.basura1 = new Model("models/city/Prod/basura_norte_azul.fbx");
+    ta.basura2 = new Model("models/city/Prod/basura_norte_cafe.fbx");
+    ta.basura3 = new Model("models/city/Prod/basura_norte_rojo.fbx");
+    ta.basura4 = new Model("models/city/Prod/basura_sur_blanca.fbx"); 
+    ta.basura5 = new Model("models/city/Prod/basura_sur_ladrillo.fbx");
+    ta.basura6 = new Model("models/city/Prod/basura_sur_rojo.fbx");
+
+    //BOTES
+    ta.bote1 = new Model("models/city/Prod/bote_norte_azul.fbx");
+    ta.bote2 = new Model("models/city/Prod/bote_norte_cafe.fbx");
+    ta.bote3 = new Model("models/city/Prod/bote_norte_gris.fbx");
+    ta.bote4 = new Model("models/city/Prod/bote_norte_rojo.fbx");
+    ta.bote5 = new Model("models/city/Prod/bote_sur_blanca.fbx");
+    ta.bote6 = new Model("models/city/Prod/bote_sur_gris.fbx");
+    ta.bote7 = new Model("models/city/Prod/bote_sur_ladrillo.fbx");
+    ta.bote8 = new Model("models/city/Prod/bote_sur_rojo.fbx");
+
+    //CONTENEDORES
+    ta.contenedor1 = new Model("models/city/Prod/contenedor_norte_azul.fbx");
+    ta.contenedor2 = new Model("models/city/Prod/contenedor_norte_cafe.fbx");
+    ta.contenedor3 = new Model("models/city/Prod/contenedor_norte_gris.fbx");
+    ta.contenedor4 = new Model("models/city/Prod/contenedor_norte_rojo.fbx");
+    ta.contenedor5 = new Model("models/city/Prod/contenedor_sur_blanco.fbx");
+    ta.contenedor6 = new Model("models/city/Prod/contenedor_sur_gris.fbx");
+    ta.contenedor7 = new Model("models/city/Prod/contenedor_sur_ladrillo.fbx");
+    ta.contenedor8 = new Model("models/city/Prod/contenedor_sur_rojo.fbx");
+
+    //MUEBLES
+    ta.mueble1 = new Model("models/city/Prod/mueble_norte_cafe_1.fbx");
+    ta.mueble2 = new Model("models/city/Prod/mueble_norte_cafe_2.fbx");
+    ta.mueble3 = new Model("models/city/Prod/mueble_norte_rojo_1.fbx");
+    ta.mueble4 = new Model("models/city/Prod/mueble_norte_rojo_2.fbx");
+    ta.mueble5 = new Model("models/city/Prod/mueble_norte_rojo_3.fbx");
+    ta.mueble6 = new Model("models/city/Prod/mueble_norte_rojo_4.fbx");
+    ta.mueble7 = new Model("models/city/Prod/mueble_sur_rojo_1.fbx");
+    ta.mueble8 = new Model("models/city/Prod/mueble_sur_rojo_2.fbx");
+    ta.mueble9 = new Model("models/city/Prod/mueble_sur_rojo_3.fbx");
+    ta.mueble10 = new Model("models/city/Prod/mueble_sur_rojo_4.fbx");
+
     //Modelos IA
 
     ta.fabrica = new Model("models/city/Prod/fabrica.fbx");
