@@ -47,8 +47,6 @@ void main(void)
     vRefract[2] = refract(I, normWorld, mRefractionRatio * 0.98); // B
 
     // Schlick Aproximacion
-    //float f = clamp(_Bias + _Scale * pow(1.0 + dot(I, normWorld), _Power), 0.0, 1.0);
-    //reflectionCoefficient = f;
     reflectionCoefficient = max(0, min(1,_Bias + _Scale * pow( 1.0f + dot( I, normWorld ), _Power ))); // Fresnel equation
 
     TexCoords = aTexCoords;
