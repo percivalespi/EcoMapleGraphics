@@ -275,6 +275,7 @@ void processInput(GLFWwindow* window) {
             if (sunElevationAngle < 0.0f) {
                 sunElevationAngle += 360.0f;
             }
+            /*
             if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
                 if (temperatura < 40.00)temperatura += 0.35f;
                 if (temperatura > 0)calor = true;
@@ -282,6 +283,8 @@ void processInput(GLFWwindow* window) {
             if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS) {
                 if ((temperatura > -40.00 && !calor) || (temperatura > 0.00 && calor))temperatura -= 0.35f;
             }
+            */
+            
         }
        
         if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {

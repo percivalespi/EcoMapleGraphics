@@ -96,6 +96,8 @@ Shader* lambertShader;
 //Variables para Fresnel
 unsigned int g_envCubemapTexID = 0;
 Model* g_glassModel = nullptr;
+std::vector<unsigned int> g_envCubemaps;
+int g_envIndex = 0;
 
 // --> Estado del Mundo
 std::vector<Chunk> terrain_chunks;
@@ -187,6 +189,8 @@ bool calor = false;
 CamAni g_anim1;
 MenuAnim g_menu;
 
+float desp = 359.5f;
+
 // --> Glaciar variables
 float glacierScaleY = 1.0f;
 float meltSpeedBase = 0.01f;
@@ -203,6 +207,15 @@ glm::vec3 posicionCarga(0.0f, 47.0f, 4.0f);
 glm::vec3 posicionInicioG(0.0f, 2.0f, 10.0f);
 glm::vec3 posicionOrigen(0.0f, 0.0f, 0.0f);
 glm::vec3 posicionEscenario1(0.0f, 40.0f, 340.0f);
+
+const glm::vec3 aguaCentro1(0.0f, 0.0f, desp);
+const glm::vec3 aguaCentro2(0.0f, 0.0f, desp + -42.4f);
+
+bool iniciadoOlas = false;
+bool Olas = false;
+double inicioOlas;
+double duracionOlas = 0.5;
+float dismin=0;
 
 // =============================================================================================
 // === VARIABLES GLOBALES PARA PERSONAJE Y CÁMARA 3RA PERSONA ===
@@ -367,6 +380,7 @@ bool Start() {
     loadEspacio(ea);
     loadGlaciar(ga);
     loadFresnelGlassResources();
+    loadAllEnvironmentCubemaps();
 
     initializeRenderBuffers(ui);
 

@@ -320,13 +320,6 @@ void initializeModelsGlaciar(GlaciarAssets& ga) {
     ga.Oso1 = new Animated("models/iceland/OsoPS.fbx");
     ga.Oso2 = new Animated("models/iceland/OsoPW.fbx");
 
-    // CORREGIDO: Usar -> en punteros
-    if (!fa.cubeenv || fa.cubeenv->meshes.empty() || fa.cubeenv->meshes[0].textures.empty()) {
-        std::cout << "ERROR: Skybox DIA" << std::endl;
-    }
-    if (!fa.cubeenv_noche || fa.cubeenv_noche->meshes.empty() || fa.cubeenv_noche->meshes[0].textures.empty()) {
-        std::cout << "ERROR: Skybox NIGHT" << std::endl;
-    }
 }
 
 void initilizeMaterialsGlaciar(GlaciarAssets& ga) {
@@ -415,4 +408,39 @@ void loadFresnelGlassResources()
             std::cerr << "ERROR: Could not load models/GlassBuilding.fbx" << std::endl;
         }
     }
+}
+
+int addEnvironmentCubemap(const std::vector<std::string>& faces) {
+    unsigned int id = LoadCubemap(faces);
+    if (id != 0) {
+        g_envCubemaps.push_back(id);
+        return int(g_envCubemaps.size()) - 1;
+    }
+    return -1;
+}
+
+void loadAllEnvironmentCubemaps() {
+    g_envCubemaps.clear();
+
+    // Ejemplo: “Día”
+    addEnvironmentCubemap({
+            "models/mycube.fbm/posx.jpg",
+            "models/mycube.fbm/negx.jpg",
+            "models/mycube.fbm/posy.jpg",
+            "models/mycube.fbm/negy.jpg",
+            "models/mycube.fbm/posz.jpg",
+            "models/mycube.fbm/negz.jpg"
+        });
+
+    // Ejemplo: “Atardecer”
+    addEnvironmentCubemap({
+        "models/noche/mycube.fbm/posx.jpg",
+        "models/noche/mycube.fbm/negx.jpg",
+        "models/noche/mycube.fbm/posy.jpg",
+        "models/noche/mycube.fbm/negy.jpg",
+        "models/noche/mycube.fbm/posz.jpg",
+        "models/noche/mycube.fbm/negz.jpg"
+        });
+
+    g_envIndex = 0; // empieza con el primero
 }

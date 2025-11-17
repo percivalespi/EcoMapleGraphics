@@ -10,7 +10,7 @@ void main()
 {   
 
     vec2 coordsT = TexCoords;
-    coordsT.x += 0.01f*time;
+    //coordsT.x += 0.01f*time;
 
     vec4 texel = texture(texture_diffuse1, coordsT);
 

@@ -421,6 +421,8 @@ extern bool isDay;
 
 // Cubemap ambiental para Fresnel
 extern unsigned int g_envCubemapTexID; // <- NUEVO
+extern std::vector<unsigned int> g_envCubemaps;
+extern int g_envIndex;
 
 // Modelo de cristal (edificio/panel)
 extern Model* g_glassModel;
@@ -495,11 +497,22 @@ extern float temperatura;
 extern float barraTF;
 extern float barraTC;
 
+extern float desp;
+
 extern int escena;
 
 extern bool menu;
 extern bool animacion1;
 extern bool calor;
+
+extern const glm::vec3 aguaCentro1;
+extern const glm::vec3 aguaCentro2;
+
+extern bool iniciadoOlas;
+extern bool Olas;
+extern double inicioOlas;
+extern double duracionOlas;
+extern float dismin;
 
 // === Variables globales para derretimiento en escena 1 ===
 extern float glacierScaleY;          // escala vertical de Glaciares (1 → 0)
