@@ -41,6 +41,10 @@ void loadGlaciar(GlaciarAssets& ga);
 static unsigned int LoadCubemap(const std::vector<std::string>& faces);
 void loadFresnelGlassResources();
 
+int addEnvironmentCubemap(const std::vector<std::string>& faces);
+// Inicializar varios cubemaps predefinidos
+void loadAllEnvironmentCubemaps();
+
 
 
 

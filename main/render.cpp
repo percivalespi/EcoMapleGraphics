@@ -224,22 +224,32 @@ void renderFresnelCristal(const glm::mat4& projection, const glm::mat4& view)
     fresnelShader->setVec3("cameraPosition", camera.Position);
 
     // Parámetros Fresnel típicos para vidrio
-    fresnelShader->setFloat("mRefractionRatio", 1.0f / 1.52f); // ~0.658
+    fresnelShader->setFloat("mRefractionRatio", 1.0f / 1.52f);
     fresnelShader->setFloat("_Bias", 0.02f);
     fresnelShader->setFloat("_Scale", 0.98f);
     fresnelShader->setFloat("_Power", 5.0f);
+    if (isDay) {
+        g_envIndex = 0;
+    }
+    else {
+        g_envIndex = 1;
+    }
+    // Bind del cubemap
+    unsigned int envID =
+        (!g_envCubemaps.empty() ? g_envCubemaps[g_envIndex] : 0);
+    if (envID == 0) return;
 
-    // Bind del cubemap en la unidad 0
+    fresnelShader->use();
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, g_envCubemapTexID);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, envID);
     fresnelShader->setInt("cubetex", 0);
 
-    // Si el mesh tiene difusa, la ponemos en unidad 1 (opcional)
+    // Si el mesh tiene difusa, la ponemos en unidad 1
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, 0);
     fresnelShader->setInt("texture_diffuse1", 1);
 
-    // Matriz de modelo: coloca/escala el “cristal de edificio”
+    // Matriz de modelo: coloca/escala el cristal
     glm::mat4 model = glm::mat4(1.0f);
     // Ajusta a tu escena (altura, rotación, escala)
     model = glm::translate(model, glm::vec3(0.0f, 0.0f, (-WORLD_SIZE * 35) - 2.5));
@@ -267,7 +277,6 @@ void renderFresnelCristal(const glm::mat4& projection, const glm::mat4& view)
         glBindVertexArray(0);
     }
 
-    // Limpieza mínima
     glActiveTexture(GL_TEXTURE1); glBindTexture(GL_TEXTURE_2D, 0);
     glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     glUseProgram(0);
@@ -431,23 +440,37 @@ void renderMenuScene(const glm::mat4& projection, const glm::mat4& view) {
 }
 
 void renderEspacioScene(const glm::mat4& projection, const glm::mat4& view) {
-    glm::mat4 view_skybox = glm::mat4(glm::mat3(view));
 
-    if (skyboxShader != nullptr && skyboxShader->ID != 0) {
-        glDepthFunc(GL_LEQUAL);
+    if (skyboxShader != nullptr) {
+        glDepthFunc(GL_LEQUAL); // Truco: Dibujar solo donde la profundidad sea <= (al fondo)
         skyboxShader->use();
+
+        // 1. Proyección normal
         skyboxShader->setMat4("projection", projection);
-        skyboxShader->setMat4("view", view_skybox);
+
+        // 2. Vista SIN TRASLACIÓN (Para que el cielo te siga y no te acerques nunca)
+        glm::mat4 viewNoTrans = glm::mat4(glm::mat3(view));
+        skyboxShader->setMat4("view", viewNoTrans);
+
+        // 3. Transformación del Modelo
         glm::mat4 model = glm::mat4(1.0f);
+
+        // Rotación opcional si la textura quedó chueca en Blender
         model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+        // Escalamos la esfera para que sea gigante y cubra todo
         model = glm::scale(model, glm::vec3(1000.0f));
+
         skyboxShader->setMat4("model", model);
-        Model* currentSkybox = ea.cubeenv_noche;
-        if (currentSkybox != nullptr) {
-            currentSkybox->Draw(*skyboxShader);
-        }
-        glDepthFunc(GL_LESS);
+
+ 
+        if (ea.cubeenv_noche) ea.cubeenv_noche->Draw(*skyboxShader);
+
+        glDepthFunc(GL_LESS); // Regresar profundidad a la normalidad
     }
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -540,29 +563,14 @@ void renderEspacioScene(const glm::mat4& projection, const glm::mat4& view) {
 }
 
 void renderGlaciarScene(const glm::mat4& projection, const glm::mat4& view) {
-
-    float desp = 359.5f;
-
-    // --- LÓGICA DE DESHIELO Y CONGELAMIENTO ---
-    if (temperatura > 0.0f) {
-        // CALOR: Se derrite (Scale baja hacia 0)
-        if (glacierScaleY > 0.0f) {
-            float speed = meltSpeedBase * temperatura;
-            glacierScaleY -= speed * deltaTime;
-            // Límite inferior
-            if (glacierScaleY < 0.0f) glacierScaleY = 0.0f;
-        }
-    }
-    else {
-        // FRÍO (Temperatura <= 0): Se congela (Scale sube hacia 1)
-        if (glacierScaleY < 1.0f) {
-            // Usamos abs() porque temperatura es negativa, pero queremos velocidad positiva
-            float speed = meltSpeedBase * glm::abs(temperatura);
-            glacierScaleY += speed * deltaTime;
-            // Límite superior
-            if (glacierScaleY > 1.0f) glacierScaleY = 1.0f;
-        }
-    }
+	
+    if (temperatura > 0.0f && glacierScaleY > 0.0f) {
+        float speed = meltSpeedBase * temperatura;     // más calor → más rápido
+        glacierScaleY = glm::max(0.0f, glacierScaleY - speed * deltaTime);
+    }if(temperatura < 0.0f && glacierScaleY < 1.0f) {
+        float speed = meltSpeedBase * -temperatura;    // más frío → más rápido
+        glacierScaleY = glm::min(1.0f, glacierScaleY + speed * deltaTime);
+	}
     setupStaticShader(mLightsShader, projection, view);
     setupShaderLights(mLightsShader, gLights);
 
@@ -579,7 +587,10 @@ void renderGlaciarScene(const glm::mat4& projection, const glm::mat4& view) {
         glm::mat4 mG = model;
         mG = glm::scale(mG, glm::vec3(1.0f, 1.0f, glacierScaleY));
         drawObject(mLightsShader, ga.Iceberg, ga.nieveMaterial, mG);
-
+        Olas = false;
+    }
+    else {
+        Olas = true;
     }
 
     {
@@ -588,26 +599,33 @@ void renderGlaciarScene(const glm::mat4& projection, const glm::mat4& view) {
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, desp));
         model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
-
+        //model = glm::scale(model, glm::vec3(10.97f, 9.548f, 1.0f));
+        model = glm::scale(model, glm::vec3(10.0f, 10.0f, 10.0f));
         wavesShader2->setMat4("projection", projection);
         wavesShader2->setMat4("view", view);
 
         wavesShader2->setMat4("model", model);
 
         wavesShader2->setFloat("time", wavesTime);
-        if (calor) {
-            wavesShader2->setFloat("radius", 0.7f);
-            wavesShader2->setFloat("height", 0.7f);
+        if (Olas) {
+            if (!iniciadoOlas)inicioOlas = glfwGetTime();
+			iniciadoOlas = true;
+            double now = glfwGetTime(); // reloj estable
+            wavesTime = (now - inicioOlas) / duracionOlas;
+            float x = (now - inicioOlas) / 10.0f;
+            x = glm::clamp(x, 0.0f, 2.5f);
+            wavesShader2->setFloat("radius", 2.5-x);
+            wavesShader2->setFloat("height", 2.5-x);
+            wavesShader2->setVec3("center1", aguaCentro1);
+            wavesShader2->setVec3("center2", aguaCentro2);
+            dismin += 0.05f;
         }
         else {
-            wavesShader2->setFloat("radius", 0.2f);
-            wavesShader2->setFloat("height", 0.2f);
+            dismin = 0.0f;
+            iniciadoOlas = false;
         }
 
         ga.Agua->Draw(*wavesShader2);
-
-        wavesTime += 0.01f;
     }
     glUseProgram(0);
     // Descenso de osos 1 y 2 en función del derretimiento
@@ -647,20 +665,20 @@ void renderGlaciarScene(const glm::mat4& projection, const glm::mat4& view) {
     }
     glUseProgram(0);
     {
-        ga.Oso2->UpdateAnimation(deltaTime);
+        ga.Oso1->UpdateAnimation(deltaTime);
 
         dynamicShader->use();
         dynamicShader->setMat4("projection", projection);
         dynamicShader->setMat4("view", view);
 
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(-1.0f, 6.4+osoDown, -42.4+desp));
+        model = glm::translate(model, glm::vec3(0.0f, 7.4+osoDown, -42.4+desp));
         model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
 
         dynamicShader->setMat4("model", model);
-        dynamicShader->setMat4("gBones", MAX_RIGGING_BONES, ga.Oso2->gBones);
-        ga.Oso2->Draw(*dynamicShader);
+        dynamicShader->setMat4("gBones", MAX_RIGGING_BONES, ga.Oso1->gBones);
+        ga.Oso1->Draw(*dynamicShader);
     }
     glUseProgram(0);
     
@@ -676,10 +694,11 @@ void renderGlaciarScene(const glm::mat4& projection, const glm::mat4& view) {
 
             // Si ya recorrió 10 unidades desde el último giro, elige izquierda o derecha al azar
             float distTramo = glm::length(osoPos[idx] - osoUltimoGiro[idx]);
-            if (distTramo >= OSO_SEGMENTO) {
+			float distGeneral = glm::length(osoPos[idx] - glm::vec3(0.0f, 0.0f, 0.0f ));
+            if (distTramo >= OSO_SEGMENTO || distGeneral >= 40.0f) {
                 int signo = (std::rand() & 1) ? 1 : -1;   // 1 o -1
                 osoYawDeg[idx] += 90.0f * signo;
-                // Normaliza yaw a [-180,180] opcional
+                // Normaliza yaw a [-180,180]
                 if (osoYawDeg[idx] > 180.0f) osoYawDeg[idx] -= 360.0f;
                 if (osoYawDeg[idx] < -180.0f) osoYawDeg[idx] += 360.0f;
                 // Nuevo origen del siguiente tramo
@@ -695,10 +714,9 @@ void renderGlaciarScene(const glm::mat4& projection, const glm::mat4& view) {
             dynamicShader->use();
             dynamicShader->setMat4("projection", projection);
             dynamicShader->setMat4("view", view);
-
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, osoPos[0]);
-            model = glm::translate(model, glm::vec3(80.0f, 9.5f, -11.4f+desp));
+            model = glm::translate(model, glm::vec3(90.0f, 9.5f, -11.4f+desp));
             model = glm::rotate(model, glm::radians(osoYawDeg[0]), glm::vec3(0.0f, 1.0f, 0.0f)); // yaw
             model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
 
@@ -709,7 +727,7 @@ void renderGlaciarScene(const glm::mat4& projection, const glm::mat4& view) {
         glUseProgram(0);
 
         // Oso4
-        {
+        if(temperatura < -20.0f){
             ga.Oso2->UpdateAnimation(deltaTime);
 
             avanzarOso(1);
@@ -720,7 +738,7 @@ void renderGlaciarScene(const glm::mat4& projection, const glm::mat4& view) {
 
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, osoPos[1]);
-            model = glm::translate(model, glm::vec3(80.0f, 9.2f, -5.759+desp));
+            model = glm::translate(model, glm::vec3(90.0f, 9.2f, -5.759+desp));
             model = glm::rotate(model, glm::radians(osoYawDeg[1]), glm::vec3(0.0f, 1.0f, 0.0f)); // yaw
             model = glm::scale(model, glm::vec3(0.008f, 0.008f, 0.008f));
 
@@ -731,7 +749,7 @@ void renderGlaciarScene(const glm::mat4& projection, const glm::mat4& view) {
         glUseProgram(0);
 
         // Oso5
-        {
+        if (temperatura < -30.0f) {
             ga.Oso2->UpdateAnimation(deltaTime);
             avanzarOso(2);
 
@@ -741,7 +759,7 @@ void renderGlaciarScene(const glm::mat4& projection, const glm::mat4& view) {
 
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, osoPos[2]);
-            model = glm::translate(model, glm::vec3(80.0f, 9.2f, -16.23f+desp));
+            model = glm::translate(model, glm::vec3(90.0f, 9.2f, -16.23f+desp));
             model = glm::rotate(model, glm::radians(osoYawDeg[2]), glm::vec3(0.0f, 1.0f, 0.0f)); // yaw
             model = glm::scale(model, glm::vec3(0.008f, 0.008f, 0.008f));
 
@@ -754,6 +772,7 @@ void renderGlaciarScene(const glm::mat4& projection, const glm::mat4& view) {
 
     if (!menu) {
         {
+			temperatura = (g_forestHealth - 0.5f) * -80.0f; // Rango -40 a +40
             // === Termómetro pegado a la cámara (lateral izquierdo) ===
             basicShader->use();
             basicShader->setMat4("projection", projection);

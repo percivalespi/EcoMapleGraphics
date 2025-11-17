@@ -20,10 +20,10 @@ uniform mat4 projection;
 uniform vec3 cameraPosition;
 
 // Fresnel parameters (expuestos para ajustar apariencia)
-uniform float mRefractionRatio; // ~1.0/1.52 para vidrio ~0.658
-uniform float _Bias;            // típico 0.02–0.1
-uniform float _Scale;           // típico 0.9–1.0
-uniform float _Power;           // típico 5.0
+uniform float mRefractionRatio; 
+uniform float _Bias;            
+uniform float _Scale;           
+uniform float _Power;           
 
 void main(void)
 {
@@ -46,9 +46,10 @@ void main(void)
     vRefract[1] = refract(I, normWorld, mRefractionRatio * 0.99); // G
     vRefract[2] = refract(I, normWorld, mRefractionRatio * 0.98); // B
 
-    // Schlick Approximation
-    float f = clamp(_Bias + _Scale * pow(1.0 + dot(I, normWorld), _Power), 0.0, 1.0);
-    reflectionCoefficient = f;
+    // Schlick Aproximacion
+    //float f = clamp(_Bias + _Scale * pow(1.0 + dot(I, normWorld), _Power), 0.0, 1.0);
+    //reflectionCoefficient = f;
+    reflectionCoefficient = max(0, min(1,_Bias + _Scale * pow( 1.0f + dot( I, normWorld ), _Power ))); // Fresnel equation
 
     TexCoords = aTexCoords;
 }
