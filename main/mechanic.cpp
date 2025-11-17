@@ -803,46 +803,19 @@ bool g_PlayerIsInCave = false; // Estado para evitar reiniciar la música
 // --- Implementación de la Función ---
 void updateAudioLogic(const glm::vec3& playerPos) {
 
-    // --- PETICIÓN 2: Música por Escena Fija ---
-
+    
     if (menu) {
-        // (Asumiendo que tienes una variable global 'menu' como en tu render)
-        playMusic("music/AriaMath.mp3");
+        playMusic("music/SecretGarden.mp3");
     }
     else if (escena == 0) {
-        // (Asumiendo que tienes una variable global 'escena')
-        playMusic("music/SecretGarden.mp3"); // Música para la Escena 0
+        playMusic("music/SecretGarden.mp3"); 
     }
     else if (escena == 1) {
-        // Estamos en la escena 1 (Bosque/Glaciar/Test),
-        // ahora revisamos la lógica de coordenadas.
-
-        // --- PETICIÓN 1: Música por Coordenadas ---
-
-        // 1. Revisar si el jugador está DENTRO de la "caja" de la cueva
-        /*
-        
-        bool isInside = (playerPos.x >= g_CaveMin.x && playerPos.x <= g_CaveMax.x) &&
-            (playerPos.y >= g_CaveMin.y && playerPos.y <= g_CaveMax.y) &&
-            (playerPos.z >= g_CaveMin.z && playerPos.z <= g_CaveMax.z);
-
-        // 2. Lógica de Transición (solo se activa al cruzar el límite)
-        if (isInside && !g_PlayerIsInCave) {
-            // El jugador ACABA DE ENTRAR
-            g_PlayerIsInCave = true;
-            std::cout << "Entrando a la cueva..." << std::endl;
-            playMusic("sound/cave_ambience.mp3"); // Poner música de cueva
+        if (isFireActive) {
+            playMusic("music/Deliverance.mp3");
         }
-        else if (!isInside && g_PlayerIsInCave) {
-            // El jugador ACABA DE SALIR
-            g_PlayerIsInCave = false;
-            std::cout << "Saliendo de la cueva..." << std::endl;
-            playMusic("sound/forest_ambience.mp3"); // Volver a la música normal del bosque
+        else {
+            playMusic("music/AriaMath.mp3");
         }
-        else if (!isInside && g_CurrentMusicFile == "") {
-            // Si está afuera Y no hay música sonando, pone la de por defecto
-            playMusic("sound/forest_ambience.mp3");
-        }
-        */
     }
 }
