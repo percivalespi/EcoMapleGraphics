@@ -235,7 +235,7 @@ struct TestAssets { //Elementos Para el entorno de Prueba
     //Modelos
     Model* suelo, *suelo_verde, *metales, *objMadera, *objCristales;
     Model* objPlasticos, *objConcreto, *objLlantas, *objLadrillo;
-    Model* bandera, *grafitis, *luzSemaforo, *co2;
+    Model* bandera, *grafitis, *luzSemaforo, *co2, *arboles;
 
 
     //Modelos IA
@@ -416,6 +416,14 @@ extern Shader* moonShader;
 extern Shader* basicShader;
 extern Shader* wavesShader;
 extern Shader* wavesShader2;
+
+extern Shader* wavesShader2;
+extern Shader* singleTreeShader;
+
+
+extern Shader* smoke;
+
+extern float timeSmoke;
 
 extern bool isDay;
 

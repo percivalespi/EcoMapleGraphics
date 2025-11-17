@@ -18,6 +18,8 @@ void initializeModelsTest(TestAssets& ta) {
 
     ta.luzSemaforo = new Model("models/city/Prod/luzSemaforo.fbx");
     ta.co2 = new Model("models/city/Prod/CO2.fbx");
+    ta.arboles = new Model("models/city/Prod/arbolesv2.fbx");
+
 
     //Modelos IA
 

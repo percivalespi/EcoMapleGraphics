@@ -92,11 +92,33 @@ void renderTestEnvironment(const glm::mat4& projection, const glm::mat4& view) {
     drawObject(mLightsShader, ta.banco, ta.concreto, model);
     drawObject(mLightsShader, ta.policia, ta.concreto, model);
     drawObject(mLightsShader, ta.luzSemaforo, ta.traslucido, model);
-    drawObject(mLightsShader, ta.co2, ta.gases, model);
+    //drawObject(mLightsShader, ta.co2, ta.gases, model);
     drawObject(mLightsShader, ta.camion, ta.plastic, model);
+    drawObject(mLightsShader, ta.arboles, ta.plastic, model);
     glUseProgram(0);
 
+    {
+        smoke->use();
 
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        smoke->setMat4("projection", projection);
+        smoke->setMat4("view", view);
+        smoke->setMat4("model", model);
+
+        smoke->setFloat("time", timeSmoke);
+        smoke->setFloat("intensity", 4.0f);   // FUERTE
+        smoke->setFloat("speed", 4.0f);       // RÁPIDO
+        smoke->setFloat("scale", 0.3f);       // RUIDO DETALLADO
+
+        smoke->setVec4("baseColor", glm::vec4(0.12f, 0.12f, 0.12f, 0.55f));
+
+        ta.co2->Draw(*smoke);   // <- aquí pasas *shader, no el puntero
+
+        timeSmoke += 0.05f;
+    }
+    glUseProgram(0);  
 }
 
 void renderFresnelCristal(const glm::mat4& projection, const glm::mat4& view)

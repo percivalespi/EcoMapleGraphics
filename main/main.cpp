@@ -94,6 +94,10 @@ Shader* basicShader;
 Shader* wavesShader;
 Shader* wavesShader2;
 Shader* lambertShader;
+Shader* singleTreeShader;
+Shader* smoke;
+
+float timeSmoke = 0.0f;
 
 //Variables para Fresnel
 unsigned int g_envCubemapTexID = 0;
@@ -184,7 +188,7 @@ const float velocidadCarga = 0.01f;
 float temperatura = -25.0f;
 float barraTF = 0.0f;
 float barraTC = 0.0f;
-int escena = 0;
+int escena = 1;
 bool menu = false;
 bool animacion1 = false;
 bool calor = false;
@@ -314,7 +318,7 @@ bool Start() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "EcoMapleGrahics v1.0.0-alpha", NULL, NULL);
+    window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "EcoMapleGrahics v1.0", NULL, NULL);
     if (window == NULL) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -349,6 +353,9 @@ bool Start() {
     phongShader2 = new Shader("shaders/11_BasicPhongShader2.vs", "shaders/11_BasicPhongShader2.fs");
     mLightsShader = new Shader("shaders/11_PhongShaderMultLights.vs", "shaders/11_PhongShaderMultLights.fs");
     dynamicShader = new Shader("shaders/10_vertex_skinning-IT.vs", "shaders/10_fragment_skinning-IT.fs");
+    singleTreeShader = new Shader("shaders/12_PhongShaderMultLights.vs", "shaders/12_PhongShaderMultLights.fs");
+    smoke = new Shader("shaders/smoke.vs", "shaders/smoke.fs");
+
 
     if (!phongShader || phongShader->ID == 0 ||
         !instancePhongShader || instancePhongShader->ID == 0 ||
