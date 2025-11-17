@@ -239,7 +239,7 @@ void renderFresnelCristal(const glm::mat4& projection, const glm::mat4& view)
         (!g_envCubemaps.empty() ? g_envCubemaps[g_envIndex] : 0);
     if (envID == 0) return;
 
-    fresnelShader->use();
+ 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, envID);
     fresnelShader->setInt("cubetex", 0);

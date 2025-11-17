@@ -467,11 +467,7 @@ bool Update() {
     else if (!menu && animacion1) UpdateAnim1(window);
     else if (menu) Transicion(window);
 
-    // ... código anterior (Transicion, etc) ...
 
-        // --- CORRECCIÓN: LIMITAR LA TEMPERATURA (CLAMPING) ---
-        // Esto asegura que la temperatura se mantenga dentro de los límites visuales del termómetro.
-        // Si baja de -40, se queda en -40. Si sube de 40, se queda en 40.
     float tempVisual = glm::clamp(temperatura, -40.0f, 40.0f);
 
     // Usamos 'tempVisual' para calcular el tamaño de las barras
