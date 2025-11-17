@@ -237,6 +237,17 @@ struct TestAssets { //Elementos Para el entorno de Prueba
     Model* objPlasticos, *objConcreto, *objLlantas, *objLadrillo;
     Model* bandera, *grafitis, *luzSemaforo, *co2, *arboles;
 
+    //BASURAS
+    Model* basura1, * basura2, * basura3, * basura4, * basura5, * basura6;
+
+    //BOTES
+    Model* bote1, * bote2, * bote3, * bote4, * bote5, * bote6, * bote7, * bote8;
+
+    //CONTENEDORES
+    Model* contenedor1, * contenedor2, * contenedor3, * contenedor4, * contenedor5, * contenedor6, * contenedor7, * contenedor8;
+
+    //MUEBLES
+    Model* mueble1, * mueble2, * mueble3, * mueble4, * mueble5, * mueble6, * mueble7, * mueble8, * mueble9, * mueble10; 
 
     //Modelos IA
     Model* hopstial, * fabrica, * policia, * tienda, * rascacielos, *edificio2, *banco, *camion;
@@ -472,6 +483,7 @@ extern bool p_key_pressed;
 extern bool f_key_pressed;
 extern bool g_key_pressed;
 extern bool z_key_pressed;
+extern bool r_key_pressed;
 extern const float max_plant_distance;
 extern bool isFireActive;
 extern float fireStartTime;
@@ -556,4 +568,6 @@ struct MenuAnim {
 extern MenuAnim g_menu;
 
 
+extern int rrr;
+extern int bandera;
 #endif

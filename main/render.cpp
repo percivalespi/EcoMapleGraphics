@@ -94,6 +94,51 @@ void renderTestEnvironment(const glm::mat4& projection, const glm::mat4& view) {
     drawObject(mLightsShader, ta.luzSemaforo, ta.traslucido, model);
     //drawObject(mLightsShader, ta.co2, ta.gases, model);
     drawObject(mLightsShader, ta.camion, ta.plastic, model);
+
+    if (rrr == 0) {
+        //BASURAS
+        drawObject(mLightsShader, ta.basura1, ta.plastic, model);
+        drawObject(mLightsShader, ta.basura2, ta.plastic, model);
+        drawObject(mLightsShader, ta.basura3, ta.plastic, model);
+        drawObject(mLightsShader, ta.basura4, ta.plastic, model);
+        drawObject(mLightsShader, ta.basura5, ta.plastic, model);
+        drawObject(mLightsShader, ta.basura6, ta.plastic, model);
+
+        //BOTES NORMALES
+        drawObject(mLightsShader, ta.bote1, ta.steel, model);
+        drawObject(mLightsShader, ta.bote2, ta.steel, model);
+        drawObject(mLightsShader, ta.bote3, ta.steel, model);
+        drawObject(mLightsShader, ta.bote4, ta.steel, model);
+        drawObject(mLightsShader, ta.bote5, ta.steel, model);
+        drawObject(mLightsShader, ta.bote6, ta.steel, model);
+        drawObject(mLightsShader, ta.bote7, ta.steel, model);
+        drawObject(mLightsShader, ta.bote8, ta.steel, model);
+
+        // MUEBLES DE MADERA
+        drawObject(mLightsShader, ta.mueble1, ta.madera, model);
+        drawObject(mLightsShader, ta.mueble2, ta.madera, model);
+        drawObject(mLightsShader, ta.mueble3, ta.madera, model);
+        drawObject(mLightsShader, ta.mueble4, ta.madera, model);
+        drawObject(mLightsShader, ta.mueble5, ta.madera, model);
+        drawObject(mLightsShader, ta.mueble6, ta.madera, model);
+        drawObject(mLightsShader, ta.mueble7, ta.madera, model);
+        drawObject(mLightsShader, ta.mueble8, ta.madera, model);
+        drawObject(mLightsShader, ta.mueble9, ta.madera, model);
+        drawObject(mLightsShader, ta.mueble10, ta.madera, model);
+
+    }
+    else {
+        //BOTES CONTENEDOR
+        drawObject(mLightsShader, ta.contenedor1, ta.plastic, model);
+        drawObject(mLightsShader, ta.contenedor2, ta.plastic, model);
+        drawObject(mLightsShader, ta.contenedor3, ta.plastic, model);
+        drawObject(mLightsShader, ta.contenedor4, ta.plastic, model);
+        drawObject(mLightsShader, ta.contenedor5, ta.plastic, model);
+        drawObject(mLightsShader, ta.contenedor6, ta.plastic, model);
+        drawObject(mLightsShader, ta.contenedor7, ta.plastic, model);
+        drawObject(mLightsShader, ta.contenedor8, ta.plastic, model);
+
+    }
     drawObject(mLightsShader, ta.arboles, ta.plastic, model);
     glUseProgram(0);
 

@@ -74,6 +74,24 @@ void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
+    
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
+        if (!r_key_pressed) {   // Se ejecuta UNA sola vez
+            rrr = 1;
+
+            if (bandera == 0) {
+                temperatura -= 10.0f;
+                bandera = 1;
+            }
+
+            r_key_pressed = true;
+        }
+    }
+    else {
+        r_key_pressed = false;  // Se libera la tecla
+    }
+
+
 
     //Sube --> el volumen al presionar (U)
     if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
@@ -343,6 +361,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
             for (size_t t_idx = 0; t_idx < terrain_chunks[c_idx].tree_instances.size(); ++t_idx) {
                 const auto& tree_instance = terrain_chunks[c_idx].tree_instances[t_idx];
                 if (tree_instance.state == TreeState::CHOPPED_TWICE) {
+                    temperatura += 1;
                     continue;
                 }
 
@@ -377,6 +396,8 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
                     hit_tree.state = TreeState::CHOPPED_ONCE;
 
                     g_currentLivingTrees--; // <-- PIERDE VIDA POR TALA
+                    //temperatura += 1.0f;
+
 
                     int leaves_deactivated = 0;
                     for (Leaf& leaf : falling_leaves) {
