@@ -453,8 +453,30 @@ bool Update() {
     else if (!menu && animacion1) UpdateAnim1(window);
     else if (menu) Transicion(window);
 
+    // ... código anterior (Transicion, etc) ...
+
+        // --- CORRECCIÓN: LIMITAR LA TEMPERATURA (CLAMPING) ---
+        // Esto asegura que la temperatura se mantenga dentro de los límites visuales del termómetro.
+        // Si baja de -40, se queda en -40. Si sube de 40, se queda en 40.
+    float tempVisual = glm::clamp(temperatura, -40.0f, 40.0f);
+
+    // Usamos 'tempVisual' para calcular el tamaño de las barras
+    // (Nota: Si quieres que la mecánica del juego siga subiendo más allá de 40 
+    // aunque no se vea, usa 'tempVisual' aquí. Si quieres limitar el juego también,
+    // asigna el clamp a 'temperatura' directamente: temperatura = glm::clamp(...))
+
+    // Opción recomendada: Limitar todo el juego para evitar errores lógicos:
+    temperatura = glm::clamp(temperatura, -40.0f, 40.0f);
+
     barraTF = (temperatura + 25.0) * 0.04088f;
     barraTC = temperatura * 0.0236f;
+
+    // Corrección extra: Evitar que las barras sean negativas si la fórmula falla
+    if (barraTF < 0.0f) barraTF = 0.0f;
+    if (barraTC < 0.0f) barraTC = 0.0f;
+    // -----------------------------------------------------
+
+
 
     processInput(window);
 

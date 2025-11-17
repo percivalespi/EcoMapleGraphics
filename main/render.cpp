@@ -543,9 +543,25 @@ void renderGlaciarScene(const glm::mat4& projection, const glm::mat4& view) {
 
     float desp = 359.5f;
 
-    if (temperatura > 0.0f && glacierScaleY > 0.0f) {
-        float speed = meltSpeedBase * temperatura;     // más calor → más rápido
-        glacierScaleY = glm::max(0.0f, glacierScaleY - speed * deltaTime);
+    // --- LÓGICA DE DESHIELO Y CONGELAMIENTO ---
+    if (temperatura > 0.0f) {
+        // CALOR: Se derrite (Scale baja hacia 0)
+        if (glacierScaleY > 0.0f) {
+            float speed = meltSpeedBase * temperatura;
+            glacierScaleY -= speed * deltaTime;
+            // Límite inferior
+            if (glacierScaleY < 0.0f) glacierScaleY = 0.0f;
+        }
+    }
+    else {
+        // FRÍO (Temperatura <= 0): Se congela (Scale sube hacia 1)
+        if (glacierScaleY < 1.0f) {
+            // Usamos abs() porque temperatura es negativa, pero queremos velocidad positiva
+            float speed = meltSpeedBase * glm::abs(temperatura);
+            glacierScaleY += speed * deltaTime;
+            // Límite superior
+            if (glacierScaleY > 1.0f) glacierScaleY = 1.0f;
+        }
     }
     setupStaticShader(mLightsShader, projection, view);
     setupShaderLights(mLightsShader, gLights);
