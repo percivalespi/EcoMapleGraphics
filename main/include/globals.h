@@ -264,6 +264,8 @@ struct TestAssets { //Elementos Para el entorno de Prueba
     Material plastic;
     Material traslucido;
     Material madera;
+
+    unsigned int cityTreesVBO = 0;
 };
 
 struct EspacioAssets {

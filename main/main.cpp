@@ -240,104 +240,7 @@ const float MIKU_SCALE = 0.04f;
 const float DEMI_CAM_DIST = 15.0f;
 const float DEMI_OFFSET_Y = 0.0f;
 
-// ============================================================================
-// CLASE AABB PARA PRUEBAS - TODO EN MAIN
-// ============================================================================
 
-class AABB {
-public:
-    glm::vec3 min;
-    glm::vec3 max;
-    GLuint vao = 0, vbo = 0;
-
-    AABB(glm::vec3 center, glm::vec3 halfSize) {
-        // -- Debug --
-        //std::cout << "[AABB] Constructor\n";
-        //std::cout << " center = " << center.x << ", " << center.y << ", " << center.z << "\n";
-        //std::cout << " halfSize = " << halfSize.x << ", " << halfSize.y << ", " << halfSize.z << "\n";
-
-        // Guarda límites
-        min = center - halfSize;
-        max = center + halfSize;
-
-        //std::cout << " min = " << min.x << ", " << min.y << ", " << min.z << "\n";
-        //std::cout << " max = " << max.x << ", " << max.y << ", " << max.z << "\n";
-
-        generateLineVAO();
-    }
-
-    ~AABB() {
-        //std::cout << "[AABB] Destructor\n";
-        if (vao) glDeleteVertexArrays(1, &vao);
-        if (vbo) glDeleteBuffers(1, &vbo);
-    }
-
-    void generateLineVAO() {
-        //std::cout << "[AABB] Generando VAO...\n";
-
-        glm::vec3 v[] = {
-            // frente
-            {min.x, min.y, max.z}, {max.x, min.y, max.z},
-            {max.x, min.y, max.z}, {max.x, max.y, max.z},
-            {max.x, max.y, max.z}, {min.x, max.y, max.z},
-            {min.x, max.y, max.z}, {min.x, min.y, max.z},
-
-            // atrás
-            {min.x, min.y, min.z}, {max.x, min.y, min.z},
-            {max.x, min.y, min.z}, {max.x, max.y, min.z},
-            {max.x, max.y, min.z}, {min.x, max.y, min.z},
-            {min.x, max.y, min.z}, {min.x, min.y, min.z},
-
-            // conexiones
-            {min.x, min.y, min.z}, {min.x, min.y, max.z},
-            {max.x, min.y, min.z}, {max.x, min.y, max.z},
-            {max.x, max.y, min.z}, {max.x, max.y, max.z},
-            {min.x, max.y, min.z}, {min.x, max.y, max.z}
-        };
-
-       // std::cout << "[AABB] Total líneas: " << (sizeof(v) / sizeof(glm::vec3)) << "\n";
-
-        glGenVertexArrays(1, &vao);
-        glGenBuffers(1, &vbo);
-
-        if (!vao || !vbo)
-            //std::cout << "[AABB] ERROR creando VAO o VBO\n";
-
-        glBindVertexArray(vao);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-        glBufferData(GL_ARRAY_BUFFER, sizeof(v), v, GL_STATIC_DRAW);
-        //std::cout << "[AABB] Buffer cargado.\n";
-
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
-
-        glBindVertexArray(0);
-
-        //std::cout << "[AABB] VAO listo. vao=" << vao << "\n\n";
-    }
-
-    void Draw(Shader& shader) {
-        if (!vao) {
-            //std::cout << "[AABB] WARNING: VAO = 0, no se puede dibujar\n";
-            return;
-        }
-
-
-        glUseProgram(shader.ID);
-        glBindVertexArray(vao);
-        glDrawArrays(GL_LINES, 0, 24);
-        glBindVertexArray(0);
-    }
-};
-
-
-
-// ============================================================================
-// VARIABLES AABB PARA PRUEBAS
-// ============================================================================
-AABB* testAABB = nullptr;
-bool collisionDetected = false;
 
 // =============================================================================================
 
@@ -353,13 +256,7 @@ int main() {
         }
     }
 
-    // ============================================================================
-    // LIMPIEZA AABB
-    // ============================================================================
-    if (testAABB != nullptr) {
-        delete testAABB;
-        testAABB = nullptr;
-    }
+
 
     // Limpieza existente
     if (ui.crosshairVAO != 0) { glDeleteVertexArrays(1, &ui.crosshairVAO); ui.crosshairVAO = 0; }
@@ -513,6 +410,8 @@ bool Start() {
 
     initializeInstanceBuffers(fa);
 
+    setupInstanceVBO(ta.cityTreesVBO, 1, ta.arboles);
+
     // =============================================================================================
     // === CARGA DE MODELOS JUGABLES ===
     // =============================================================================================
@@ -538,11 +437,6 @@ bool Start() {
         std::cout << "ERROR: No se cargo models/miku.fbx" << std::endl;
     }
 
-    // ============================================================================
-    // CREAR AABB DE PRUEBA
-    // ============================================================================
-    testAABB = new AABB(glm::vec3(0, 2, 0), glm::vec3(5, 5, 5));
-    //std::cout << "AABB creado en (0,2,0) con halfsize 5.\n";
 
 
     return true;
@@ -584,48 +478,10 @@ bool Update() {
     updateGameLogic();
     updateAudioLogic(camera.Position);
 
-    // DIBUJAR AABB
-    if (testAABB != nullptr) {
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom),
-            (float)SCR_WIDTH / (float)SCR_HEIGHT,
-            0.1f, 2000.0f);
-
-        glm::mat4 view = camera.GetViewMatrix();
-
-        if (testAABB) {
-
-            glm::mat4 projection = glm::perspective(
-                glm::radians(camera.Zoom),
-                (float)SCR_WIDTH / (float)SCR_HEIGHT,
-                0.1f, 5000.0f
-            );
-
-            glm::mat4 view = camera.GetViewMatrix();
-            glm::mat4 model = glm::mat4(1.0f);
-
-            lineShader->use();
-            lineShader->setMat4("projection", projection);
-            lineShader->setMat4("view", view);
-            lineShader->setMat4("model", model);
-
-            // COLOR FUERTE FLUORESCENTE
-            lineShader->setVec3("color", glm::vec3(1.0f, 1.0f, 0.0f));
-
-            // GROSOR DE LÍNEA
-            glLineWidth(5.0f);
-
-            // SIN ZBUFFER — SIEMPRE VISIBLE
-            glDisable(GL_DEPTH_TEST);
-
-            // DIBUJAR
-            testAABB->Draw(*lineShader);
-
-            glEnable(GL_DEPTH_TEST);
-            glLineWidth(1.0f);
-        }
+    
 
 
-    }
+    
 
     renderScene();
 

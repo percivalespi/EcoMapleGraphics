@@ -139,7 +139,52 @@ void renderTestEnvironment(const glm::mat4& projection, const glm::mat4& view) {
         drawObject(mLightsShader, ta.contenedor8, ta.plastic, model);
 
     }
-    drawObject(mLightsShader, ta.arboles, ta.plastic, model);
+    //drawObject(mLightsShader, ta.arboles, ta.plastic, model);
+
+    // --- NUEVO: DIBUJADO DE ÁRBOLES CIUDAD CON SHADER DE BOSQUE ---
+    if (instanceAlphaTestPhongShader != nullptr && ta.arboles != nullptr) {
+        instanceAlphaTestPhongShader->use();
+        instanceAlphaTestPhongShader->setMat4("projection", projection);
+        instanceAlphaTestPhongShader->setMat4("view", view);
+
+        // Usamos la iluminación del bosque (Sol/Luna)
+        // NOTA: Este shader no reacciona a las luces puntuales de la ciudad, solo al sol.
+        instanceAlphaTestPhongShader->setVec3("lightPosition", fa.theLight.Position);
+        instanceAlphaTestPhongShader->setVec4("LightColor", fa.theLight.Color);
+        instanceAlphaTestPhongShader->setVec4("LightPower", fa.theLight.Power); // O dimmedLightPower si está disponible en este scope
+        instanceAlphaTestPhongShader->setInt("alphaIndex", fa.theLight.alphaIndex);
+
+        // Material (Usamos el material de árbol por defecto o uno personalizado)
+        instanceAlphaTestPhongShader->setVec4("MaterialAmbientColor", fa.treeMaterial.ambient);
+        instanceAlphaTestPhongShader->setVec4("MaterialSpecularColor", fa.treeMaterial.specular);
+        instanceAlphaTestPhongShader->setFloat("transparency", 1.0f);
+
+        // 1. Actualizar el VBO con la matriz 'model' actual de la ciudad
+        // 'model' es la matriz que calculaste líneas arriba para toda la ciudad
+        glBindBuffer(GL_ARRAY_BUFFER, ta.cityTreesVBO);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::mat4), &model[0][0]);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        // 2. Dibujar Mallas
+        for (unsigned int i = 0; i < ta.arboles->meshes.size(); i++) {
+            if (!ta.arboles->meshes[i].textures.empty()) {
+                glActiveTexture(GL_TEXTURE0);
+                instanceAlphaTestPhongShader->setInt("texture_diffuse1", 0);
+                glBindTexture(GL_TEXTURE_2D, ta.arboles->meshes[i].textures[0].id);
+            }
+            else {
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, 0);
+            }
+
+            glBindVertexArray(ta.arboles->meshes[i].VAO);
+            // Dibujamos 1 sola instancia
+            glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(ta.arboles->meshes[i].indices.size()), GL_UNSIGNED_INT, 0, 1);
+            glBindVertexArray(0);
+        }
+    }
+    // --- FIN NUEVO ---
+
     glUseProgram(0);
 
     {
