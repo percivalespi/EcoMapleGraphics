@@ -135,6 +135,10 @@ struct UIAssets {//Buffers
 
     // --- TEXTURA BLOQUEO ---
     unsigned int tex_bloqueado = 0;
+
+    unsigned int tex_solid_green = 0; // Barra de vida
+    unsigned int tex_solid_gray = 0;  // Fondo de la barra
+    unsigned int tex_solid_red = 0;   // (Opcional) Para cuando esté crítica
 };
 
 struct IntroSequence {

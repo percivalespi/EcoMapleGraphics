@@ -1587,6 +1587,54 @@ void renderUI() {
             float y_pos_legend = padding;
             float y_pos_icon = padding + legend_height;
 
+            // ==========================================================================
+            // === I. BARRA DE VIDA DEL BOSQUE (ARRIBA IZQUIERDA) ===
+            // ==========================================================================
+
+            // 1. Configuración
+            float barWidth = 300.0f;  // Ancho total de la barra (pixeles)
+            float barHeight = 25.0f;  // Alto de la barra
+            float marginX = 20.0f;    // Separación del borde izquierdo
+            float marginY = 20.0f;    // Separación del borde superior
+
+            // Posición (Arriba Izquierda)
+            float x = marginX;
+            float y = SCR_HEIGHT - marginY - barHeight;
+
+            uiShader->setFloat("alphaMultiplier", 1.0f); // Opacidad total
+
+            // 2. Dibujar FONDO (Gris)
+            if (ui.tex_solid_gray != 0) {
+                glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, 0.0f));
+                model = glm::scale(model, glm::vec3(barWidth, barHeight, 1.0f));
+
+                uiShader->setMat4("model", model);
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, ui.tex_solid_gray);
+                glDrawArrays(GL_TRIANGLES, 0, 6);
+            }
+
+            // 3. Dibujar VIDA (Verde/Rojo)
+            // g_forestHealth va de 0.0 a 1.0
+            float currentHealth = glm::clamp(g_forestHealth, 0.0f, 1.0f);
+
+            if (currentHealth > 0.0f) {
+                // Elegir color: Verde si está sano, Rojo si es crítico (< 25%)
+                unsigned int colorTex = (currentHealth > 0.25f) ? ui.tex_solid_green : ui.tex_solid_red;
+
+                if (colorTex != 0) {
+                    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, 0.0f));
+
+                    // ESCALA EN X = Ancho Total * Porcentaje de Vida
+                    model = glm::scale(model, glm::vec3(barWidth * currentHealth, barHeight, 1.0f));
+
+                    uiShader->setMat4("model", model);
+                    glActiveTexture(GL_TEXTURE0);
+                    glBindTexture(GL_TEXTURE_2D, colorTex);
+                    glDrawArrays(GL_TRIANGLES, 0, 6);
+                }
+            }
+
             // --- C. ICONOS DE JUEGO (P, F) ---
             uiShader->setFloat("alphaMultiplier", 1.0f); // Reset alpha
 
@@ -1726,7 +1774,7 @@ void renderUI() {
                         float w = 450.0f; float h = 120.0f;
                         float margin = 20.0f;
                         float x = margin;
-                        float y = SCR_HEIGHT - h - margin;
+                        float y = SCR_HEIGHT - h - 80.0f;
                         glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, 0.0f));
                         model = glm::scale(model, glm::vec3(w, h, 1.0f));
                         uiShader->setMat4("model", model);

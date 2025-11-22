@@ -170,10 +170,38 @@ void loadTest(TestAssets& ta) {
     initializeModelsTest(ta);
 }
 
+// Función auxiliar para crear una textura de 1 píxel de color sólido
+unsigned int CreateSolidTexture(unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+
+    unsigned char data[] = { r, g, b, a }; // Un solo píxel RGBA
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+    // Configuración para que se estire sin borrosidad
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    return textureID;
+}
+
 /* -------------------------------------------- - Manejo de Recursos UI------------------------------------------*/
 void loadUI(UIAssets& ui) {
     // --- MODIFICADO: CARGAR LEYENDAS ---
     // --- Cargar Texturas UI ---
+
+    ui.tex_solid_green = CreateSolidTexture(50, 205, 50, 255);
+
+    // Gris oscuro semitransparente para el fondo (R=50, G=50, B=50, A=150)
+    ui.tex_solid_gray = CreateSolidTexture(50, 50, 50, 150);
+
+    // Rojo para peligro (opcional)
+    ui.tex_solid_red = CreateSolidTexture(220, 20, 60, 255);
+
     ui.fireTextureID = TextureFromFile("fire.png", "models/image");
     ui.treeTextureID = TextureFromFile("tree.png", "models/image");
     ui.highlightTextureID = TextureFromFile("highlight.png", "models/image");
@@ -252,6 +280,8 @@ void loadUI(UIAssets& ui) {
     if (ui.legendTreeTextureID == 0) {
         std::cerr << "ERROR: Failed to load 'models/image/legend_tree.png'" << std::endl;
     }
+
+
 }
 
 
