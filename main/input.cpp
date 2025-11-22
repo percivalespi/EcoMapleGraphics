@@ -78,9 +78,10 @@ void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
         if (!r_key_pressed) {   // Se ejecuta UNA sola vez
             rrr = 1;
+            g_isRReady = false;
 
             if (bandera == 0) {
-                temperatura -= 10.0f;
+                temperatura_externa -= 30.0f;
                 bandera = 1;
             }
 

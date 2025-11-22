@@ -4,6 +4,8 @@
 /* -------------------------------------------- - Manejo de Recursos TEST------------------------------------------*/
 void initializeModelsTest(TestAssets& ta) {
 
+    ta.respawn = false;
+
     ta.suelo = new Model("models/city/Prod/suelo.fbx");
     ta.suelo_verde = new Model("models/city/Prod/sueloVerde.fbx");
     ta.metales = new Model("models/city/Prod/metales.fbx");

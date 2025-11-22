@@ -592,6 +592,19 @@ void updateGameLogic() {
 
     // --- L gica de Animales ---
     updateForestHealthAndAnimals(deltaTime);
+
+    if (!g_isRReady) {
+        g_rTimer += deltaTime; // Sumamos el tiempo que pasó en este frame
+        // Checamos si ya pasaron los 5 minutos
+        if (g_rTimer >= R_COOLDOWN_TIME) {
+            g_isRReady = true; // ¡Vuelve a TRUE!
+            temperatura_externa += 30.0f;
+            bandera = 0;
+            rrr =  0;
+            g_rTimer = 0.0f;   // Reseteamos el contador
+        }
+    }
+
 }
 
 

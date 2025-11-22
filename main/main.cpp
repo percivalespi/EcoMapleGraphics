@@ -260,6 +260,13 @@ GlacierSequence g_glacierSeq;
 ForestSequence g_forestSeq;
 // =============================================================================================
 
+
+// Respawn botes de basura.
+bool g_isRReady = true;      
+float g_rTimer = 0.0f;
+const float R_COOLDOWN_TIME = 30.0f; // 5 minutos * 60 segundos = 300.0f
+float temperatura_externa = 0.0f;
+
 int main() {
     if (!Start()) {
         glfwTerminate();
@@ -484,6 +491,7 @@ bool Update() {
     // asigna el clamp a 'temperatura' directamente: temperatura = glm::clamp(...))
 
     // Opción recomendada: Limitar todo el juego para evitar errores lógicos:
+    temperatura += temperatura_externa;
     temperatura = glm::clamp(temperatura, -40.0f, 40.0f);
 
     barraTF = (temperatura + 25.0) * 0.04088f;

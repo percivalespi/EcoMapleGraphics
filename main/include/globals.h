@@ -295,6 +295,9 @@ struct ForestAssets {
 };
 
 struct TestAssets { //Elementos Para el entorno de Prueba
+
+    bool respawn;
+
     Light light01;
     Light light02;
     Model* car;
@@ -657,4 +660,11 @@ extern MenuAnim g_menu;
 
 extern int rrr;
 extern int bandera;
+
+extern float temperatura_externa;
+
+// Para el respawn de los botes viejos
+extern bool g_isRReady;       
+extern float g_rTimer;
+extern const float R_COOLDOWN_TIME; // El tiempo objetivo (5 minutos)
 #endif
