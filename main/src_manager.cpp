@@ -182,7 +182,59 @@ void loadUI(UIAssets& ui) {
     ui.legendFireTextureID = TextureFromFile("legend_fire.png", "models/image");
     ui.legendTreeTextureID = TextureFromFile("legend_tree.png", "models/image");
     // -------------------------------------------
+    ui.tex_intro_wasd = TextureFromFile("image1wasd.png", "models/image");
+    ui.tex_intro_mouse = TextureFromFile("image2mouse.png", "models/image");
+    ui.tex_intro_descender = TextureFromFile("image3_descender.png", "models/image");
+    ui.tex_intro_volar = TextureFromFile("image3_volar.png", "models/image");
+    ui.tex_intro_acercamiento = TextureFromFile("image3acercamiento.png", "models/image");
 
+
+    // --- CARGA TUTORIAL BOSQUE ---
+    ui.tex_f_plantar = TextureFromFile("image1_plantar.png", "models/image");
+    ui.tex_f_talar = TextureFromFile("image2_talar.png", "models/image");
+    ui.tex_f_camara3 = TextureFromFile("image3_camara3persona.png", "models/image");
+    ui.tex_f_incendio = TextureFromFile("image4_incendio.png", "models/image");
+
+    // --- CARGA CONDICIONALES ---
+    ui.tex_c_cambio_pj = TextureFromFile("image3_cambiopersonaje.png", "models/image");
+    ui.tex_c_parar_fuego = TextureFromFile("imagen5_pararincendio.png", "models/image");
+    ui.tex_c_polos_derretidos = TextureFromFile("image7_polosdescongelados.png", "models/image");
+    ui.tex_c_alerta_temp = TextureFromFile("imagen7_subidatemperatura.png", "models/image");
+
+    if (ui.tex_f_plantar == 0) std::cout << "ERROR: Falta image1_plantar.png" << std::endl;
+	if (ui.tex_f_talar == 0) std::cout << "ERROR: Falta image2_talar.png" << std::endl;
+	if (ui.tex_f_camara3 == 0) std::cout << "ERROR: Falta image3_camara3persona.png" << std::endl;
+	if (ui.tex_f_incendio == 0) std::cout << "ERROR: Falta image4_incendio.png" << std::endl;
+	if (ui.tex_c_cambio_pj == 0) std::cout << "ERROR: Falta image3_cambiopersonaje.png" << std::endl;
+	if (ui.tex_c_parar_fuego == 0) std::cout << "ERROR: Falta imagen5_pararincendio.png" << std::endl;
+
+	if (ui.tex_c_polos_derretidos == 0) std::cout << "ERROR: Falta image7_polosdescongelados.png" << std::endl;
+	if (ui.tex_c_alerta_temp == 0) std::cout << "ERROR: Falta imagen7_subidatemperatura.png" << std::endl;
+
+    // --- CARGA DE AVISO BLOQUEADO ---
+    ui.tex_bloqueado = TextureFromFile("image4_bloqueados.png", "models/image");
+
+    // (Opcional) Comprobación de errores rápida
+    if (ui.tex_intro_wasd == 0) std::cout << "ERROR: Falta image1wasd.png" << std::endl;
+	if (ui.tex_intro_mouse == 0) std::cout << "ERROR: Falta image2mouse.png" << std::endl;
+	if (ui.tex_intro_descender == 0) std::cout << "ERROR: Falta image3_descender.png" << std::endl;
+	if (ui.tex_intro_volar == 0) std::cout << "ERROR: Falta image3_volar.png" << std::endl;
+	if (ui.tex_intro_acercamiento == 0) std::cout << "ERROR: Falta image3acercamiento.png" << std::endl;
+
+    ui.tex_glaciar_bienvenida = TextureFromFile("image1_bienvenidapolos.png", "models/image");
+    ui.tex_glaciar_bosque = TextureFromFile("image2_inidicacionbosque.png", "models/image");
+    ui.tex_glaciar_ciclo = TextureFromFile("image3_ciclodianoche.png", "models/image");
+
+
+
+    if (ui.tex_glaciar_bienvenida == 0) std::cout << "ERROR: Falta image1_bienvenidapolos.png" << std::endl;
+	if (ui.tex_glaciar_bosque == 0) std::cout << "ERROR: Falta image2_inidicacionbosque.png" << std::endl;
+    if (ui.tex_glaciar_ciclo == 0) std::cout << "ERROR: Falta image3_ciclodianoche.png" << std::endl;
+
+    ui.warningFireID = TextureFromFile("fuegoincendio.png", "models/image");
+    if (ui.warningFireID == 0) {
+        std::cerr << "ERROR: No se cargo models/image/fuegoincendio.png" << std::endl;
+    }
     if (ui.fireTextureID == 0) {
         std::cerr << "ERROR: Failed to load 'models/image/fire.png'" << std::endl;
     }

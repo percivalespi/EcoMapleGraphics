@@ -108,8 +108,76 @@ struct UIAssets {//Buffers
     unsigned int highlightTextureID = 0;
     unsigned int legendFireTextureID = 0;
     unsigned int legendTreeTextureID = 0;
+
+    unsigned int warningFireID = 0;
+    unsigned int tex_intro_wasd = 0;
+    unsigned int tex_intro_mouse = 0;
+    unsigned int tex_intro_descender = 0;
+    unsigned int tex_intro_volar = 0;
+    unsigned int tex_intro_acercamiento = 0;
+
+    unsigned int tex_glaciar_bienvenida = 0;
+    unsigned int tex_glaciar_bosque = 0;
+    unsigned int tex_glaciar_ciclo = 0;
+
+
+    // --- NUEVO: Texturas Tutorial Bosque ---
+    unsigned int tex_f_plantar = 0;
+    unsigned int tex_f_talar = 0;
+    unsigned int tex_f_camara3 = 0;
+    unsigned int tex_f_incendio = 0;
+
+    // --- NUEVO: Texturas Condicionales ---
+    unsigned int tex_c_cambio_pj = 0;      // M y 3ra persona
+    unsigned int tex_c_parar_fuego = 0;    // Incendio activo
+    unsigned int tex_c_polos_derretidos = 0; // Glaciares muertos
+    unsigned int tex_c_alerta_temp = 0;    // Temperatura alta
+
+    // --- TEXTURA BLOQUEO ---
+    unsigned int tex_bloqueado = 0;
 };
 
+struct IntroSequence {
+    bool active = true;       // Empieza activa al iniciar el programa
+    float timer = 0.0f;       // Cronómetro interno
+    int currentStage = 0;     // Qué imagen estamos mostrando (0 a 4)
+
+    // Configuración de tiempos (segundos por mensaje)
+    const float timePerImage = 6.0f;
+    const int totalStages = 5; // wasd, mouse, descender, volar, acercamiento
+};
+
+// --- NUEVO: Estructura para controlar la animación de desvanecimiento ---
+struct FadeMessage {
+    bool active = false;      // ¿Se está mostrando?
+    float timer = 0.0f;       // Tiempo transcurrido
+    float duration = 5.0f;    // Duración total (ej. 5 segundos)
+    float currentAlpha = 0.0f;// Transparencia actual (0 a 1)
+};
+
+struct GlacierSequence {
+    bool active = false;      // Empieza FALSO (espera a que llegues)
+    bool hasPlayed = false;   // Para que solo salga UNA vez
+    float timer = 0.0f;
+
+    const float timePerImage = 5.0f; // 5 segundos por mensaje
+    const int totalStages = 3;       // Son 3 imágenes
+};
+
+struct ForestSequence {
+    bool active = false;
+    bool hasPlayed = false;
+    float timer = 0.0f;
+
+    const float timePerImage = 5.0f;
+    const int totalStages = 4; // Plantar -> Talar -> Cam3 -> Incendio
+};
+
+extern ForestSequence g_forestSeq;
+extern float g_thirdPersonTimer;
+extern GlacierSequence g_glacierSeq;
+extern IntroSequence g_introSeq;
+extern FadeMessage g_fireMessageState;
 // --- VARIABLES GLOBALES: PERSONAJE DEMI Y CÁMARA ---
 extern bool g_isThirdPerson;
 extern bool g_pressM;

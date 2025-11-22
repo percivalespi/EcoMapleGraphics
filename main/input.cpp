@@ -132,6 +132,9 @@ void processInput(GLFWwindow* window) {
                 // Al entrar, ajustamos un poco la c�mara para ver al personaje
                 camera.Pitch = -15.0f;
                 camera.ProcessMouseMovement(0, 0); // Actualizar vectores
+
+                // --- NUEVO: ACTIVAR EL MENSAJE POR 5 SEGUNDOS ---
+                g_thirdPersonTimer = 5.0f;
             }
         }
     }
@@ -519,6 +522,8 @@ void UpdateAnim1(GLFWwindow* window)
         g_anim1.active = false;
         escena = 1;
         animacion1 = false;
+        g_introSeq.active = false;
+
         camera.Position = posicionCarga;
         StartMenu(/*lookAtDestino*/ glm::vec3(0.0f, -0.20f, -1.0f),   // o punto objetivo
             /*duración por línea*/ 1.0f);
@@ -583,6 +588,17 @@ void Transicion(GLFWwindow* window) {
                             else {
                                 menu = false;
                                 camera.Position = posicionEscenario1;
+
+                                // --- ACTIVAR SECUENCIA GLACIARES ---
+                                // Como ya matamos la g_introSeq en UpdateAnim1,
+                                // esta será la única activa.
+                                if (!g_glacierSeq.hasPlayed) {
+                                    g_glacierSeq.active = true;
+                                    g_glacierSeq.hasPlayed = true;
+                                    g_glacierSeq.timer = 0.0f; // Reiniciar timer por seguridad
+                                }
+                                // -----------------------------------
+
                                 return;
                             }
                         }

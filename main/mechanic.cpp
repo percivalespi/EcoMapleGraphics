@@ -207,6 +207,11 @@ void startFire() {
     }
 
     std::cout << " Iniciando incendio!" << std::endl;
+    // --- NUEVO: ACTIVAR MENSAJE DE ALERTA ---
+    g_fireMessageState.active = true;
+    g_fireMessageState.timer = 0.0f;
+    g_fireMessageState.currentAlpha = 0.0f;
+    // ----------------------------------------
     isFireActive = true;
     fireStartTime = (float)glfwGetTime();
 

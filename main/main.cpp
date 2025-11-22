@@ -252,9 +252,12 @@ const float DEMI_SCALE = 0.04f;
 const float MIKU_SCALE = 0.04f;
 const float DEMI_CAM_DIST = 15.0f;
 const float DEMI_OFFSET_Y = 0.0f;
-
-
-
+float g_thirdPersonTimer = 0.0f;
+// main.cpp (sección de variables globales)
+FadeMessage g_fireMessageState;
+IntroSequence g_introSeq;
+GlacierSequence g_glacierSeq;
+ForestSequence g_forestSeq;
 // =============================================================================================
 
 int main() {
@@ -262,6 +265,8 @@ int main() {
         glfwTerminate();
         return -1;
     }
+
+    lastFrame = (float)glfwGetTime();
 
     while (!glfwWindowShouldClose(window)) {
         if (!Update()) {
@@ -517,8 +522,9 @@ bool Update() {
 
     renderScene();
 
-    if (escena == 1 && !menu) renderUI();
-
+    // Renderizamos la UI siempre que no estemos en el menú principal
+    // (La función renderUI se encargará de filtrar qué mostrar según la escena)
+    if (!menu) renderUI();
 
     glfwSwapBuffers(window);
     glfwPollEvents();
