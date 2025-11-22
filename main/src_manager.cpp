@@ -4,6 +4,8 @@
 /* -------------------------------------------- - Manejo de Recursos TEST------------------------------------------*/
 void initializeModelsTest(TestAssets& ta) {
 
+    ta.respawn = false;
+
     ta.suelo = new Model("models/city/Prod/suelo.fbx");
     ta.suelo_verde = new Model("models/city/Prod/sueloVerde.fbx");
     ta.metales = new Model("models/city/Prod/metales.fbx");
@@ -18,6 +20,48 @@ void initializeModelsTest(TestAssets& ta) {
 
     ta.luzSemaforo = new Model("models/city/Prod/luzSemaforo.fbx");
     ta.co2 = new Model("models/city/Prod/CO2.fbx");
+    ta.arboles = new Model("models/city/Prod/arbolesv2.fbx");
+
+
+    //BASURAS
+    ta.basura1 = new Model("models/city/Prod/basura_norte_azul.fbx");
+    ta.basura2 = new Model("models/city/Prod/basura_norte_cafe.fbx");
+    ta.basura3 = new Model("models/city/Prod/basura_norte_rojo.fbx");
+    ta.basura4 = new Model("models/city/Prod/basura_sur_blanca.fbx"); 
+    ta.basura5 = new Model("models/city/Prod/basura_sur_ladrillo.fbx");
+    ta.basura6 = new Model("models/city/Prod/basura_sur_rojo.fbx");
+
+    //BOTES
+    ta.bote1 = new Model("models/city/Prod/bote_norte_azul.fbx");
+    ta.bote2 = new Model("models/city/Prod/bote_norte_cafe.fbx");
+    ta.bote3 = new Model("models/city/Prod/bote_norte_gris.fbx");
+    ta.bote4 = new Model("models/city/Prod/bote_norte_rojo.fbx");
+    ta.bote5 = new Model("models/city/Prod/bote_sur_blanca.fbx");
+    ta.bote6 = new Model("models/city/Prod/bote_sur_gris.fbx");
+    ta.bote7 = new Model("models/city/Prod/bote_sur_ladrillo.fbx");
+    ta.bote8 = new Model("models/city/Prod/bote_sur_rojo.fbx");
+
+    //CONTENEDORES
+    ta.contenedor1 = new Model("models/city/Prod/contenedor_norte_azul.fbx");
+    ta.contenedor2 = new Model("models/city/Prod/contenedor_norte_cafe.fbx");
+    ta.contenedor3 = new Model("models/city/Prod/contenedor_norte_gris.fbx");
+    ta.contenedor4 = new Model("models/city/Prod/contenedor_norte_rojo.fbx");
+    ta.contenedor5 = new Model("models/city/Prod/contenedor_sur_blanco.fbx");
+    ta.contenedor6 = new Model("models/city/Prod/contenedor_sur_gris.fbx");
+    ta.contenedor7 = new Model("models/city/Prod/contenedor_sur_ladrillo.fbx");
+    ta.contenedor8 = new Model("models/city/Prod/contenedor_sur_rojo.fbx");
+
+    //MUEBLES
+    ta.mueble1 = new Model("models/city/Prod/mueble_norte_cafe_1.fbx");
+    ta.mueble2 = new Model("models/city/Prod/mueble_norte_cafe_2.fbx");
+    ta.mueble3 = new Model("models/city/Prod/mueble_norte_rojo_1.fbx");
+    ta.mueble4 = new Model("models/city/Prod/mueble_norte_rojo_2.fbx");
+    ta.mueble5 = new Model("models/city/Prod/mueble_norte_rojo_3.fbx");
+    ta.mueble6 = new Model("models/city/Prod/mueble_norte_rojo_4.fbx");
+    ta.mueble7 = new Model("models/city/Prod/mueble_sur_rojo_1.fbx");
+    ta.mueble8 = new Model("models/city/Prod/mueble_sur_rojo_2.fbx");
+    ta.mueble9 = new Model("models/city/Prod/mueble_sur_rojo_3.fbx");
+    ta.mueble10 = new Model("models/city/Prod/mueble_sur_rojo_4.fbx");
 
     //Modelos IA
 
@@ -128,10 +172,38 @@ void loadTest(TestAssets& ta) {
     initializeModelsTest(ta);
 }
 
+// Función auxiliar para crear una textura de 1 píxel de color sólido
+unsigned int CreateSolidTexture(unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+
+    unsigned char data[] = { r, g, b, a }; // Un solo píxel RGBA
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+    // Configuración para que se estire sin borrosidad
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    return textureID;
+}
+
 /* -------------------------------------------- - Manejo de Recursos UI------------------------------------------*/
 void loadUI(UIAssets& ui) {
     // --- MODIFICADO: CARGAR LEYENDAS ---
     // --- Cargar Texturas UI ---
+
+    ui.tex_solid_green = CreateSolidTexture(50, 205, 50, 255);
+
+    // Gris oscuro semitransparente para el fondo (R=50, G=50, B=50, A=150)
+    ui.tex_solid_gray = CreateSolidTexture(50, 50, 50, 150);
+
+    // Rojo para peligro (opcional)
+    ui.tex_solid_red = CreateSolidTexture(220, 20, 60, 255);
+
     ui.fireTextureID = TextureFromFile("fire.png", "models/image");
     ui.treeTextureID = TextureFromFile("tree.png", "models/image");
     ui.highlightTextureID = TextureFromFile("highlight.png", "models/image");
@@ -140,7 +212,59 @@ void loadUI(UIAssets& ui) {
     ui.legendFireTextureID = TextureFromFile("legend_fire.png", "models/image");
     ui.legendTreeTextureID = TextureFromFile("legend_tree.png", "models/image");
     // -------------------------------------------
+    ui.tex_intro_wasd = TextureFromFile("image1wasd.png", "models/image");
+    ui.tex_intro_mouse = TextureFromFile("image2mouse.png", "models/image");
+    ui.tex_intro_descender = TextureFromFile("image3_descender.png", "models/image");
+    ui.tex_intro_volar = TextureFromFile("image3_volar.png", "models/image");
+    ui.tex_intro_acercamiento = TextureFromFile("image3acercamiento.png", "models/image");
 
+
+    // --- CARGA TUTORIAL BOSQUE ---
+    ui.tex_f_plantar = TextureFromFile("image1_plantar.png", "models/image");
+    ui.tex_f_talar = TextureFromFile("image2_talar.png", "models/image");
+    ui.tex_f_camara3 = TextureFromFile("image3_camara3persona.png", "models/image");
+    ui.tex_f_incendio = TextureFromFile("image4_incendio.png", "models/image");
+
+    // --- CARGA CONDICIONALES ---
+    ui.tex_c_cambio_pj = TextureFromFile("image3_cambiopersonaje.png", "models/image");
+    ui.tex_c_parar_fuego = TextureFromFile("imagen5_pararincendio.png", "models/image");
+    ui.tex_c_polos_derretidos = TextureFromFile("image7_polosdescongelados.png", "models/image");
+    ui.tex_c_alerta_temp = TextureFromFile("imagen7_subidatemperatura.png", "models/image");
+
+    if (ui.tex_f_plantar == 0) std::cout << "ERROR: Falta image1_plantar.png" << std::endl;
+	if (ui.tex_f_talar == 0) std::cout << "ERROR: Falta image2_talar.png" << std::endl;
+	if (ui.tex_f_camara3 == 0) std::cout << "ERROR: Falta image3_camara3persona.png" << std::endl;
+	if (ui.tex_f_incendio == 0) std::cout << "ERROR: Falta image4_incendio.png" << std::endl;
+	if (ui.tex_c_cambio_pj == 0) std::cout << "ERROR: Falta image3_cambiopersonaje.png" << std::endl;
+	if (ui.tex_c_parar_fuego == 0) std::cout << "ERROR: Falta imagen5_pararincendio.png" << std::endl;
+
+	if (ui.tex_c_polos_derretidos == 0) std::cout << "ERROR: Falta image7_polosdescongelados.png" << std::endl;
+	if (ui.tex_c_alerta_temp == 0) std::cout << "ERROR: Falta imagen7_subidatemperatura.png" << std::endl;
+
+    // --- CARGA DE AVISO BLOQUEADO ---
+    ui.tex_bloqueado = TextureFromFile("image4_bloqueados.png", "models/image");
+
+    // (Opcional) Comprobación de errores rápida
+    if (ui.tex_intro_wasd == 0) std::cout << "ERROR: Falta image1wasd.png" << std::endl;
+	if (ui.tex_intro_mouse == 0) std::cout << "ERROR: Falta image2mouse.png" << std::endl;
+	if (ui.tex_intro_descender == 0) std::cout << "ERROR: Falta image3_descender.png" << std::endl;
+	if (ui.tex_intro_volar == 0) std::cout << "ERROR: Falta image3_volar.png" << std::endl;
+	if (ui.tex_intro_acercamiento == 0) std::cout << "ERROR: Falta image3acercamiento.png" << std::endl;
+
+    ui.tex_glaciar_bienvenida = TextureFromFile("image1_bienvenidapolos.png", "models/image");
+    ui.tex_glaciar_bosque = TextureFromFile("image2_inidicacionbosque.png", "models/image");
+    ui.tex_glaciar_ciclo = TextureFromFile("image3_ciclodianoche.png", "models/image");
+
+
+
+    if (ui.tex_glaciar_bienvenida == 0) std::cout << "ERROR: Falta image1_bienvenidapolos.png" << std::endl;
+	if (ui.tex_glaciar_bosque == 0) std::cout << "ERROR: Falta image2_inidicacionbosque.png" << std::endl;
+    if (ui.tex_glaciar_ciclo == 0) std::cout << "ERROR: Falta image3_ciclodianoche.png" << std::endl;
+
+    ui.warningFireID = TextureFromFile("fuegoincendio.png", "models/image");
+    if (ui.warningFireID == 0) {
+        std::cerr << "ERROR: No se cargo models/image/fuegoincendio.png" << std::endl;
+    }
     if (ui.fireTextureID == 0) {
         std::cerr << "ERROR: Failed to load 'models/image/fire.png'" << std::endl;
     }
@@ -158,6 +282,8 @@ void loadUI(UIAssets& ui) {
     if (ui.legendTreeTextureID == 0) {
         std::cerr << "ERROR: Failed to load 'models/image/legend_tree.png'" << std::endl;
     }
+
+
 }
 
 

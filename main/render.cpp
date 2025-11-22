@@ -92,10 +92,126 @@ void renderTestEnvironment(const glm::mat4& projection, const glm::mat4& view) {
     drawObject(mLightsShader, ta.banco, ta.concreto, model);
     drawObject(mLightsShader, ta.policia, ta.concreto, model);
     drawObject(mLightsShader, ta.luzSemaforo, ta.traslucido, model);
-    drawObject(mLightsShader, ta.co2, ta.gases, model);
+    //drawObject(mLightsShader, ta.co2, ta.gases, model);
     drawObject(mLightsShader, ta.camion, ta.plastic, model);
+
+    if (rrr == 0) {
+        //BASURAS
+        drawObject(mLightsShader, ta.basura1, ta.plastic, model);
+        drawObject(mLightsShader, ta.basura2, ta.plastic, model);
+        drawObject(mLightsShader, ta.basura3, ta.plastic, model);
+        drawObject(mLightsShader, ta.basura4, ta.plastic, model);
+        drawObject(mLightsShader, ta.basura5, ta.plastic, model);
+        drawObject(mLightsShader, ta.basura6, ta.plastic, model);
+
+        //BOTES NORMALES
+        drawObject(mLightsShader, ta.bote1, ta.steel, model);
+        drawObject(mLightsShader, ta.bote2, ta.steel, model);
+        drawObject(mLightsShader, ta.bote3, ta.steel, model);
+        drawObject(mLightsShader, ta.bote4, ta.steel, model);
+        drawObject(mLightsShader, ta.bote5, ta.steel, model);
+        drawObject(mLightsShader, ta.bote6, ta.steel, model);
+        drawObject(mLightsShader, ta.bote7, ta.steel, model);
+        drawObject(mLightsShader, ta.bote8, ta.steel, model);
+
+        // MUEBLES DE MADERA
+        drawObject(mLightsShader, ta.mueble1, ta.madera, model);
+        drawObject(mLightsShader, ta.mueble2, ta.madera, model);
+        drawObject(mLightsShader, ta.mueble3, ta.madera, model);
+        drawObject(mLightsShader, ta.mueble4, ta.madera, model);
+        drawObject(mLightsShader, ta.mueble5, ta.madera, model);
+        drawObject(mLightsShader, ta.mueble6, ta.madera, model);
+        drawObject(mLightsShader, ta.mueble7, ta.madera, model);
+        drawObject(mLightsShader, ta.mueble8, ta.madera, model);
+        drawObject(mLightsShader, ta.mueble9, ta.madera, model);
+        drawObject(mLightsShader, ta.mueble10, ta.madera, model);
+
+    }
+    else {
+        //BOTES CONTENEDOR
+        drawObject(mLightsShader, ta.contenedor1, ta.plastic, model);
+        drawObject(mLightsShader, ta.contenedor2, ta.plastic, model);
+        drawObject(mLightsShader, ta.contenedor3, ta.plastic, model);
+        drawObject(mLightsShader, ta.contenedor4, ta.plastic, model);
+        drawObject(mLightsShader, ta.contenedor5, ta.plastic, model);
+        drawObject(mLightsShader, ta.contenedor6, ta.plastic, model);
+        drawObject(mLightsShader, ta.contenedor7, ta.plastic, model);
+        drawObject(mLightsShader, ta.contenedor8, ta.plastic, model);
+
+    }
+    //drawObject(mLightsShader, ta.arboles, ta.plastic, model);
+
+    // --- NUEVO: DIBUJADO DE ÁRBOLES CIUDAD CON SHADER DE BOSQUE ---
+    if (instanceAlphaTestPhongShader != nullptr && ta.arboles != nullptr) {
+        instanceAlphaTestPhongShader->use();
+        instanceAlphaTestPhongShader->setMat4("projection", projection);
+        instanceAlphaTestPhongShader->setMat4("view", view);
+
+        // Usamos la iluminación del bosque (Sol/Luna)
+        // NOTA: Este shader no reacciona a las luces puntuales de la ciudad, solo al sol.
+        instanceAlphaTestPhongShader->setVec3("lightPosition", fa.theLight.Position);
+        instanceAlphaTestPhongShader->setVec4("LightColor", fa.theLight.Color);
+        instanceAlphaTestPhongShader->setVec4("LightPower", fa.theLight.Power); // O dimmedLightPower si está disponible en este scope
+        instanceAlphaTestPhongShader->setInt("alphaIndex", fa.theLight.alphaIndex);
+
+        // Material (Usamos el material de árbol por defecto o uno personalizado)
+        instanceAlphaTestPhongShader->setVec4("MaterialAmbientColor", fa.treeMaterial.ambient);
+        instanceAlphaTestPhongShader->setVec4("MaterialSpecularColor", fa.treeMaterial.specular);
+        instanceAlphaTestPhongShader->setFloat("transparency", 1.0f);
+
+        // 1. Actualizar el VBO con la matriz 'model' actual de la ciudad
+        // 'model' es la matriz que calculaste líneas arriba para toda la ciudad
+        glBindBuffer(GL_ARRAY_BUFFER, ta.cityTreesVBO);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::mat4), &model[0][0]);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        // 2. Dibujar Mallas
+        for (unsigned int i = 0; i < ta.arboles->meshes.size(); i++) {
+            if (!ta.arboles->meshes[i].textures.empty()) {
+                glActiveTexture(GL_TEXTURE0);
+                instanceAlphaTestPhongShader->setInt("texture_diffuse1", 0);
+                glBindTexture(GL_TEXTURE_2D, ta.arboles->meshes[i].textures[0].id);
+            }
+            else {
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, 0);
+            }
+
+            glBindVertexArray(ta.arboles->meshes[i].VAO);
+            // Dibujamos 1 sola instancia
+            glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(ta.arboles->meshes[i].indices.size()), GL_UNSIGNED_INT, 0, 1);
+            glBindVertexArray(0);
+        }
+    }
+    // --- FIN NUEVO ---
+
     glUseProgram(0);
 
+    {
+        smoke->use();
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        smoke->setMat4("projection", projection);
+        smoke->setMat4("view", view);
+        smoke->setMat4("model", model);
+
+        smoke->setFloat("time", timeSmoke);
+
+        smoke->setFloat("waveStrength", 0.22f);
+        smoke->setFloat("waveSpeed", 1.4f);
+
+        smoke->setFloat("windStrength", 0.25f);
+        smoke->setFloat("windSpeed", 0.9f);
+
+        smoke->setFloat("noiseStrength", 0.07f);
+
+        ta.co2->Draw(*smoke);
+
+        timeSmoke += 0.5f;
+    }
+    glUseProgram(0);
 
 }
 
@@ -127,7 +243,7 @@ void renderFresnelCristal(const glm::mat4& projection, const glm::mat4& view)
         (!g_envCubemaps.empty() ? g_envCubemaps[g_envIndex] : 0);
     if (envID == 0) return;
 
-    fresnelShader->use();
+ 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, envID);
     fresnelShader->setInt("cubetex", 0);
@@ -1382,133 +1498,390 @@ void renderForestScene(const glm::mat4& projection, const glm::mat4& view) {
 
 
 void renderUI() {
-    // --- 7. DIBUJAR LA CRUZ (CROSSHAIR) ---
-    glDisable(GL_DEPTH_TEST);
-    if (crosshairShader != nullptr && crosshairShader->ID != 0 && ui.crosshairVAO != 0) {
-        crosshairShader->use();
-        crosshairShader->setVec4("crosshairColor", glm::vec4(1.0f, 1.0f, 1.0f, 0.8f));
-        glBindVertexArray(ui.crosshairVAO);
-        glLineWidth(2.0f);
-        glDrawArrays(GL_LINES, 0, 4);
-        glBindVertexArray(0);
-        glLineWidth(1.0f);
-    }
-    // glDisable(GL_DEPTH_TEST) se queda desactivado para la UI
 
-    // --- 8. DIBUJAR UI (--- SECCIÓN COMPLETAMENTE MODIFICADA ---) ---
+    // --- 0. CORRECCIÓN DEL TIEMPO ---
+    float uiDelta = deltaTime;
+    if (uiDelta > 0.5f) uiDelta = 0.016f;
+
+    // --- CORRECCIÓN CRÍTICA: DESACTIVAR PROFUNDIDAD ---
+    // Esto asegura que la UI se dibuje SIEMPRE ENCIMA de todo (Espacio, Tierra, Arboles)
+    glDisable(GL_DEPTH_TEST);
+
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 
     if (uiShader != nullptr && uiShader->ID != 0 && ui.uiVAO != 0) {
         uiShader->use();
         glm::mat4 projection_ortho = glm::ortho(0.0f, (float)SCR_WIDTH, 0.0f, (float)SCR_HEIGHT);
         uiShader->setMat4("projection", projection_ortho);
-        uiShader->setInt("texture_diffuse1", 0); // Asignar sampler a textura 0
-
+        uiShader->setInt("texture_diffuse1", 0);
         glBindVertexArray(ui.uiVAO);
 
-        // --- MODIFICADO: Definir variables de layout ---
-        float icon_size = 64.0f;
-        float legend_height = 20.0f; // Altura de tu imagen de leyenda
-        float legend_width = 64.0f;  // Ancho de tu imagen de leyenda
-        float padding = 10.0f;
-        float y_pos_legend = padding; // La leyenda va abajo
-        float y_pos_icon = padding + legend_height; // El icono va arriba de la leyenda
-        // ----------------------------------------------
+        // ==============================================================================
+        // === A. SECUENCIA DE INTRODUCCIÓN (AL INICIO - ESPACIO) ===
+        // ==============================================================================
+        if (g_introSeq.active && !animacion1) {
+            g_introSeq.timer += uiDelta;
+            int stage = (int)(g_introSeq.timer / g_introSeq.timePerImage);
 
+            if (stage >= g_introSeq.totalStages) {
+                g_introSeq.active = false;
+            }
+            else {
+                unsigned int currentTex = 0;
+                if (stage == 0) currentTex = ui.tex_intro_wasd;
+                else if (stage == 1) currentTex = ui.tex_intro_mouse;
+                else if (stage == 2) currentTex = ui.tex_intro_volar;
+                else if (stage == 3) currentTex = ui.tex_intro_descender;
+                else if (stage == 4) currentTex = ui.tex_intro_acercamiento;
 
-        // --- Icono de Árbol (P) ---
-        // MODIFICADO: Mover el X_pos aquí para reusarlo
-        float tree_icon_x_pos = SCR_WIDTH - (icon_size * 2.0f) - (padding * 2.0f);
+                float localTime = fmod(g_introSeq.timer, g_introSeq.timePerImage);
+                float alpha = 1.0f;
+                if (localTime < 1.0f) alpha = localTime;
+                else if (localTime > g_introSeq.timePerImage - 1.0f)
+                    alpha = g_introSeq.timePerImage - localTime;
 
-        if (ui.treeTextureID != 0) {
-            // MODIFICADO: Posición Y
-            glm::vec3 tree_icon_pos(tree_icon_x_pos, y_pos_icon, 0.0f);
-            glm::mat4 model_tree = glm::mat4(1.0f);
-            model_tree = glm::translate(model_tree, tree_icon_pos);
-            model_tree = glm::scale(model_tree, glm::vec3(icon_size, icon_size, 1.0f));
-            uiShader->setMat4("model", model_tree);
+                if (currentTex != 0) {
+                    uiShader->setFloat("alphaMultiplier", alpha);
+                    float w = 500.0f;
+                    float h = 150.0f;
+                    // Centrado arriba
+                    float x = SCR_WIDTH - w - 20.0f;
+                    float y = (SCR_HEIGHT / 2.0f) + 200.0f;
 
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, ui.treeTextureID);
-            glDrawArrays(GL_TRIANGLES, 0, 6);
+                    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, 0.0f));
+                    model = glm::scale(model, glm::vec3(w, h, 1.0f));
+                    uiShader->setMat4("model", model);
 
-            // Dibujar borde si P está presionada
-            if (p_key_pressed && ui.highlightTextureID != 0) {
-                glBindTexture(GL_TEXTURE_2D, ui.highlightTextureID);
-                glDrawArrays(GL_TRIANGLES, 0, 6);
+                    glActiveTexture(GL_TEXTURE0);
+                    glBindTexture(GL_TEXTURE_2D, currentTex);
+                    glDrawArrays(GL_TRIANGLES, 0, 6);
+                }
             }
         }
 
-        // --- NUEVO: Dibujar leyenda "P" (ABAJO) ---
-        if (ui.legendTreeTextureID != 0) {
-            glm::vec3 legend_tree_pos(tree_icon_x_pos, y_pos_legend, 0.0f);
-            glm::mat4 model_legend_tree = glm::mat4(1.0f);
-            model_legend_tree = glm::translate(model_legend_tree, legend_tree_pos);
-            model_legend_tree = glm::scale(model_legend_tree, glm::vec3(legend_width, legend_height, 1.0f));
-            uiShader->setMat4("model", model_legend_tree);
+        // ==============================================================================
+        // === B. AVISO "CONTROLES BLOQUEADOS" (DURANTE ANIMACIÓN) ===
+        // ==============================================================================
+        if (animacion1 && ui.tex_bloqueado != 0) {
+            float pulse = (sin((float)glfwGetTime() * 5.0f) * 0.5f) + 0.5f;
+            uiShader->setFloat("alphaMultiplier", pulse);
+            float w = 500.0f; float h = 150.0f;
+            // Alineado a la derecha
+            float x = SCR_WIDTH - w - 50.0f;
+            float y = 50.0f;
 
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, 0.0f));
+            model = glm::scale(model, glm::vec3(w, h, 1.0f));
+            uiShader->setMat4("model", model);
             glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, ui.legendTreeTextureID);
+            glBindTexture(GL_TEXTURE_2D, ui.tex_bloqueado);
             glDrawArrays(GL_TRIANGLES, 0, 6);
         }
-        // ---------------------------------------------
 
+        // ==============================================================================
+        // === BLOQUE 2: UI DEL ESCENARIO 1 (BOSQUE Y GLACIARES) ===
+        // ==============================================================================
+        if (escena == 1) {
 
-        // --- Icono de Fuego (F/G) ---
-        // MODIFICADO: Mover el X_pos aquí para reusarlo
-        float fire_icon_x_pos = SCR_WIDTH - icon_size - padding;
+            float icon_size = 64.0f;
+            float legend_height = 20.0f;
+            float legend_width = 64.0f;
+            float padding = 10.0f;
+            float y_pos_legend = padding;
+            float y_pos_icon = padding + legend_height;
 
-        if (ui.fireTextureID != 0) {
-            // MODIFICADO: Posición Y
-            glm::vec3 fire_icon_pos(fire_icon_x_pos, y_pos_icon, 0.0f);
-            glm::mat4 model_fire = glm::mat4(1.0f);
-            model_fire = glm::translate(model_fire, fire_icon_pos);
-            model_fire = glm::scale(model_fire, glm::vec3(icon_size, icon_size, 1.0f));
-            uiShader->setMat4("model", model_fire);
+            // ==========================================================================
+            // === I. BARRA DE VIDA DEL BOSQUE (ARRIBA IZQUIERDA) ===
+            // ==========================================================================
 
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, ui.fireTextureID);
-            glDrawArrays(GL_TRIANGLES, 0, 6);
+            // 1. Configuración
+            float barWidth = 300.0f;  // Ancho total de la barra (pixeles)
+            float barHeight = 25.0f;  // Alto de la barra
+            float marginX = 20.0f;    // Separación del borde izquierdo
+            float marginY = 20.0f;    // Separación del borde superior
 
-            // Dibujar borde si el incendio está activo
-            if (isFireActive && ui.highlightTextureID != 0) {
-                glBindTexture(GL_TEXTURE_2D, ui.highlightTextureID);
+            // Posición (Arriba Izquierda)
+            float x = marginX;
+            float y = SCR_HEIGHT - marginY - barHeight;
+
+            uiShader->setFloat("alphaMultiplier", 1.0f); // Opacidad total
+
+            // 2. Dibujar FONDO (Gris)
+            if (ui.tex_solid_gray != 0) {
+                glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, 0.0f));
+                model = glm::scale(model, glm::vec3(barWidth, barHeight, 1.0f));
+
+                uiShader->setMat4("model", model);
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, ui.tex_solid_gray);
                 glDrawArrays(GL_TRIANGLES, 0, 6);
             }
-        }
 
-        // --- NUEVO: Dibujar leyenda "F/G" (ABAJO) ---
-        if (ui.legendFireTextureID != 0) {
-            glm::vec3 legend_fire_pos(fire_icon_x_pos, y_pos_legend, 0.0f);
-            glm::mat4 model_legend_fire = glm::mat4(1.0f);
-            model_legend_fire = glm::translate(model_legend_fire, legend_fire_pos);
-            model_legend_fire = glm::scale(model_legend_fire, glm::vec3(legend_width, legend_height, 1.0f));
-            uiShader->setMat4("model", model_legend_fire);
+            // 3. Dibujar VIDA (Verde/Rojo)
+            // g_forestHealth va de 0.0 a 1.0
+            float currentHealth = glm::clamp(g_forestHealth, 0.0f, 1.0f);
 
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, ui.legendFireTextureID);
-            glDrawArrays(GL_TRIANGLES, 0, 6);
+            if (currentHealth > 0.0f) {
+                // Elegir color: Verde si está sano, Rojo si es crítico (< 25%)
+                unsigned int colorTex = (currentHealth > 0.25f) ? ui.tex_solid_green : ui.tex_solid_red;
+
+                if (colorTex != 0) {
+                    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, 0.0f));
+
+                    // ESCALA EN X = Ancho Total * Porcentaje de Vida
+                    model = glm::scale(model, glm::vec3(barWidth * currentHealth, barHeight, 1.0f));
+
+                    uiShader->setMat4("model", model);
+                    glActiveTexture(GL_TEXTURE0);
+                    glBindTexture(GL_TEXTURE_2D, colorTex);
+                    glDrawArrays(GL_TRIANGLES, 0, 6);
+                }
+            }
+
+            // --- C. ICONOS DE JUEGO (P, F) ---
+            uiShader->setFloat("alphaMultiplier", 1.0f); // Reset alpha
+
+            // 1. Icono Árbol
+            float tree_x = SCR_WIDTH - (icon_size * 2.0f) - (padding * 2.0f);
+            if (ui.treeTextureID != 0) {
+                glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(tree_x, y_pos_icon, 0.0f));
+                model = glm::scale(model, glm::vec3(icon_size, icon_size, 1.0f));
+                uiShader->setMat4("model", model);
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, ui.treeTextureID);
+                glDrawArrays(GL_TRIANGLES, 0, 6);
+
+                if (p_key_pressed && ui.highlightTextureID != 0) {
+                    glBindTexture(GL_TEXTURE_2D, ui.highlightTextureID);
+                    glDrawArrays(GL_TRIANGLES, 0, 6);
+                }
+                if (ui.legendTreeTextureID != 0) {
+                    model = glm::translate(glm::mat4(1.0f), glm::vec3(tree_x, y_pos_legend, 0.0f));
+                    model = glm::scale(model, glm::vec3(legend_width, legend_height, 1.0f));
+                    uiShader->setMat4("model", model);
+                    glActiveTexture(GL_TEXTURE0);
+                    glBindTexture(GL_TEXTURE_2D, ui.legendTreeTextureID);
+                    glDrawArrays(GL_TRIANGLES, 0, 6);
+                }
+            }
+
+            // 2. Icono Fuego
+            float fire_x = SCR_WIDTH - icon_size - padding;
+            if (ui.fireTextureID != 0) {
+                glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(fire_x, y_pos_icon, 0.0f));
+                model = glm::scale(model, glm::vec3(icon_size, icon_size, 1.0f));
+                uiShader->setMat4("model", model);
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, ui.fireTextureID);
+                glDrawArrays(GL_TRIANGLES, 0, 6);
+
+                if (isFireActive && ui.highlightTextureID != 0) {
+                    glBindTexture(GL_TEXTURE_2D, ui.highlightTextureID);
+                    glDrawArrays(GL_TRIANGLES, 0, 6);
+                }
+                if (ui.legendFireTextureID != 0) {
+                    model = glm::translate(glm::mat4(1.0f), glm::vec3(fire_x, y_pos_legend, 0.0f));
+                    model = glm::scale(model, glm::vec3(legend_width, legend_height, 1.0f));
+                    uiShader->setMat4("model", model);
+                    glActiveTexture(GL_TEXTURE0);
+                    glBindTexture(GL_TEXTURE_2D, ui.legendFireTextureID);
+                    glDrawArrays(GL_TRIANGLES, 0, 6);
+                }
+            }
+
+            // --- D. AVISO DE INCENDIO (CENTRO) ---
+            if (g_fireMessageState.active) {
+                g_fireMessageState.timer += uiDelta;
+                float t = g_fireMessageState.timer;
+                float fade = 1.0f;
+                if (t < 1.0f) fade = t;
+                else if (t > g_fireMessageState.duration - 1.0f) fade = g_fireMessageState.duration - t;
+
+                if (t >= g_fireMessageState.duration) g_fireMessageState.active = false;
+
+                if (g_fireMessageState.active && ui.warningFireID != 0) {
+                    uiShader->setFloat("alphaMultiplier", fade);
+                    float w = 400.0f; float h = 100.0f;
+                    float x = (SCR_WIDTH - w) / 2.0f;
+                    float y = (SCR_HEIGHT / 2.0f) + 200.0f;
+                    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, 0.0f));
+                    model = glm::scale(model, glm::vec3(w, h, 1.0f));
+                    uiShader->setMat4("model", model);
+                    glActiveTexture(GL_TEXTURE0);
+                    glBindTexture(GL_TEXTURE_2D, ui.warningFireID);
+                    glDrawArrays(GL_TRIANGLES, 0, 6);
+                }
+            }
+
+            // --- E. SECUENCIA DE GLACIARES ---
+            if (g_glacierSeq.active) {
+                g_glacierSeq.timer += uiDelta;
+                int stage = (int)(g_glacierSeq.timer / g_glacierSeq.timePerImage);
+
+                if (stage >= g_glacierSeq.totalStages) {
+                    g_glacierSeq.active = false;
+                }
+                else {
+                    unsigned int currentTex = 0;
+                    if (stage == 0) currentTex = ui.tex_glaciar_bienvenida;
+                    else if (stage == 1) currentTex = ui.tex_glaciar_bosque;
+                    else if (stage == 2) currentTex = ui.tex_glaciar_ciclo;
+
+                    float localTime = fmod(g_glacierSeq.timer, g_glacierSeq.timePerImage);
+                    float alpha = 1.0f;
+                    float fade = 1.0f;
+                    if (localTime < fade) alpha = localTime;
+                    else if (localTime > g_glacierSeq.timePerImage - fade) alpha = g_glacierSeq.timePerImage - localTime;
+
+                    if (currentTex != 0) {
+                        uiShader->setFloat("alphaMultiplier", alpha);
+                        float w = 500.0f; float h = 150.0f;
+                        float margin = 20.0f;
+                        float x = SCR_WIDTH - w - margin;
+                        float y = SCR_HEIGHT - h - margin;
+                        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, 0.0f));
+                        model = glm::scale(model, glm::vec3(w, h, 1.0f));
+                        uiShader->setMat4("model", model);
+                        glActiveTexture(GL_TEXTURE0);
+                        glBindTexture(GL_TEXTURE_2D, currentTex);
+                        glDrawArrays(GL_TRIANGLES, 0, 6);
+                    }
+                }
+            }
+
+            // --- F. SECUENCIA TUTORIAL BOSQUE ---
+            if (!g_forestSeq.hasPlayed && camera.Position.z < 200.0f && !menu) {
+                g_forestSeq.active = true;
+            }
+            if (g_forestSeq.active) {
+                g_forestSeq.timer += uiDelta;
+                int stage = (int)(g_forestSeq.timer / g_forestSeq.timePerImage);
+                if (stage >= g_forestSeq.totalStages) {
+                    g_forestSeq.active = false;
+                    g_forestSeq.hasPlayed = true;
+                }
+                else {
+                    unsigned int currentTex = 0;
+                    if (stage == 0) currentTex = ui.tex_f_plantar;
+                    else if (stage == 1) currentTex = ui.tex_f_talar;
+                    else if (stage == 2) currentTex = ui.tex_f_camara3;
+                    else if (stage == 3) currentTex = ui.tex_f_incendio;
+
+                    float localTime = fmod(g_forestSeq.timer, g_forestSeq.timePerImage);
+                    float alpha = 1.0f;
+                    if (localTime < 1.0f) alpha = localTime;
+                    else if (localTime > g_forestSeq.timePerImage - 1.0f) alpha = g_forestSeq.timePerImage - localTime;
+
+                    if (currentTex != 0) {
+                        uiShader->setFloat("alphaMultiplier", alpha);
+                        float w = 450.0f; float h = 120.0f;
+                        float margin = 20.0f;
+                        float x = margin;
+                        float y = SCR_HEIGHT - h - 80.0f;
+                        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, 0.0f));
+                        model = glm::scale(model, glm::vec3(w, h, 1.0f));
+                        uiShader->setMat4("model", model);
+                        glActiveTexture(GL_TEXTURE0);
+                        glBindTexture(GL_TEXTURE_2D, currentTex);
+                        glDrawArrays(GL_TRIANGLES, 0, 6);
+                    }
+                }
+            }
+
+            // --- G. MENSAJES CONDICIONALES (DERECHA) ---
+            float msgWidth = 450.0f;
+            float msgHeight = 100.0f;
+            float spacing = 10.0f;
+            float stackX = SCR_WIDTH - msgWidth - 20.0f;
+            float stackY = SCR_HEIGHT - 200.0f;
+
+            uiShader->setFloat("alphaMultiplier", 1.0f);
+
+            // 1. Cambio Personaje (Timer 5 seg)
+            if (g_isThirdPerson) {
+                g_thirdPersonTimer -= uiDelta;
+                if (g_thirdPersonTimer > 0.0f && ui.tex_c_cambio_pj != 0) {
+                    if (g_thirdPersonTimer < 1.0f) uiShader->setFloat("alphaMultiplier", g_thirdPersonTimer);
+                    else uiShader->setFloat("alphaMultiplier", 1.0f);
+
+                    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(stackX, stackY - msgHeight, 0.0f));
+                    model = glm::scale(model, glm::vec3(msgWidth, msgHeight, 1.0f));
+                    uiShader->setMat4("model", model);
+                    glActiveTexture(GL_TEXTURE0);
+                    glBindTexture(GL_TEXTURE_2D, ui.tex_c_cambio_pj);
+                    glDrawArrays(GL_TRIANGLES, 0, 6);
+                    stackY -= (msgHeight + spacing);
+                    uiShader->setFloat("alphaMultiplier", 1.0f);
+                }
+            }
+
+            // 2. Parar Incendio
+            if (isFireActive && ui.tex_c_parar_fuego != 0) {
+                float pulse = (sin((float)glfwGetTime() * 8.0f) * 0.3f) + 0.7f;
+                uiShader->setFloat("alphaMultiplier", pulse);
+                glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(stackX, stackY - msgHeight, 0.0f));
+                model = glm::scale(model, glm::vec3(msgWidth, msgHeight, 1.0f));
+                uiShader->setMat4("model", model);
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, ui.tex_c_parar_fuego);
+                glDrawArrays(GL_TRIANGLES, 0, 6);
+                uiShader->setFloat("alphaMultiplier", 1.0f);
+                stackY -= (msgHeight + spacing);
+            }
+
+            // 3. Alerta Temperatura
+            if (temperatura > 10.0f && ui.tex_c_alerta_temp != 0) {
+                float pulse = (sin((float)glfwGetTime() * 5.0f) * 0.5f) + 0.5f;
+                uiShader->setFloat("alphaMultiplier", pulse);
+                glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(stackX, stackY - msgHeight, 0.0f));
+                model = glm::scale(model, glm::vec3(msgWidth, msgHeight, 1.0f));
+                uiShader->setMat4("model", model);
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, ui.tex_c_alerta_temp);
+                glDrawArrays(GL_TRIANGLES, 0, 6);
+                uiShader->setFloat("alphaMultiplier", 1.0f);
+                stackY -= (msgHeight + spacing);
+            }
+
+            // 4. Polos Derretidos
+            if (glacierScaleY <= 0.01f && ui.tex_c_polos_derretidos != 0) {
+                glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(stackX, stackY - msgHeight, 0.0f));
+                model = glm::scale(model, glm::vec3(msgWidth, msgHeight, 1.0f));
+                uiShader->setMat4("model", model);
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, ui.tex_c_polos_derretidos);
+                glDrawArrays(GL_TRIANGLES, 0, 6);
+                stackY -= (msgHeight + spacing);
+            }
         }
-        // ----------------------------------------------
 
         glBindVertexArray(0);
     }
+    glUseProgram(0);
+
+    // --- H. LA CRUZ (CROSSHAIR) - SIEMPRE EN ESCENA 1 ---
+    if (escena == 1) {
+        glDisable(GL_DEPTH_TEST);
+        if (crosshairShader != nullptr && crosshairShader->ID != 0 && ui.crosshairVAO != 0) {
+            crosshairShader->use();
+            crosshairShader->setVec4("crosshairColor", glm::vec4(1.0f, 1.0f, 1.0f, 0.8f));
+            glBindVertexArray(ui.crosshairVAO);
+            glLineWidth(2.0f);
+            glDrawArrays(GL_LINES, 0, 4);
+            glBindVertexArray(0);
+            glLineWidth(1.0f);
+        }
+    }
 
     glDisable(GL_BLEND);
+    // IMPORTANTE: Volver a activar profundidad para el siguiente cuadro 3D
     glEnable(GL_DEPTH_TEST);
-    // ----------------------
-
-    // --- Limpieza Frame ---
-    glBindVertexArray(0);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glUseProgram(0);
 }
 
 void initializeRenderBuffers(UIAssets& ui) {
-    // --- Configuración Cruz ---
+    // --- 1. Configuración de la Cruz (Crosshair) ---
+    // (Esta parte se queda igual)
     float crosshairSize = 0.03f;
     float aspectRatio = (float)SCR_WIDTH / (float)SCR_HEIGHT;
     float crosshairVertices[] = {
@@ -1516,8 +1889,10 @@ void initializeRenderBuffers(UIAssets& ui) {
          crosshairSize / aspectRatio, 0.0f,
          0.0f, -crosshairSize,
          0.0f,  crosshairSize
-
     };
+
+    if (ui.crosshairVAO != 0) glDeleteVertexArrays(1, &ui.crosshairVAO);
+    if (ui.crosshairVBO != 0) glDeleteBuffers(1, &ui.crosshairVBO);
 
     glGenVertexArrays(1, &ui.crosshairVAO);
     glGenBuffers(1, &ui.crosshairVBO);
@@ -1529,28 +1904,37 @@ void initializeRenderBuffers(UIAssets& ui) {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    // --- Configuración UI VAO/VBO ---
+    // --- 2. Configuración UI VAO/VBO (CORREGIDO) ---
+    // Aquí es donde invertimos las texturas para que no salgan al revés
     float uiQuadVertices[] = {
-        // pos      // tex
-        0.0f, 1.0f,  0.0f, 1.0f,
-        1.0f, 0.0f,  1.0f, 0.0f,
-        0.0f, 0.0f,  0.0f, 0.0f,
+        // Posición (x, y)    // Textura (u, v)
+        // Triángulo 1
+        0.0f, 1.0f,           0.0f, 0.0f,  // Arriba-Izquierda (Ahora v=0 apunta al inicio de la data, que es el top de la imagen)
+        1.0f, 0.0f,           1.0f, 1.0f,  // Abajo-Derecha
+        0.0f, 0.0f,           0.0f, 1.0f,  // Abajo-Izquierda
 
-        0.0f, 1.0f,  0.0f, 1.0f,
-        1.0f, 1.0f,  1.0f, 1.0f,
-        1.0f, 0.0f,  1.0f, 0.0f
+        // Triángulo 2
+        0.0f, 1.0f,           0.0f, 0.0f,  // Arriba-Izquierda
+        1.0f, 1.0f,           1.0f, 0.0f,  // Arriba-Derecha
+        1.0f, 0.0f,           1.0f, 1.0f   // Abajo-Derecha
     };
+
+    if (ui.uiVAO != 0) glDeleteVertexArrays(1, &ui.uiVAO);
+    if (ui.uiVBO != 0) glDeleteBuffers(1, &ui.uiVBO);
+
     glGenVertexArrays(1, &ui.uiVAO);
     glGenBuffers(1, &ui.uiVBO);
     glBindVertexArray(ui.uiVAO);
     glBindBuffer(GL_ARRAY_BUFFER, ui.uiVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(uiQuadVertices), &uiQuadVertices, GL_STATIC_DRAW);
+
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-    glBindVertexArray(0);
 
+    glBindVertexArray(0);
 }
 
 /* --------------------------------------------- Renderizado de Iluminacion ------------------------------------------*/

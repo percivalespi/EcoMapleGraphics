@@ -1,6 +1,7 @@
 ﻿#include "mechanic.h"
 #include "globals.h"
-//Hola
+#include "audio.h"
+
 void plantTree() {
     // 1. Calcular Rayo en Coordenadas del Mundo
     glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 2000.0f);
@@ -115,6 +116,7 @@ void plantTree() {
                     target_chunk.tree_instances[old_base_index].id == hit_tree_id)
                 {
                     target_chunk.tree_instances.erase(target_chunk.tree_instances.begin() + old_base_index);
+                    temperatura -= 10;
                 }
                 else {
                     bool found = false;
@@ -132,6 +134,7 @@ void plantTree() {
             }
             else {
                 std::cout << "Plantando nuevo  rbol en el suelo." << std::endl;
+                temperatura -= 10;
             }
 
             // Crear nueva instancia de  rbol
@@ -204,6 +207,11 @@ void startFire() {
     }
 
     std::cout << " Iniciando incendio!" << std::endl;
+    // --- NUEVO: ACTIVAR MENSAJE DE ALERTA ---
+    g_fireMessageState.active = true;
+    g_fireMessageState.timer = 0.0f;
+    g_fireMessageState.currentAlpha = 0.0f;
+    // ----------------------------------------
     isFireActive = true;
     fireStartTime = (float)glfwGetTime();
 
@@ -508,6 +516,7 @@ void updateGameLogic() {
                 for (TreeInstance& tree : chunk.tree_instances) {
                     if (tree.state == TreeState::BURNING) {
                         tree.state = TreeState::CHOPPED_TWICE;
+                        temperatura += 1;
                     }
                 }
             }
@@ -528,6 +537,7 @@ void updateGameLogic() {
                                     }
                                 }
                                 g_currentLivingTrees--; // <-- PIERDE VIDA POR FUEGO
+                                temperatura += 0.1;
                             }
                             tree.state = TreeState::BURNING;
                             tree.fireTriggerTime = -1.0f; // Previene que se active de nuevo
@@ -540,6 +550,7 @@ void updateGameLogic() {
                     if (tree.burnOutTime >= 0.0f && fire_elapsed >= tree.burnOutTime) {
                         if (tree.state == TreeState::BURNING) {
                             tree.state = TreeState::CHOPPED_TWICE;
+                            temperatura += 5;
                             tree.burnOutTime = -1.0f; // Previene que se active de nuevo
                         }
                     }
@@ -581,6 +592,19 @@ void updateGameLogic() {
 
     // --- L gica de Animales ---
     updateForestHealthAndAnimals(deltaTime);
+
+    if (!g_isRReady) {
+        g_rTimer += deltaTime; // Sumamos el tiempo que pasó en este frame
+        // Checamos si ya pasaron los 5 minutos
+        if (g_rTimer >= R_COOLDOWN_TIME) {
+            g_isRReady = true; // ¡Vuelve a TRUE!
+            temperatura_externa += 30.0f;
+            bandera = 0;
+            rrr =  0;
+            g_rTimer = 0.0f;   // Reseteamos el contador
+        }
+    }
+
 }
 
 
@@ -792,6 +816,29 @@ void generateForest() {
     // --- FIN Comprobaci n ---
 }
 
-void generateCity() {
-    //proximamente a implementar
+// --------------------------- Control del Audio Por Biomasi 
+
+// Ejemplo: Una "caja" (AABB) para una cueva en la escena 1
+const glm::vec3 g_CaveMin(-10.0f, 0.0f, 20.0f); // Esquina min (X, Y, Z)
+const glm::vec3 g_CaveMax(10.0f, 15.0f, 40.0f); // Esquina max (X, Y, Z)
+bool g_PlayerIsInCave = false; // Estado para evitar reiniciar la música
+
+// --- Implementación de la Función ---
+void updateAudioLogic(const glm::vec3& playerPos) {
+
+    
+    if (menu) {
+        playMusic("music/SecretGarden.mp3");
+    }
+    else if (escena == 0) {
+        playMusic("music/SecretGarden.mp3"); 
+    }
+    else if (escena == 1) {
+        if (isFireActive) {
+            playMusic("music/Deliverance.mp3");
+        }
+        else {
+            playMusic("music/AriaMath.mp3");
+        }
+    }
 }
