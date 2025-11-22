@@ -198,17 +198,21 @@ void renderTestEnvironment(const glm::mat4& projection, const glm::mat4& view) {
         smoke->setMat4("model", model);
 
         smoke->setFloat("time", timeSmoke);
-        smoke->setFloat("intensity", 4.0f);   // FUERTE
-        smoke->setFloat("speed", 4.0f);       // RÁPIDO
-        smoke->setFloat("scale", 0.3f);       // RUIDO DETALLADO
 
-        smoke->setVec4("baseColor", glm::vec4(0.12f, 0.12f, 0.12f, 0.55f));
+        smoke->setFloat("waveStrength", 0.22f);
+        smoke->setFloat("waveSpeed", 1.4f);
 
-        ta.co2->Draw(*smoke);   // <- aquí pasas *shader, no el puntero
+        smoke->setFloat("windStrength", 0.25f);
+        smoke->setFloat("windSpeed", 0.9f);
 
-        timeSmoke += 0.05f;
+        smoke->setFloat("noiseStrength", 0.07f);
+
+        ta.co2->Draw(*smoke);
+
+        timeSmoke += 0.5f;
     }
-    glUseProgram(0);  
+    glUseProgram(0);
+
 }
 
 void renderFresnelCristal(const glm::mat4& projection, const glm::mat4& view)

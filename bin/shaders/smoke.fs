@@ -2,9 +2,10 @@
 
 out vec4 FragColor;
 
-uniform vec4 baseColor; // por ejemplo (0.2,0.2,0.2,0.5)
+in vec2 TexCoords;
+uniform sampler2D smokeTex;
 
 void main()
 {
-    FragColor = baseColor;
+    FragColor = texture(smokeTex, TexCoords);
 }

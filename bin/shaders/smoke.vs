@@ -1,6 +1,9 @@
 #version 330 core
 
-layout(location = 0) in vec3 aPos;
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec2 aTexCoords;
+
+out vec2 TexCoords;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -8,31 +11,44 @@ uniform mat4 projection;
 
 uniform float time;
 
-uniform float intensity;   // 2.0 – 8.0
-uniform float speed;       // 3.0 – 10.0
-uniform float scale;       // 1.0 – 4.0
+// controles
+uniform float waveStrength;   // 0.05 – 0.35
+uniform float waveSpeed;      // 0.5 – 3.0
 
-out vec3 FragPos;
+uniform float windStrength;   // 0.05 – 0.4
+uniform float windSpeed;      // 0.5 – 3.0
 
-// Nuevo nombre (no genera conflicto)
-float fastNoise(vec3 p)
+uniform float noiseStrength;  // 0.02 – 0.15
+
+float fakeNoise(vec3 p)
 {
-    return 
-        sin(p.x * 3.7 + time * speed) +
-        sin(p.y * 4.3 + time * speed * 1.2) +
-        sin(p.z * 5.1 + time * speed * 0.8);
+    return sin(p.x * 1.2 + time * 0.7) *
+           cos(p.y * 1.7 + time * 0.4);
 }
 
 void main()
 {
+    // onda suave
+    float wave = sin(aPos.y * 1.5 + time * waveSpeed);
+
+    // viento que empuja lateralmente
+    float wind = sin(time * windSpeed + aPos.y * 0.8);
+
+    // ruido suave adicional para deformación
+    float n = fakeNoise(aPos);
+
     vec3 pos = aPos;
 
-    float n = fastNoise(pos * scale);
+    // Onda principal
+    pos.x += wave * waveStrength;
 
-    pos.x += n * intensity * 0.7;
-    pos.y += n * intensity;
-    pos.z += n * intensity * 0.9;
+    // Empuje del viento
+    pos.x += wind * windStrength;
 
-    FragPos = vec3(model * vec4(pos, 1.0));
-    gl_Position = projection * view * vec4(FragPos, 1.0);
+    // Deformación ligera tipo turbulencia
+    pos.x += n * noiseStrength;
+    pos.y += n * noiseStrength * 0.4;
+
+    gl_Position = projection * view * model * vec4(pos, 1.0);
+    TexCoords = aTexCoords;
 }

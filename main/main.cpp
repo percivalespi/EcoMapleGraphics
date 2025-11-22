@@ -216,7 +216,7 @@ glm::vec3 posicionA1(-0.6f, 6.0f, 5.0f);
 glm::vec3 posicionCarga(0.0f, 47.0f, 4.0f);
 glm::vec3 posicionInicioG(0.0f, 2.0f, 10.0f);
 glm::vec3 posicionOrigen(0.0f, 0.0f, 0.0f);
-glm::vec3 posicionEscenario1(0.0f, 40.0f, 340.0f);
+glm::vec3 posicionEscenario1(0.0f, 40.0f, 250.0f);
 
 const glm::vec3 aguaCentro1(0.0f, 0.0f, desp);
 const glm::vec3 aguaCentro2(0.0f, 0.0f, desp + -42.4f);
@@ -242,7 +242,7 @@ Animated* g_mikuModel = nullptr;
 
 // Estado del Jugador
 int g_activeCharacter = 1; // 1=Demi, 2=Miku
-glm::vec3 g_demiPos(0.0f, 0.0f, 0.0f); // Posición compartida
+glm::vec3 g_demiPos(0.0f, 0.0f, 250.0f); // Posición compartida
 float g_demiRotY = 0.0f;
 bool g_demiMoving = false;
 
@@ -440,7 +440,7 @@ bool Start() {
     if (g_demiModel) {
         g_demiModel->currentAnimation = 0;
         g_demiModel->fps = 30.0f;
-        g_demiPos = glm::vec3(0.0f, 0.0f, 0.0f); // Posición inicial
+        g_demiPos = glm::vec3(0.0f, 0.0f, 250.0f); // Posición inicial
     }
     else {
         std::cout << "ERROR CRITICO: No se cargo models/demi.fbx" << std::endl;
@@ -465,6 +465,9 @@ bool Update() {
     float currentFrame = (float)glfwGetTime();
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
+
+    //Guardar el movimiento de la camara desplazandose
+
 
     if (!animacion1 && escena == 0 && !g_isThirdPerson) {
         CalculoCamara(window);
@@ -491,7 +494,7 @@ bool Update() {
     if (barraTC < 0.0f) barraTC = 0.0f;
     // -----------------------------------------------------
 
-
+    //printf("X = %.2f , Y =%.2f , Z =%.2f \n", g_demiPos.x, g_demiPos.y, g_demiPos.z);
 
     processInput(window);
 
@@ -521,6 +524,8 @@ bool Update() {
     
 
     renderScene();
+
+
 
     // Renderizamos la UI siempre que no estemos en el menú principal
     // (La función renderUI se encargará de filtrar qué mostrar según la escena)

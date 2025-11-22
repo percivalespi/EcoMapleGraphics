@@ -130,6 +130,7 @@ void processInput(GLFWwindow* window) {
             g_pressM = true;
             if (g_isThirdPerson) {
                 // Al entrar, ajustamos un poco la c�mara para ver al personaje
+                g_demiPos = glm::vec3(camera.Position.x, 0.0f, camera.Position.z);
                 camera.Pitch = -15.0f;
                 camera.ProcessMouseMovement(0, 0); // Actualizar vectores
 
