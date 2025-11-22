@@ -502,8 +502,6 @@ bool Update() {
     if (barraTC < 0.0f) barraTC = 0.0f;
     // -----------------------------------------------------
 
-    //printf("X = %.2f , Y =%.2f , Z =%.2f \n", g_demiPos.x, g_demiPos.y, g_demiPos.z);
-
     processInput(window);
 
     Animated* currentModel = nullptr;
