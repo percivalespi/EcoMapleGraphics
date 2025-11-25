@@ -22,7 +22,6 @@ void initializeModelsTest(TestAssets& ta) {
     ta.co2 = new Model("models/city/Prod/CO2.fbx");
     ta.arboles = new Model("models/city/Prod/arbolesv2.fbx");
 
-
     //BASURAS
     ta.basura1 = new Model("models/city/Prod/basura_norte_azul.fbx");
     ta.basura2 = new Model("models/city/Prod/basura_norte_cafe.fbx");
@@ -74,6 +73,10 @@ void initializeModelsTest(TestAssets& ta) {
     ta.banco = new Model("models/city/Prod/banco.fbx");
     ta.policia = new Model("models/city/Prod/policia.fbx");
     ta.camion = new Model("models/city/Prod/Camionv2.fbx");
+
+	ta.persona1 = new Animated("models/city/Prod/persona1.fbx");
+    ta.persona2 = new Animated("models/city/Prod/persona2.fbx");
+    ta.persona3 = new Animated("models/city/Prod/persona3.fbx");
 }
 
 /*                                         PROPIEDADES DE LOS MATERIALES CIUDAD                                    */
@@ -301,8 +304,6 @@ void initializeModelsForest(ForestAssets& fa) {
     fa.moon_model = new Model("models/moon.fbx");
     fa.cloud_model = new Model("models/cloud.fbx");
     fa.leaf_model = new Model("models/hojaarce.fbx");
-    fa.cubeenv = new Model("models/mycube.fbx");
-    fa.cubeenv_noche = new Model("models/noche/mycube.fbx");
 
     fa.sphereDay = new Model("models/esfera_cielo.fbx");
     fa.sphereNight = new Model("models/esfera_noche.fbx");
@@ -335,13 +336,6 @@ void initializeModelsForest(ForestAssets& fa) {
     }
     if (!fa.skull_model) { // <-- NUEVO
         std::cerr << "ERROR: Could not load Craneo.fbx" << std::endl;
-    }
-    // CORREGIDO: Usar -> en punteros
-    if (!fa.cubeenv || fa.cubeenv->meshes.empty() || fa.cubeenv->meshes[0].textures.empty()) {
-        std::cout << "ERROR: Skybox DIA" << std::endl;
-    }
-    if (!fa.cubeenv_noche || fa.cubeenv_noche->meshes.empty() || fa.cubeenv_noche->meshes[0].textures.empty()) {
-        std::cout << "ERROR: Skybox NIGHT" << std::endl;
     }
 }
 
@@ -386,13 +380,6 @@ void initializeModelsEspacio(EspacioAssets& ea) {
     ea.cubeenv_noche = new Model("models/noche_tierra.fbx");
     ea.sol = new Model("models/iceland/Sol.fbx");
 
-    // CORREGIDO: Usar -> en punteros
-    if (!fa.cubeenv || fa.cubeenv->meshes.empty() || fa.cubeenv->meshes[0].textures.empty()) {
-        std::cout << "ERROR: Skybox DIA" << std::endl;
-    }
-    if (!fa.cubeenv_noche || fa.cubeenv_noche->meshes.empty() || fa.cubeenv_noche->meshes[0].textures.empty()) {
-        std::cout << "ERROR: Skybox NIGHT" << std::endl;
-    }
 }
 
 void initilizeMaterialsEspacio(EspacioAssets& ea) {

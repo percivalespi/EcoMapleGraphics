@@ -253,8 +253,6 @@ struct ForestAssets {
     Model* chopped_once_model;
     Model* burning_tree_model;
     Model* chopped_twice_model;
-    Model* cubeenv;
-    Model* cubeenv_noche;
     Model* sun_model;
     Model* moon_model;
     Model* cloud_model;
@@ -333,7 +331,10 @@ struct TestAssets { //Elementos Para el entorno de Prueba
 
     //Materiales
     Material asphalt, cesped, concreto, goma, ladrillo, tela, gases, focos;
-    
+
+    Animated* persona1;
+    Animated* persona2;
+    Animated* persona3;
 
     Material steel;
     Material plastic;
@@ -580,6 +581,7 @@ extern bool g_runTestEnvironment;
 //Variables para Tierra y Glaciar
 extern float Time;
 extern float TimeA1;
+extern const float TIEMPO_LUNA;
 
 extern float transparenciaC;
 extern float wavesTime;
@@ -610,8 +612,10 @@ extern const glm::vec3 aguaCentro1;
 extern const glm::vec3 aguaCentro2;
 
 extern bool iniciadoOlas;
+extern bool iniciadoOlas2;
 extern bool Olas;
 extern double inicioOlas;
+extern double inicioOlas2;
 extern double duracionOlas;
 extern float dismin;
 

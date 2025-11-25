@@ -330,12 +330,12 @@ void processInput(GLFWwindow* window) {
             */
             
         }
-       
+        
         if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
-            Time += 0.05f;
+            Time += TIEMPO_LUNA*deltaTime;
         }
         if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
-            Time -= 0.05f;
+            Time -= TIEMPO_LUNA * deltaTime;
         }
 
 
