@@ -202,7 +202,24 @@ glm::vec3 posicionA1(-0.6f, 6.0f, 5.0f);
 glm::vec3 posicionCarga(0.0f, 47.0f, 4.0f);
 glm::vec3 posicionInicioG(0.0f, 2.0f, 10.0f);
 glm::vec3 posicionOrigen(0.0f, 0.0f, 0.0f);
+<<<<<<< Updated upstream
 glm::vec3 posicionEscenario1(0.0f, 40.0f, 340.0f);
+=======
+glm::vec3 posicionEscenario1(0.0f, 40.0f, 250.0f);
+
+const glm::vec3 aguaCentro1(0.0f, 0.0f, desp);
+const glm::vec3 aguaCentro2(0.0f, 0.0f, desp + -42.4f);
+
+bool iniciadoOlas = false;
+bool iniciadoOlas2 = false;
+bool Olas = false;
+double inicioOlas;
+double inicioOlas2;
+double duracionOlas = 0.5;
+float dismin=0;
+>>>>>>> Stashed changes
+
+const float TIEMPO_LUNA = 4.0f;
 
 // =============================================================================================
 // === VARIABLES GLOBALES PARA PERSONAJE Y CÁMARA 3RA PERSONA ===
@@ -286,8 +303,6 @@ int main() {
     delete fa.chopped_once_model;
     delete fa.burning_tree_model;
     delete fa.chopped_twice_model;
-    delete fa.cubeenv;
-    delete fa.cubeenv_noche;
     delete fa.sun_model;
     delete fa.moon_model;
     delete fa.cloud_model;
@@ -295,6 +310,101 @@ int main() {
 
     delete fa.sphereDay;
 	delete fa.sphereNight;
+
+    delete ea.Tierra;
+    delete ea.Canada;
+    delete ea.Luna;
+    delete ea.cubeenv_noche;
+    delete ea.sol;
+
+    delete ma.Texto1;
+    delete ma.Texto2;
+    delete ma.Texto3;
+    delete ma.Texto4;
+    delete ma.Texto5;
+    delete ma.Texto6;
+    delete ma.HojaArce_Menu;
+    delete ma.Fondo_Menu;
+
+    delete ga.BarraAzul;
+    delete ga.BarraRoja;
+    delete ga.TerAzulBase;
+    delete ga.TerRojoBase;
+    delete ga.TrozoH1;
+    delete ga.TrozoH2;
+    delete ga.Agua;
+    delete ga.Iceberg;
+    delete ga.PlacaHielo;
+    delete ga.Glaciares;
+
+    delete ta.car;
+    delete ta.luminaire;
+    delete ta.stop;
+    delete ta.floor;
+    delete ta.suelo;
+    delete ta.suelo_verde;
+    delete ta.metales;
+    delete ta.objMadera;
+    delete ta.objCristales;
+    delete ta.objPlasticos;
+    delete ta.objConcreto;
+    delete ta.objLlantas;
+    delete ta.objLadrillo;
+    delete ta.bandera;
+    delete ta.grafitis;
+    delete ta.luzSemaforo;
+    delete ta.co2;
+    delete ta.arboles;
+
+    //BASURAS
+    delete ta.basura1;
+    delete ta.basura2;
+    delete ta.basura3;
+    delete ta.basura4;
+    delete ta.basura5; 
+    delete ta.basura6;
+
+    //BOTES
+    delete ta.bote1; 
+    delete ta.bote2;
+    delete ta.bote3;
+    delete ta.bote4;
+    delete ta.bote5; 
+    delete ta.bote6;
+    delete ta.bote7;
+    delete ta.bote8;
+
+    //CONTENEDORES
+    delete ta.contenedor1;
+    delete ta.contenedor2; 
+    delete ta.contenedor3;
+    delete ta.contenedor4; 
+    delete ta.contenedor5;
+    delete ta.contenedor6;
+    delete ta.contenedor7;
+    delete ta.contenedor8;
+
+    //MUEBLES
+    delete ta.mueble1;
+    delete ta.mueble2;
+    delete ta.mueble3; 
+    delete ta.mueble4;
+    delete ta.mueble5; 
+    delete ta.mueble6;
+    delete ta.mueble7;
+    delete ta.mueble8;
+    delete ta.mueble9;
+    delete ta.mueble10;
+
+    //Modelos IA
+    delete ta.hopstial;
+    delete ta.fabrica;
+    delete ta.policia;
+    delete ta.tienda;
+    delete ta.rascacielos;
+    delete ta.edificio2;
+    delete ta.banco;
+    delete ta.camion;
 
     // Limpiar Personajes
     if (g_demiModel) delete g_demiModel;

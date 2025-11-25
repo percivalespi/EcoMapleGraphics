@@ -283,12 +283,12 @@ void processInput(GLFWwindow* window) {
                 if ((temperatura > -40.00 && !calor) || (temperatura > 0.00 && calor))temperatura -= 0.35f;
             }
         }
-       
+        
         if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
-            Time += 0.05f;
+            Time += TIEMPO_LUNA*deltaTime;
         }
         if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
-            Time -= 0.05f;
+            Time -= TIEMPO_LUNA * deltaTime;
         }
     }
     

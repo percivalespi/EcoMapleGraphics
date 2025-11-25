@@ -18,6 +18,50 @@ void initializeModelsTest(TestAssets& ta) {
 
     ta.luzSemaforo = new Model("models/city/Prod/luzSemaforo.fbx");
     ta.co2 = new Model("models/city/Prod/CO2.fbx");
+<<<<<<< Updated upstream
+=======
+    ta.arboles = new Model("models/city/Prod/arbolesv2.fbx");
+
+    //BASURAS
+    ta.basura1 = new Model("models/city/Prod/basura_norte_azul.fbx");
+    ta.basura2 = new Model("models/city/Prod/basura_norte_cafe.fbx");
+    ta.basura3 = new Model("models/city/Prod/basura_norte_rojo.fbx");
+    ta.basura4 = new Model("models/city/Prod/basura_sur_blanca.fbx"); 
+    ta.basura5 = new Model("models/city/Prod/basura_sur_ladrillo.fbx");
+    ta.basura6 = new Model("models/city/Prod/basura_sur_rojo.fbx");
+
+    //BOTES
+    ta.bote1 = new Model("models/city/Prod/bote_norte_azul.fbx");
+    ta.bote2 = new Model("models/city/Prod/bote_norte_cafe.fbx");
+    ta.bote3 = new Model("models/city/Prod/bote_norte_gris.fbx");
+    ta.bote4 = new Model("models/city/Prod/bote_norte_rojo.fbx");
+    ta.bote5 = new Model("models/city/Prod/bote_sur_blanca.fbx");
+    ta.bote6 = new Model("models/city/Prod/bote_sur_gris.fbx");
+    ta.bote7 = new Model("models/city/Prod/bote_sur_ladrillo.fbx");
+    ta.bote8 = new Model("models/city/Prod/bote_sur_rojo.fbx");
+
+    //CONTENEDORES
+    ta.contenedor1 = new Model("models/city/Prod/contenedor_norte_azul.fbx");
+    ta.contenedor2 = new Model("models/city/Prod/contenedor_norte_cafe.fbx");
+    ta.contenedor3 = new Model("models/city/Prod/contenedor_norte_gris.fbx");
+    ta.contenedor4 = new Model("models/city/Prod/contenedor_norte_rojo.fbx");
+    ta.contenedor5 = new Model("models/city/Prod/contenedor_sur_blanco.fbx");
+    ta.contenedor6 = new Model("models/city/Prod/contenedor_sur_gris.fbx");
+    ta.contenedor7 = new Model("models/city/Prod/contenedor_sur_ladrillo.fbx");
+    ta.contenedor8 = new Model("models/city/Prod/contenedor_sur_rojo.fbx");
+
+    //MUEBLES
+    ta.mueble1 = new Model("models/city/Prod/mueble_norte_cafe_1.fbx");
+    ta.mueble2 = new Model("models/city/Prod/mueble_norte_cafe_2.fbx");
+    ta.mueble3 = new Model("models/city/Prod/mueble_norte_rojo_1.fbx");
+    ta.mueble4 = new Model("models/city/Prod/mueble_norte_rojo_2.fbx");
+    ta.mueble5 = new Model("models/city/Prod/mueble_norte_rojo_3.fbx");
+    ta.mueble6 = new Model("models/city/Prod/mueble_norte_rojo_4.fbx");
+    ta.mueble7 = new Model("models/city/Prod/mueble_sur_rojo_1.fbx");
+    ta.mueble8 = new Model("models/city/Prod/mueble_sur_rojo_2.fbx");
+    ta.mueble9 = new Model("models/city/Prod/mueble_sur_rojo_3.fbx");
+    ta.mueble10 = new Model("models/city/Prod/mueble_sur_rojo_4.fbx");
+>>>>>>> Stashed changes
 
     //Modelos IA
 
@@ -30,6 +74,10 @@ void initializeModelsTest(TestAssets& ta) {
     ta.banco = new Model("models/city/Prod/banco.fbx");
     ta.policia = new Model("models/city/Prod/policia.fbx");
     ta.camion = new Model("models/city/Prod/Camionv2.fbx");
+
+	ta.persona1 = new Animated("models/city/Prod/persona1.fbx");
+    ta.persona2 = new Animated("models/city/Prod/persona2.fbx");
+    ta.persona3 = new Animated("models/city/Prod/persona3.fbx");
 }
 
 /*                                         PROPIEDADES DE LOS MATERIALES CIUDAD                                    */
@@ -175,8 +223,6 @@ void initializeModelsForest(ForestAssets& fa) {
     fa.moon_model = new Model("models/moon.fbx");
     fa.cloud_model = new Model("models/cloud.fbx");
     fa.leaf_model = new Model("models/hojaarce.fbx");
-    fa.cubeenv = new Model("models/mycube.fbx");
-    fa.cubeenv_noche = new Model("models/noche/mycube.fbx");
 
     fa.sphereDay = new Model("models/esfera_cielo.fbx");
     fa.sphereNight = new Model("models/esfera_noche.fbx");
@@ -209,13 +255,6 @@ void initializeModelsForest(ForestAssets& fa) {
     }
     if (!fa.skull_model) { // <-- NUEVO
         std::cerr << "ERROR: Could not load Craneo.fbx" << std::endl;
-    }
-    // CORREGIDO: Usar -> en punteros
-    if (!fa.cubeenv || fa.cubeenv->meshes.empty() || fa.cubeenv->meshes[0].textures.empty()) {
-        std::cout << "ERROR: Skybox DIA" << std::endl;
-    }
-    if (!fa.cubeenv_noche || fa.cubeenv_noche->meshes.empty() || fa.cubeenv_noche->meshes[0].textures.empty()) {
-        std::cout << "ERROR: Skybox NIGHT" << std::endl;
     }
 }
 
@@ -260,13 +299,6 @@ void initializeModelsEspacio(EspacioAssets& ea) {
     ea.cubeenv_noche = new Model("models/noche_tierra.fbx");
     ea.sol = new Model("models/iceland/Sol.fbx");
 
-    // CORREGIDO: Usar -> en punteros
-    if (!fa.cubeenv || fa.cubeenv->meshes.empty() || fa.cubeenv->meshes[0].textures.empty()) {
-        std::cout << "ERROR: Skybox DIA" << std::endl;
-    }
-    if (!fa.cubeenv_noche || fa.cubeenv_noche->meshes.empty() || fa.cubeenv_noche->meshes[0].textures.empty()) {
-        std::cout << "ERROR: Skybox NIGHT" << std::endl;
-    }
 }
 
 void initilizeMaterialsEspacio(EspacioAssets& ea) {

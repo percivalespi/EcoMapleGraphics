@@ -46,24 +46,7 @@ static void drawObject(Shader* shader, Model* model, const Material& material, c
 }
 
 void renderTestEnvironment(const glm::mat4& projection, const glm::mat4& view) {
-    if (skyboxShader != nullptr && skyboxShader->ID != 0) {
-        glDepthFunc(GL_LEQUAL);
-        skyboxShader->use();
-        skyboxShader->setMat4("projection", projection);
-        glm::mat4 view_skybox = glm::mat4(glm::mat3(view));
-        skyboxShader->setMat4("view", view_skybox);
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(1000.0f));
-        Model* currentSkybox = isDay ? fa.cubeenv : fa.cubeenv_noche;
-        if (currentSkybox != nullptr) {
-            currentSkybox->Draw(*skyboxShader);
-        }
-        glDepthFunc(GL_LESS);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, 0);
 
-    }
     setupStaticShader(mLightsShader, projection, view);
     setupShaderLights(mLightsShader, gLights);
 
@@ -96,6 +79,91 @@ void renderTestEnvironment(const glm::mat4& projection, const glm::mat4& view) {
     drawObject(mLightsShader, ta.camion, ta.plastic, model);
     glUseProgram(0);
 
+
+    //Personas en la ciudad
+    {
+        ta.persona1->UpdateAnimation(deltaTime);
+
+        dynamicShader->use();
+        dynamicShader->setMat4("projection", projection);
+        dynamicShader->setMat4("view", view);
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(17.804f, -2.0f, (-WORLD_SIZE * 35) - 2.5 -51.77));
+        model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(0.00035f, 0.00035f, 0.00035f));
+
+        dynamicShader->setMat4("model", model);
+        dynamicShader->setMat4("gBones", MAX_RIGGING_BONES, ta.persona1->gBones);
+        ta.persona1->Draw(*dynamicShader);
+
+        glm::mat4 model2 = glm::mat4(1.0f);
+        model2 = glm::translate(model2, glm::vec3(-223.39f, -2.0f, (-WORLD_SIZE * 35) - 2.5 + 6.22));
+        model2 = glm::rotate(model2, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        model2 = glm::scale(model2, glm::vec3(0.00035f, 0.00035f, 0.00035f));
+        dynamicShader->setMat4("model", model2);
+        dynamicShader->setMat4("gBones", MAX_RIGGING_BONES, ta.persona1->gBones);
+        ta.persona1->Draw(*dynamicShader);
+
+        glm::mat4 model3 = glm::mat4(1.0f);
+        model3 = glm::translate(model3, glm::vec3(196.73f, -2.0f, (-WORLD_SIZE * 35) - 2.5 + 53.95));
+        model3 = glm::rotate(model3, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        model3 = glm::scale(model3, glm::vec3(0.00035f, 0.00035f, 0.00035f));
+        dynamicShader->setMat4("model", model3);
+        dynamicShader->setMat4("gBones", MAX_RIGGING_BONES, ta.persona1->gBones);
+        ta.persona1->Draw(*dynamicShader);
+    }
+    glUseProgram(0);
+    {
+        ta.persona2->UpdateAnimation(deltaTime);
+
+        dynamicShader->use();
+        dynamicShader->setMat4("projection", projection);
+        dynamicShader->setMat4("view", view);
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(17.2f, -2.0f, (-WORLD_SIZE * 35) - 2.5 - 48.7));
+        model = glm::rotate(model, glm::radians(115.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(0.00035f, 0.00035f, 0.00035f));
+
+        dynamicShader->setMat4("model", model);
+        dynamicShader->setMat4("gBones", MAX_RIGGING_BONES, ta.persona2->gBones);
+        ta.persona2->Draw(*dynamicShader);
+
+        glm::mat4 model2 = glm::mat4(1.0f);
+        model2 = glm::translate(model2, glm::vec3(-223.39f, -2.0f, (-WORLD_SIZE * 35) - 2.5 + 38.2));
+        model2 = glm::rotate(model2, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        model2 = glm::scale(model2, glm::vec3(0.00035f, 0.00035f, 0.00035f));
+        dynamicShader->setMat4("model", model2);
+        dynamicShader->setMat4("gBones", MAX_RIGGING_BONES, ta.persona2->gBones);
+        ta.persona2->Draw(*dynamicShader);
+    }
+    glUseProgram(0);
+    {
+        ta.persona3->UpdateAnimation(deltaTime);
+
+        dynamicShader->use();
+        dynamicShader->setMat4("projection", projection);
+        dynamicShader->setMat4("view", view);
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(50.9f, -2.0f, (-WORLD_SIZE * 35) - 2.5 - 58.3));
+        model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(0.00035f, 0.00035f, 0.00035f));
+
+        dynamicShader->setMat4("model", model);
+        dynamicShader->setMat4("gBones", MAX_RIGGING_BONES, ta.persona3->gBones);
+        ta.persona3->Draw(*dynamicShader);
+
+        glm::mat4 model2 = glm::mat4(1.0f);
+        model2 = glm::translate(model2, glm::vec3(196.73f, -2.0f, (-WORLD_SIZE * 35) - 2.5 + 78.3));
+        model2 = glm::rotate(model2, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        model2 = glm::scale(model2, glm::vec3(0.00035f, 0.00035f, 0.00035f));
+        dynamicShader->setMat4("model", model2);
+        dynamicShader->setMat4("gBones", MAX_RIGGING_BONES, ta.persona3->gBones);
+        ta.persona3->Draw(*dynamicShader);
+    }
+    glUseProgram(0);
 
 }
 
@@ -455,11 +523,18 @@ void renderGlaciarScene(const glm::mat4& projection, const glm::mat4& view) {
     }
 
     {
-        wavesShader2->use();
+        if (Olas) {
+            wavesShader2->use();
+        }
+        else {
+            wavesShader->use();
+        }
+        
 
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, desp));
         model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+<<<<<<< Updated upstream
         model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
 
         wavesShader2->setMat4("projection", projection);
@@ -480,6 +555,52 @@ void renderGlaciarScene(const glm::mat4& projection, const glm::mat4& view) {
         ga.Agua->Draw(*wavesShader2);
 
         wavesTime += 0.01f;
+=======
+        //model = glm::scale(model, glm::vec3(10.97f, 9.548f, 1.0f));
+        model = glm::scale(model, glm::vec3(10.0f, 10.0f, 10.0f));
+        
+        if (Olas) {
+            wavesShader2->setMat4("projection", projection);
+            wavesShader2->setMat4("view", view);
+
+            wavesShader2->setMat4("model", model);
+
+            wavesShader2->setFloat("time", wavesTime);
+            if (!iniciadoOlas2)inicioOlas2 = glfwGetTime();
+			iniciadoOlas2 = true;
+            double now = glfwGetTime(); // reloj estable
+            wavesTime = (now - inicioOlas2) / duracionOlas;
+            float x = (now - inicioOlas2) / 10.0f;
+            x = glm::clamp(x, 0.0f, 2.5f);
+            wavesShader2->setFloat("radius", 2.5-x);
+            wavesShader2->setFloat("height", 2.5-x);
+            wavesShader2->setVec3("center1", aguaCentro1);
+            wavesShader2->setVec3("center2", aguaCentro2);
+            wavesShader2->setFloat("texFlowScale", 0.04f);
+
+            dismin += 0.05f;
+            iniciadoOlas = false;
+            ga.Agua->Draw(*wavesShader2);
+        }
+        else {
+            wavesShader->setMat4("projection", projection);
+            wavesShader->setMat4("view", view);
+
+            wavesShader->setMat4("model", model);
+
+            wavesShader->setFloat("time", wavesTime);
+            if (!iniciadoOlas)inicioOlas = glfwGetTime();
+            iniciadoOlas = true;
+            double now = glfwGetTime(); // reloj estable
+            wavesTime = (now - inicioOlas) / (duracionOlas*8);
+            wavesShader->setFloat("height", 0.06);
+
+            dismin = 0.0f;
+            iniciadoOlas2 = false;
+            ga.Agua->Draw(*wavesShader);
+        }
+
+>>>>>>> Stashed changes
     }
     glUseProgram(0);
     // Descenso de osos 1 y 2 en función del derretimiento
@@ -526,7 +647,11 @@ void renderGlaciarScene(const glm::mat4& projection, const glm::mat4& view) {
         dynamicShader->setMat4("view", view);
 
         glm::mat4 model = glm::mat4(1.0f);
+<<<<<<< Updated upstream
         model = glm::translate(model, glm::vec3(-1.0f, 6.4+osoDown, -42.4+desp));
+=======
+        model = glm::translate(model, glm::vec3(0.0f, 7.9+osoDown, -42.4+desp));
+>>>>>>> Stashed changes
         model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
 
