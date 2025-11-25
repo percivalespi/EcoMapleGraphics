@@ -108,8 +108,80 @@ struct UIAssets {//Buffers
     unsigned int highlightTextureID = 0;
     unsigned int legendFireTextureID = 0;
     unsigned int legendTreeTextureID = 0;
+
+    unsigned int warningFireID = 0;
+    unsigned int tex_intro_wasd = 0;
+    unsigned int tex_intro_mouse = 0;
+    unsigned int tex_intro_descender = 0;
+    unsigned int tex_intro_volar = 0;
+    unsigned int tex_intro_acercamiento = 0;
+
+    unsigned int tex_glaciar_bienvenida = 0;
+    unsigned int tex_glaciar_bosque = 0;
+    unsigned int tex_glaciar_ciclo = 0;
+
+
+    // --- NUEVO: Texturas Tutorial Bosque ---
+    unsigned int tex_f_plantar = 0;
+    unsigned int tex_f_talar = 0;
+    unsigned int tex_f_camara3 = 0;
+    unsigned int tex_f_incendio = 0;
+
+    // --- NUEVO: Texturas Condicionales ---
+    unsigned int tex_c_cambio_pj = 0;      // M y 3ra persona
+    unsigned int tex_c_parar_fuego = 0;    // Incendio activo
+    unsigned int tex_c_polos_derretidos = 0; // Glaciares muertos
+    unsigned int tex_c_alerta_temp = 0;    // Temperatura alta
+
+    // --- TEXTURA BLOQUEO ---
+    unsigned int tex_bloqueado = 0;
+
+    unsigned int tex_solid_green = 0; // Barra de vida
+    unsigned int tex_solid_gray = 0;  // Fondo de la barra
+    unsigned int tex_solid_red = 0;   // (Opcional) Para cuando esté crítica
 };
 
+struct IntroSequence {
+    bool active = true;       // Empieza activa al iniciar el programa
+    float timer = 0.0f;       // Cronómetro interno
+    int currentStage = 0;     // Qué imagen estamos mostrando (0 a 4)
+
+    // Configuración de tiempos (segundos por mensaje)
+    const float timePerImage = 6.0f;
+    const int totalStages = 5; // wasd, mouse, descender, volar, acercamiento
+};
+
+// --- NUEVO: Estructura para controlar la animación de desvanecimiento ---
+struct FadeMessage {
+    bool active = false;      // ¿Se está mostrando?
+    float timer = 0.0f;       // Tiempo transcurrido
+    float duration = 5.0f;    // Duración total (ej. 5 segundos)
+    float currentAlpha = 0.0f;// Transparencia actual (0 a 1)
+};
+
+struct GlacierSequence {
+    bool active = false;      // Empieza FALSO (espera a que llegues)
+    bool hasPlayed = false;   // Para que solo salga UNA vez
+    float timer = 0.0f;
+
+    const float timePerImage = 5.0f; // 5 segundos por mensaje
+    const int totalStages = 3;       // Son 3 imágenes
+};
+
+struct ForestSequence {
+    bool active = false;
+    bool hasPlayed = false;
+    float timer = 0.0f;
+
+    const float timePerImage = 5.0f;
+    const int totalStages = 4; // Plantar -> Talar -> Cam3 -> Incendio
+};
+
+extern ForestSequence g_forestSeq;
+extern float g_thirdPersonTimer;
+extern GlacierSequence g_glacierSeq;
+extern IntroSequence g_introSeq;
+extern FadeMessage g_fireMessageState;
 // --- VARIABLES GLOBALES: PERSONAJE DEMI Y CÁMARA ---
 extern bool g_isThirdPerson;
 extern bool g_pressM;
@@ -221,6 +293,9 @@ struct ForestAssets {
 };
 
 struct TestAssets { //Elementos Para el entorno de Prueba
+
+    bool respawn;
+
     Light light01;
     Light light02;
     Model* car;
@@ -233,8 +308,19 @@ struct TestAssets { //Elementos Para el entorno de Prueba
     //Modelos
     Model* suelo, *suelo_verde, *metales, *objMadera, *objCristales;
     Model* objPlasticos, *objConcreto, *objLlantas, *objLadrillo;
-    Model* bandera, *grafitis, *luzSemaforo, *co2;
+    Model* bandera, *grafitis, *luzSemaforo, *co2, *arboles;
 
+    //BASURAS
+    Model* basura1, * basura2, * basura3, * basura4, * basura5, * basura6;
+
+    //BOTES
+    Model* bote1, * bote2, * bote3, * bote4, * bote5, * bote6, * bote7, * bote8;
+
+    //CONTENEDORES
+    Model* contenedor1, * contenedor2, * contenedor3, * contenedor4, * contenedor5, * contenedor6, * contenedor7, * contenedor8;
+
+    //MUEBLES
+    Model* mueble1, * mueble2, * mueble3, * mueble4, * mueble5, * mueble6, * mueble7, * mueble8, * mueble9, * mueble10; 
 
     //Modelos IA
     Model* hopstial, * fabrica, * policia, * tienda, * rascacielos, *edificio2, *banco, *camion;
@@ -254,6 +340,8 @@ struct TestAssets { //Elementos Para el entorno de Prueba
     Material plastic;
     Material traslucido;
     Material madera;
+
+    unsigned int cityTreesVBO = 0;
 };
 
 struct EspacioAssets {
@@ -418,10 +506,20 @@ extern Shader* basicShader;
 extern Shader* wavesShader;
 extern Shader* wavesShader2;
 
+extern Shader* wavesShader2;
+extern Shader* singleTreeShader;
+
+
+extern Shader* smoke;
+
+extern float timeSmoke;
+
 extern bool isDay;
 
 // Cubemap ambiental para Fresnel
 extern unsigned int g_envCubemapTexID; // <- NUEVO
+extern std::vector<unsigned int> g_envCubemaps;
+extern int g_envIndex;
 
 // Modelo de cristal (edificio/panel)
 extern Model* g_glassModel;
@@ -465,9 +563,14 @@ extern bool p_key_pressed;
 extern bool f_key_pressed;
 extern bool g_key_pressed;
 extern bool z_key_pressed;
+extern bool r_key_pressed;
 extern const float max_plant_distance;
 extern bool isFireActive;
 extern float fireStartTime;
+
+//Variables para el control del volumen
+extern bool plus_key_pressed;  
+extern bool minus_key_pressed;
 
 // --- Audio ---
 extern ISoundEngine* SoundEngine;
@@ -497,14 +600,14 @@ extern float temperatura;
 extern float barraTF;
 extern float barraTC;
 
+extern float desp;
+
 extern int escena;
 
 extern bool menu;
 extern bool animacion1;
 extern bool calor;
 
-<<<<<<< Updated upstream
-=======
 extern const glm::vec3 aguaCentro1;
 extern const glm::vec3 aguaCentro2;
 
@@ -516,7 +619,6 @@ extern double inicioOlas2;
 extern double duracionOlas;
 extern float dismin;
 
->>>>>>> Stashed changes
 // === Variables globales para derretimiento en escena 1 ===
 extern float glacierScaleY;          // escala vertical de Glaciares (1 → 0)
 extern float meltSpeedBase;         // factor base de derretimiento por °C
@@ -560,4 +662,13 @@ struct MenuAnim {
 extern MenuAnim g_menu;
 
 
+extern int rrr;
+extern int bandera;
+
+extern float temperatura_externa;
+
+// Para el respawn de los botes viejos
+extern bool g_isRReady;       
+extern float g_rTimer;
+extern const float R_COOLDOWN_TIME; // El tiempo objetivo (5 minutos)
 #endif

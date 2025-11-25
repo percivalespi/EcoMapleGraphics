@@ -1,5 +1,6 @@
 ﻿#include "input.h"
 #include "mechanic.h"
+#include "audio.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     // --- NUEVO: Actualizar dimensiones globales y viewport ---
@@ -26,8 +27,6 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
     camera.ProcessMouseScroll((float)yoffset);
 }
-
-#include "input.h"
 
 // --- NUEVO: Implementaci�n de la funci�n para pantalla completa ---
 void toggleFullscreen(GLFWwindow* window) {
@@ -75,6 +74,47 @@ void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
+    
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
+        if (!r_key_pressed) {   // Se ejecuta UNA sola vez
+            rrr = 1;
+            g_isRReady = false;
+
+            if (bandera == 0) {
+                temperatura_externa -= 30.0f;
+                bandera = 1;
+            }
+
+            r_key_pressed = true;
+        }
+    }
+    else {
+        r_key_pressed = false;  // Se libera la tecla
+    }
+
+
+
+    //Sube --> el volumen al presionar (U)
+    if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
+        if (!plus_key_pressed) { 
+            changeGlobalVolume(0.1f); // Sube 10%
+            plus_key_pressed = true;  
+        }
+    }
+    else {
+        plus_key_pressed = false; 
+    }
+
+    //Baja --> al presionar (J)
+    if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
+        if (!minus_key_pressed) { 
+            changeGlobalVolume(-0.1f); // Baja 10%
+            minus_key_pressed = true;   
+        }
+    }
+    else {
+        minus_key_pressed = false;     }
+
 
     // --- CAMBIO DE PERSONAJE (1 y 2) ---
     if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) {
@@ -91,8 +131,12 @@ void processInput(GLFWwindow* window) {
             g_pressM = true;
             if (g_isThirdPerson) {
                 // Al entrar, ajustamos un poco la c�mara para ver al personaje
+                g_demiPos = glm::vec3(camera.Position.x, 0.0f, camera.Position.z);
                 camera.Pitch = -15.0f;
                 camera.ProcessMouseMovement(0, 0); // Actualizar vectores
+
+                // --- NUEVO: ACTIVAR EL MENSAJE POR 5 SEGUNDOS ---
+                g_thirdPersonTimer = 5.0f;
             }
         }
     }
@@ -275,6 +319,7 @@ void processInput(GLFWwindow* window) {
             if (sunElevationAngle < 0.0f) {
                 sunElevationAngle += 360.0f;
             }
+            /*
             if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
                 if (temperatura < 40.00)temperatura += 0.35f;
                 if (temperatura > 0)calor = true;
@@ -282,6 +327,8 @@ void processInput(GLFWwindow* window) {
             if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS) {
                 if ((temperatura > -40.00 && !calor) || (temperatura > 0.00 && calor))temperatura -= 0.35f;
             }
+            */
+            
         }
         
         if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
@@ -290,6 +337,8 @@ void processInput(GLFWwindow* window) {
         if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
             Time -= TIEMPO_LUNA * deltaTime;
         }
+
+
     }
     
 }
@@ -320,6 +369,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
             for (size_t t_idx = 0; t_idx < terrain_chunks[c_idx].tree_instances.size(); ++t_idx) {
                 const auto& tree_instance = terrain_chunks[c_idx].tree_instances[t_idx];
                 if (tree_instance.state == TreeState::CHOPPED_TWICE) {
+                    temperatura += 1;
                     continue;
                 }
 
@@ -354,6 +404,8 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
                     hit_tree.state = TreeState::CHOPPED_ONCE;
 
                     g_currentLivingTrees--; // <-- PIERDE VIDA POR TALA
+                    //temperatura += 1.0f;
+
 
                     int leaves_deactivated = 0;
                     for (Leaf& leaf : falling_leaves) {
@@ -472,6 +524,8 @@ void UpdateAnim1(GLFWwindow* window)
         g_anim1.active = false;
         escena = 1;
         animacion1 = false;
+        g_introSeq.active = false;
+
         camera.Position = posicionCarga;
         StartMenu(/*lookAtDestino*/ glm::vec3(0.0f, -0.20f, -1.0f),   // o punto objetivo
             /*duración por línea*/ 1.0f);
@@ -536,6 +590,17 @@ void Transicion(GLFWwindow* window) {
                             else {
                                 menu = false;
                                 camera.Position = posicionEscenario1;
+
+                                // --- ACTIVAR SECUENCIA GLACIARES ---
+                                // Como ya matamos la g_introSeq en UpdateAnim1,
+                                // esta será la única activa.
+                                if (!g_glacierSeq.hasPlayed) {
+                                    g_glacierSeq.active = true;
+                                    g_glacierSeq.hasPlayed = true;
+                                    g_glacierSeq.timer = 0.0f; // Reiniciar timer por seguridad
+                                }
+                                // -----------------------------------
+
                                 return;
                             }
                         }
@@ -550,3 +615,4 @@ void Transicion(GLFWwindow* window) {
     camera.Right = glm::normalize(glm::cross(camera.Front, worldUp));
     camera.Up = glm::normalize(glm::cross(camera.Right, camera.Front));
 }
+

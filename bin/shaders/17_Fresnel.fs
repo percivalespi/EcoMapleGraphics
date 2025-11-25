@@ -28,9 +28,5 @@ void main(void)
     vec4 fresnelColor = reflectionCoefficient * reflectedColor +
                         (1.0 - reflectionCoefficient) * refractedColor;
 
-    // Si quisieras teñir ligeramente por una textura del modelo:
-    // vec4 texel = texture(texture_diffuse1, TexCoords);
-    // fresnelColor.rgb = mix(fresnelColor.rgb, texel.rgb, 0.1);
-
     FragColor = vec4(fresnelColor.rgb, 1.0);
 }

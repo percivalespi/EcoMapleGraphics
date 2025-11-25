@@ -1,5 +1,4 @@
 /*
-*
 * ProyectoFinal 0.0.1-alpha - Main.cpp
 * Integración: Cámara 3ra Persona + Cambio de Personaje (Demi/Miku)
 */
@@ -9,6 +8,7 @@
 #include "mechanic.h"
 #include "render.h"
 #include "src_manager.h"
+#include "audio.h"
 
 // Bandera Para activar entorno de prueba
 bool g_runTestEnvironment = false;
@@ -19,6 +19,8 @@ bool Update();
 void processInput2(GLFWwindow* window);
 
 /* ------------------------------------------ Variables Globales ------------------------------------------------------ */
+int rrr=0;
+int bandera = 0;
 
 // --> Ventana
 GLFWwindow* window;
@@ -92,10 +94,17 @@ Shader* basicShader;
 Shader* wavesShader;
 Shader* wavesShader2;
 Shader* lambertShader;
+Shader* lineShader = nullptr;
+Shader* singleTreeShader;
+Shader* smoke;
+
+float timeSmoke = 0.0f;
 
 //Variables para Fresnel
 unsigned int g_envCubemapTexID = 0;
 Model* g_glassModel = nullptr;
+std::vector<unsigned int> g_envCubemaps;
+int g_envIndex = 0;
 
 // --> Estado del Mundo
 std::vector<Chunk> terrain_chunks;
@@ -146,7 +155,10 @@ bool p_key_pressed = false;
 bool f_key_pressed = false;
 bool g_key_pressed = false;
 bool z_key_pressed = false;
+bool plus_key_pressed = false;
+bool minus_key_pressed = false;
 bool isFireActive = false;
+bool r_key_pressed = false;
 float fireStartTime = 0.0f;
 
 // Vector de Luces
@@ -187,6 +199,8 @@ bool calor = false;
 CamAni g_anim1;
 MenuAnim g_menu;
 
+float desp = 359.5f;
+
 // --> Glaciar variables
 float glacierScaleY = 1.0f;
 float meltSpeedBase = 0.01f;
@@ -202,9 +216,6 @@ glm::vec3 posicionA1(-0.6f, 6.0f, 5.0f);
 glm::vec3 posicionCarga(0.0f, 47.0f, 4.0f);
 glm::vec3 posicionInicioG(0.0f, 2.0f, 10.0f);
 glm::vec3 posicionOrigen(0.0f, 0.0f, 0.0f);
-<<<<<<< Updated upstream
-glm::vec3 posicionEscenario1(0.0f, 40.0f, 340.0f);
-=======
 glm::vec3 posicionEscenario1(0.0f, 40.0f, 250.0f);
 
 const glm::vec3 aguaCentro1(0.0f, 0.0f, desp);
@@ -217,7 +228,6 @@ double inicioOlas;
 double inicioOlas2;
 double duracionOlas = 0.5;
 float dismin=0;
->>>>>>> Stashed changes
 
 const float TIEMPO_LUNA = 4.0f;
 
@@ -231,23 +241,35 @@ bool g_pressM = false;
 
 // Variables de los Modelos
 Animated* g_demiModel = nullptr;
-Animated* g_mikuModel = nullptr; 
+Animated* g_mikuModel = nullptr;
 //Model* camionBasura = nullptr;
 
 // Estado del Jugador
 int g_activeCharacter = 1; // 1=Demi, 2=Miku
-glm::vec3 g_demiPos(0.0f, 0.0f, 0.0f); // Posición compartida
+glm::vec3 g_demiPos(0.0f, 0.0f, 250.0f); // Posición compartida
 float g_demiRotY = 0.0f;
 bool g_demiMoving = false;
 
 // Constantes (Definición)
 const float DEMI_SPEED = 10.0f;
 const float DEMI_SCALE = 0.04f;
-const float MIKU_SCALE = 0.04f; 
+const float MIKU_SCALE = 0.04f;
 const float DEMI_CAM_DIST = 15.0f;
 const float DEMI_OFFSET_Y = 0.0f;
-
+float g_thirdPersonTimer = 0.0f;
+// main.cpp (sección de variables globales)
+FadeMessage g_fireMessageState;
+IntroSequence g_introSeq;
+GlacierSequence g_glacierSeq;
+ForestSequence g_forestSeq;
 // =============================================================================================
+
+
+// Respawn botes de basura.
+bool g_isRReady = true;      
+float g_rTimer = 0.0f;
+const float R_COOLDOWN_TIME = 30.0f; // 5 minutos * 60 segundos = 300.0f
+float temperatura_externa = 0.0f;
 
 int main() {
     if (!Start()) {
@@ -255,13 +277,17 @@ int main() {
         return -1;
     }
 
+    lastFrame = (float)glfwGetTime();
+
     while (!glfwWindowShouldClose(window)) {
         if (!Update()) {
             break;
         }
     }
 
-    // Limpieza
+
+
+    // Limpieza existente
     if (ui.crosshairVAO != 0) { glDeleteVertexArrays(1, &ui.crosshairVAO); ui.crosshairVAO = 0; }
     if (ui.crosshairVBO != 0) { glDeleteBuffers(1, &ui.crosshairVBO); ui.crosshairVBO = 0; }
     if (ui.uiVAO != 0) { glDeleteVertexArrays(1, &ui.uiVAO); ui.uiVAO = 0; }
@@ -309,7 +335,7 @@ int main() {
     delete fa.leaf_model;
 
     delete fa.sphereDay;
-	delete fa.sphereNight;
+    delete fa.sphereNight;
 
     delete ea.Tierra;
     delete ea.Canada;
@@ -420,7 +446,7 @@ bool Start() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "EcoMapleGrahics v1.0.0-alpha", NULL, NULL);
+    window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "EcoMapleGrahics v1.0 - Consecuencias Efecto Invernadero", NULL, NULL);
     if (window == NULL) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -455,6 +481,11 @@ bool Start() {
     phongShader2 = new Shader("shaders/11_BasicPhongShader2.vs", "shaders/11_BasicPhongShader2.fs");
     mLightsShader = new Shader("shaders/11_PhongShaderMultLights.vs", "shaders/11_PhongShaderMultLights.fs");
     dynamicShader = new Shader("shaders/10_vertex_skinning-IT.vs", "shaders/10_fragment_skinning-IT.fs");
+    lineShader = new Shader("shaders/line.vs", "shaders/line.fs");
+    singleTreeShader = new Shader("shaders/12_PhongShaderMultLights.vs", "shaders/12_PhongShaderMultLights.fs");
+    smoke = new Shader("shaders/smoke.vs", "shaders/smoke.fs");
+
+
 
     if (!phongShader || phongShader->ID == 0 ||
         !instancePhongShader || instancePhongShader->ID == 0 ||
@@ -469,7 +500,7 @@ bool Start() {
         std::cerr << "ERROR: Shaders failed to load." << std::endl;
         return false;
     }
-
+    audio_init();
     loadUI(ui);
     loadTest(ta);
     loadForest(fa);
@@ -477,6 +508,7 @@ bool Start() {
     loadEspacio(ea);
     loadGlaciar(ga);
     loadFresnelGlassResources();
+    loadAllEnvironmentCubemaps();
 
     initializeRenderBuffers(ui);
 
@@ -501,6 +533,8 @@ bool Start() {
 
     initializeInstanceBuffers(fa);
 
+    setupInstanceVBO(ta.cityTreesVBO, 1, ta.arboles);
+
     // =============================================================================================
     // === CARGA DE MODELOS JUGABLES ===
     // =============================================================================================
@@ -510,7 +544,7 @@ bool Start() {
     if (g_demiModel) {
         g_demiModel->currentAnimation = 0;
         g_demiModel->fps = 30.0f;
-        g_demiPos = glm::vec3(0.0f, 0.0f, 0.0f); // Posición inicial
+        g_demiPos = glm::vec3(0.0f, 0.0f, 250.0f); // Posición inicial
     }
     else {
         std::cout << "ERROR CRITICO: No se cargo models/demi.fbx" << std::endl;
@@ -526,6 +560,8 @@ bool Start() {
         std::cout << "ERROR: No se cargo models/miku.fbx" << std::endl;
     }
 
+
+
     return true;
 }
 
@@ -534,37 +570,48 @@ bool Update() {
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
 
-    // Evitar conflicto de cámaras
+    //Guardar el movimiento de la camara desplazandose
+
+
     if (!animacion1 && escena == 0 && !g_isThirdPerson) {
         CalculoCamara(window);
     }
     else if (!menu && animacion1) UpdateAnim1(window);
     else if (menu) Transicion(window);
 
+
+    float tempVisual = glm::clamp(temperatura, -40.0f, 40.0f);
+
+    // Usamos 'tempVisual' para calcular el tamaño de las barras
+    // (Nota: Si quieres que la mecánica del juego siga subiendo más allá de 40 
+    // aunque no se vea, usa 'tempVisual' aquí. Si quieres limitar el juego también,
+    // asigna el clamp a 'temperatura' directamente: temperatura = glm::clamp(...))
+
+    // Opción recomendada: Limitar todo el juego para evitar errores lógicos:
+    temperatura += temperatura_externa;
+    temperatura = glm::clamp(temperatura, -40.0f, 40.0f);
+
     barraTF = (temperatura + 25.0) * 0.04088f;
     barraTC = temperatura * 0.0236f;
 
+    // Corrección extra: Evitar que las barras sean negativas si la fórmula falla
+    if (barraTF < 0.0f) barraTF = 0.0f;
+    if (barraTC < 0.0f) barraTC = 0.0f;
+    // -----------------------------------------------------
+
     processInput(window);
 
-    // ==========================================================
-    // === ACTUALIZACIÓN DE ANIMACIÓN DE PERSONAJE ACTIVO ===
-    // ==========================================================
-
-    // 1. Seleccionar modelo activo
     Animated* currentModel = nullptr;
     if (g_activeCharacter == 1) currentModel = g_demiModel;
     else if (g_activeCharacter == 2) currentModel = g_mikuModel;
 
-    // 2. Actualizar si existe
     if (currentModel) {
-        currentModel->currentAnimation = 0; // Solo hay anim 0
+        currentModel->currentAnimation = 0;
 
         if (g_demiMoving) {
-            // Moverse
             currentModel->UpdateAnimation(deltaTime);
         }
         else {
-            // Pausar/Resetear a frame 0
             currentModel->animationCount = 0;
             currentModel->elapsedTime = 0.0f;
             currentModel->UpdateAnimation(0.0f);
@@ -572,12 +619,24 @@ bool Update() {
     }
 
     updateGameLogic();
+    updateAudioLogic(camera.Position);
+
+    
+
+
+    
+
     renderScene();
 
-    if (escena == 1 && !menu) renderUI();
+
+
+    // Renderizamos la UI siempre que no estemos en el menú principal
+    // (La función renderUI se encargará de filtrar qué mostrar según la escena)
+    if (!menu) renderUI();
 
     glfwSwapBuffers(window);
     glfwPollEvents();
+
 
     return true;
 }

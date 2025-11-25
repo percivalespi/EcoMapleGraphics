@@ -36,12 +36,7 @@ void main()
     vec2 flow = radialFlow(vWorldPos, center1, radius, time)
               + radialFlow(vWorldPos, center2, radius, time);
 
-<<<<<<< Updated upstream
-    vec2 coordsT = TexCoords;
-    coordsT.x += 0.01f*time;
-=======
     vec2 uvDistorted = TexCoords + texFlowScale * flow;
->>>>>>> Stashed changes
 
     // Muestrea textura con UV distorsionado
     vec4 tex = texture(texture_diffuse1, uvDistorted);
